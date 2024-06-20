@@ -6,7 +6,7 @@ on:
       - 'created'
 
 jobs:
-  social-service-ea-deployment:
+  exploration-games-deployment:
     uses: decentraland/platform-actions/.github/workflows/apps-docker-release.yml@main
     with:
       service-name: exploration-games

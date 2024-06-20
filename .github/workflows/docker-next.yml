@@ -6,7 +6,7 @@ on:
       - 'main'
 
 jobs:
-  social-service-ea-deployment:
+  exploration-games-deployment:
     uses: decentraland/platform-actions/.github/workflows/apps-docker-next.yml@main
     with:
       service-name: exploration-games
