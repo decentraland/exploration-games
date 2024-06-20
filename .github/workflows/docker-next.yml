@@ -1,0 +1,15 @@
+name: CI/CD on main branch
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  social-service-ea-deployment:
+    uses: decentraland/platform-actions/.github/workflows/apps-docker-next.yml@main
+    with:
+      service-name: exploration-games
+      image-name: exploration-games
+      deployment-environment: dev
+    secrets: inherit
