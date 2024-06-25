@@ -11,6 +11,7 @@ import { metricDeclarations } from './metrics'
 import { createFetchComponent } from '@well-known-components/fetch-component'
 import { createPgComponent } from '@well-known-components/pg-component'
 import { resolve } from 'path'
+import { createDBComponent } from './adapters/db'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {
@@ -45,6 +46,8 @@ export async function initComponents(): Promise<AppComponents> {
     }
   )
 
+  const db = createDBComponent({ pg })
+
   await instrumentHttpServerWithPromClientRegistry({ metrics, server, config, registry: metrics.registry! })
 
   return {
@@ -54,6 +57,7 @@ export async function initComponents(): Promise<AppComponents> {
     statusChecks,
     metrics,
     fetcher,
-    pg
+    pg,
+    db
   }
 }
