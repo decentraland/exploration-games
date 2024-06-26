@@ -8,6 +8,7 @@ import type {
 } from '@well-known-components/interfaces'
 import { IPgComponent } from '@well-known-components/pg-component'
 import { metricDeclarations } from './metrics'
+import { IDatabaseComponent } from './adapters/db'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -21,6 +22,7 @@ export type BaseComponents = {
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
   fetcher: IFetchComponent
   pg: IPgComponent
+  db: IDatabaseComponent
 }
 
 // components used in runtime
@@ -46,3 +48,28 @@ export type HandlerContextWithPath<
 >
 
 export type Context<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path>
+
+export type Game = {
+  id: string
+  name: string
+  parcel: string
+  max_levels: number
+  active: boolean
+}
+
+export type UserProgress = {
+  game_id: string
+  user_address: string
+  level: number
+  score: number
+  data: Record<string, any>
+  updated_at: string
+}
+
+export type Challenge = {
+  id: string
+  description: string
+  game_id: string
+  target_level: number
+  active: boolean
+}
