@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { MigrationBuilder, ColumnDefinitions, PgType } from 'node-pg-migrate'
-
-export const shorthands: ColumnDefinitions | undefined = undefined
+import { MigrationBuilder, PgType } from 'node-pg-migrate'
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.createTable('challenges', {
