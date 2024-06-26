@@ -13,7 +13,8 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
     },
     game_id: {
       type: PgType.UUID,
-      notNull: true
+      notNull: true,
+      references: 'games'
     },
     target_level: {
       type: PgType.INTEGER,
