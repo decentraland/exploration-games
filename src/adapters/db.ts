@@ -1,14 +1,11 @@
 import SQL from 'sql-template-strings'
 import { randomUUID } from 'crypto'
-import { AppComponents, Challenge, Game, UserProgress } from '../types'
-
-const GAMES_TABLE = 'games'
-const PROGRESS_TABLE = 'progress'
-const CHALLENGES = 'challenges'
-const USER_CHALLENGES = 'user_challenges'
+import { AppComponents, Challenge, Game, GamePlayedByUser, UserProgress } from '../types'
 
 export interface IDatabaseComponent {
-  createGame(name: string, parcel: string, maxLevels: number): Promise<void>
+  createGame(name: string, parcel: string, maxLevels: number): Promise<Game>
+  getGame(gameId: string): Promise<Game>
+  getAllGames(): Promise<Game[]>
   getActiveGames(): Promise<Game[]>
   deactivateGame(gameId: string): Promise<void>
   getUserProgressInGame(gameId: string, userAddress: string): Promise<UserProgress>
@@ -17,12 +14,14 @@ export interface IDatabaseComponent {
     userAddress: string,
     level: number,
     score: number,
-    data: Record<string, any>
-  ): Promise<void>
-  createGameChallenge(gameId: string, description: string, targetLevel: number): Promise<void>
+    data?: Record<string, any> | null
+  ): Promise<UserProgress>
+  getAllGamesBeingPlayedByUser(userAddress: string): Promise<GamePlayedByUser[]>
+  createGameChallenge(gameId: string, description: string, targetLevel: number): Promise<Challenge>
   getActiveChallengesForGame(gameId: string): Promise<Challenge[]>
   deactivateGameChallenge(challengeId: string): Promise<void>
   userCompletedChallenge(userAddress: string, challengeId: string): Promise<void>
+  getChallenge(challengeId: string): Promise<Challenge>
 }
 
 export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatabaseComponent {
@@ -31,53 +30,83 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
   return {
     async createGame(name, parcel, maxLevels) {
       const uuid = randomUUID()
-      await pg.query(
-        SQL`INSERT INTO ${GAMES_TABLE} (id, name, parcel, max_levels) VALUES (${uuid}, ${name}, ${parcel}, ${maxLevels})`
+      const results = await pg.query<Game>(
+        SQL`INSERT INTO games (id, name, parcel, max_levels) VALUES (${uuid}, ${name}, ${parcel}, ${maxLevels}) RETURNING *`
       )
+
+      return results.rows[0]
+    },
+    async getGame(gameId) {
+      const results = await pg.query<Game>(SQL`SELECT * FROM games WHERE id = ${gameId}`)
+
+      return results.rows[0]
     },
     async getActiveGames() {
-      const results = await pg.query<Game>(SQL`SELECT * FROM ${GAMES_TABLE} WHERE active IS TRUE`)
+      const results = await pg.query<Game>(SQL`SELECT * FROM games WHERE active IS TRUE`)
+
+      return results.rows
+    },
+    async getAllGames() {
+      const results = await pg.query<Game>(SQL`SELECT * FROM games`)
 
       return results.rows
     },
     async deactivateGame(gameId) {
-      await pg.query(SQL`UPDATE ${GAMES_TABLE} SET active = false WHERE id = ${gameId}`)
+      await pg.query(SQL`UPDATE games SET active = false WHERE id = ${gameId}`)
     },
     async getUserProgressInGame(gameId, userAddress) {
       const results = await pg.query<UserProgress>(
-        SQL`SELECT * FROM ${PROGRESS_TABLE} WHERE game_id = ${gameId} AND user_address = ${userAddress}`
+        SQL`SELECT * FROM progress WHERE game_id = ${gameId} AND user_address = ${userAddress}`
       )
 
       return results.rows[0]
     },
     async upsertProgressInGame(gameId, userAddress, level, score, data) {
-      await pg.query(
-        SQL`INSERT INTO ${PROGRESS_TABLE} (game_id, user_address, level, score, data) 
+      const results = await pg.query<UserProgress>(
+        SQL`INSERT INTO progress (game_id, user_address, level, score, data) 
             VALUES (${gameId}, ${userAddress}, ${level}, ${score}, ${data})
-            ON CONFLICT ON CONSTRAINT user_progress_idx
-            DO UPDATE SET level = ${level}, score = ${score}, data = ${data}, updated_at = now()
+            ON CONFLICT (user_address,game_id)
+            DO UPDATE SET level = ${level}, score = ${score}, data = ${data || null}, updated_at = now()
+            RETURNING *
           `
       )
+
+      return results.rows[0]
     },
     async createGameChallenge(gameId, description, targetLevel) {
       const uuid = randomUUID()
-      await pg.query(
-        SQL`INSERT INTO ${CHALLENGES} (id, game_id, description, target_level) VALUES (${uuid}, ${gameId}, ${description}, ${targetLevel})`
+      const results = await pg.query<Challenge>(
+        SQL`INSERT INTO challenges (id, game_id, description, target_level) VALUES (${uuid}, ${gameId}, ${description}, ${targetLevel}) RETURNING *`
       )
+
+      return results.rows[0]
     },
     async getActiveChallengesForGame(gameId) {
       const results = await pg.query<Challenge>(
-        SQL`SELECT * FROM ${CHALLENGES} WHERE active IS TRUE AND game_id = ${gameId}`
+        SQL`SELECT * FROM challenges WHERE active IS TRUE AND game_id = ${gameId}`
       )
       return results.rows
     },
     async deactivateGameChallenge(challengeId) {
-      await pg.query(SQL`UPDATE ${CHALLENGES} SET active = false WHERE id = ${challengeId}`)
+      await pg.query(SQL`UPDATE challenges SET active = false WHERE id = ${challengeId}`)
     },
     async userCompletedChallenge(userAddress, challengeId) {
       await pg.query(
-        SQL`INSERT INTO ${USER_CHALLENGES} (user_address, challenge_id) VALUES (${userAddress}, ${challengeId})`
+        SQL`INSERT INTO user_challenges (user_address, challenge_id) VALUES (${userAddress}, ${challengeId})`
       )
+    },
+    async getAllGamesBeingPlayedByUser(userAddress) {
+      const results = await pg.query<GamePlayedByUser>(
+        SQL`SELECT g.id, g.name, g.parcel, g.max_levels, p.level, p.score, p.data 
+          FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE p.user_address = ${userAddress}`
+      )
+
+      return results.rows
+    },
+    async getChallenge(challengeId: string) {
+      const results = await pg.query<Challenge>(SQL`SELECT * FROM challenges WHERE id = ${challengeId}`)
+
+      return results.rows[0]
     }
   }
 }

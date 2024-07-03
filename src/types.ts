@@ -9,6 +9,7 @@ import type {
 import { IPgComponent } from '@well-known-components/pg-component'
 import { metricDeclarations } from './metrics'
 import { IDatabaseComponent } from './adapters/db'
+import { DecentralandSignatureContext } from '@dcl/platform-crypto-middleware/dist/types'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -45,9 +46,13 @@ export type HandlerContextWithPath<
     components: Pick<AppComponents, ComponentNames>
   }>,
   Path
->
+> &
+  DecentralandSignatureContext<any>
 
 export type Context<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path>
+
+export type ContextWithAuth<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path> &
+  DecentralandSignatureContext<any>
 
 export type Game = {
   id: string
@@ -72,4 +77,13 @@ export type Challenge = {
   game_id: string
   target_level: number
   active: boolean
+}
+
+export type GamePlayedByUser = {
+  name: string
+  parcel: string
+  max_levels: number
+  level: number
+  score: number
+  data: Record<string, any>
 }
