@@ -313,10 +313,10 @@
     eth-connect "^6.0.3"
     ethereum-cryptography "^1.0.3"
 
-"@dcl/eslint-config@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.npmjs.org/@dcl/eslint-config/-/eslint-config-2.1.1.tgz"
-  integrity sha512-xCmmrh/he00MjewLXsdFf+jGmblK8ipYV+cRiQBMNf5JNLILvacjLuQ08E1pAA0/QCTod62zbPTOqbnurj8YNQ==
+"@dcl/eslint-config@^2.2.1":
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@dcl/eslint-config/-/eslint-config-2.2.1.tgz#f31d0dc35dbab09b754f80c93e616ed80e3a011c"
+  integrity sha512-9GBeC0+bzfAHsCtXGqgx5UnQDAzCym5lQGt0hysx3yNNcujcWswFaBU1iPMfp58qRFJangLonZmoP80SM3AMgg==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^6.21.0"
     "@typescript-eslint/parser" "^6.21.0"
