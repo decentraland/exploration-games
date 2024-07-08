@@ -6,6 +6,7 @@ import { createRunner, createLocalFetchCompoment } from "@well-known-components/
 import { main } from "../src/service"
 import { TestComponents } from "../src/types"
 import { initComponents as originalInitComponents } from "../src/components"
+import { createDotEnvConfigComponent } from "@well-known-components/env-config-provider"
 
 /**
  * Behaves like Jest "describe" function, used to describe a test for a
@@ -22,10 +23,16 @@ export const test = createRunner<TestComponents>({
 async function initComponents(): Promise<TestComponents> {
   const components = await originalInitComponents()
 
-  const { config } = components
+  const config = await createDotEnvConfigComponent(
+    { path: ['.env.default', '.env.local', '.env'] },
+    {
+      PG_COMPONENT_PSQL_CONNECTION_STRING: 'postgresql://usr:pwd@localhost:5432/exploration_games'
+    }
+  )
 
   return {
     ...components,
+    config,
     localFetch: await createLocalFetchCompoment(config),
   }
 }
