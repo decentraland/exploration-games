@@ -13,6 +13,7 @@ import { getChallengesForGameHandler } from './handlers/games/get-challenges-for
 import { getProgressInGameHandler } from './handlers/games/get-progress-in-game-handler'
 import { getAllUserProgressInGamesHandler } from './handlers/games/get-all-user-progress-in-games-handler'
 import { userCompletedChallengeHandler } from './handlers/challenges/user-completed-challenge-handler'
+import { getUserCompletedChallengeByGame } from './handlers/games/get-user-completed-challenges-by-game-handler'
 
 // We return the entire router because it will be easier to test than a whole server
 export async function setupRouter(globalContext: GlobalContext): Promise<Router<GlobalContext>> {
@@ -38,15 +39,13 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
 
   router.get('/games', getGamesHandler) // get created games (backoffice or PX)
   router.get('/games/:id/challenges', getChallengesForGameHandler) // get challenges for a specific game (backoffice or PX)
+  router.post('/games/:id/challenges', auth, isAdminMiddleware, createChallengeHandler) // create a new challenge for a game (backoffice)
+  router.get('/games/:id/challenges/completed', auth, getUserCompletedChallengeByGame) // get completed challenges for a specific game and user
+  router.post('/challenges/:id', auth, userCompletedChallengeHandler) // mark a challenge as completed for auth user
 
   router.get('/games/:id/progress', auth, getProgressInGameHandler) // get auth user progress for specific game
   router.post('/games/:id/progress', auth, newProgressInGameHandler) // upsert auth user progress for specific game
   router.get('/games/progress', auth, getAllUserProgressInGamesHandler) // get all games being played by auth user
-
-  // Challenges routes
-  router.post('/challenges', auth, isAdminMiddleware, createChallengeHandler) // create a new challenge for a game (backoffice)
-
-  router.post('/challenges/:id', auth, userCompletedChallengeHandler) // mark a challenge as completed for auth user
 
   return router
 }

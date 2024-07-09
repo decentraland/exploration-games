@@ -7,14 +7,12 @@ type CreateGamePayload = {
   name: string
   x: number
   y: number
-  maxLevels: number
 }
 
 const schema = Joi.object<CreateGamePayload>().keys({
   name: Joi.string().required(),
   x: Joi.number().required().min(-150).max(150),
-  y: Joi.number().required().min(-150).max(150),
-  maxLevels: Joi.number().required()
+  y: Joi.number().required().min(-150).max(150)
 })
 
 export async function createGameHandler(
@@ -37,12 +35,12 @@ export async function createGameHandler(
 
   const validatedBody = body as CreateGamePayload
 
-  const game = await db.createGame(validatedBody.name, `${validatedBody.x},${validatedBody.y}`, validatedBody.maxLevels)
+  const game = await db.createGame(validatedBody.name, `${validatedBody.x},${validatedBody.y}`)
 
   return {
     status: 201,
     body: {
-      game
+      data: game
     }
   }
 }

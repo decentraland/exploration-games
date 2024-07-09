@@ -3,8 +3,8 @@ import { test } from '../../components'
 test('GET /api/games/:id/challenges', ({ components }) => {
   it('should return 200 with challenges for game', async () => {
     const { localFetch, db } = components
-    const { id } = await db.createGame('TEST', '10,10', 10)
-    const challenge = await db.createGameChallenge(id, 'Reach level 6', 6)
+    const { id } = await db.createGame('TEST', '10,10')
+    const challenge = await db.createGameChallenge(id, 'Reach level 6')
 
     const response = await localFetch.fetch(`/api/games/${id}/challenges`)
 
@@ -12,7 +12,7 @@ test('GET /api/games/:id/challenges', ({ components }) => {
 
     const json = await response.json()
 
-    expect(json.challenges.length).toBe(1)
-    expect(json.challenges[0].id).toBe(challenge.id)
+    expect(json.data.length).toBe(1)
+    expect(json.data[0].id).toBe(challenge.id)
   })
 })

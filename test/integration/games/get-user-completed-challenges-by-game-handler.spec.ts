@@ -1,0 +1,30 @@
+import { test } from '../../components'
+import { makeRequest } from '../../utils'
+
+test('GET /api/games/:id/challenges/completed', ({ components }) => {
+  it('should return 200 with completed challenges', async () => {
+    const { localFetch, db } = components
+
+    const game = await db.createGame('TEST', '10,10')
+    const { id: challengeId } = await db.createGameChallenge(game.id, 'Reach Level 4')
+    await db.userCompletedChallenge('0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', challengeId)
+
+    const response = await makeRequest(localFetch, `/api/games/${game.id}/challenges/completed`)
+
+    expect(response.status).toBe(200)
+
+    const body = await response.json()
+    expect(body.data.length).toBeGreaterThan(0)
+    expect(body.data[0].game_id).toBe(game.id)
+    expect(body.data[0].id).toBe(challengeId)
+    expect(body.data[0].description).toBe('Reach Level 4')
+  })
+
+  it('should return 400', async () => {
+    const { localFetch } = components
+
+    const response = await makeRequest(localFetch, `/api/games/aaaaaa/challenges/completed`)
+
+    expect(response.status).toBe(400)
+  })
+})

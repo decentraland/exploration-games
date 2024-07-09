@@ -6,57 +6,49 @@ import { HandlerContextWithPath } from '../../../types'
 type CreateChallengePayload = {
   description: string
   gameId: string
-  targetLevel: number
 }
 
 const schema = Joi.object<CreateChallengePayload>().keys({
   description: Joi.string().required(),
-  targetLevel: Joi.number().required().min(1),
   gameId: Joi.string().required().uuid()
 })
 
 export async function createChallengeHandler(
-  ctx: Pick<HandlerContextWithPath<'db' | 'logs', '/challenges'>, 'components' | 'request'>
+  ctx: Pick<HandlerContextWithPath<'db' | 'logs', '/games/:id/challenges'>, 'components' | 'request' | 'params'>
 ) {
   const {
     components: { logs, db },
-    request
+    request,
+    params
   } = ctx
 
   const logger = logs.getLogger('create-challenge-handler')
 
-  const body = await parseJson(request)
+  const { id } = params
 
-  const validate = schema.validate(body)
+  const body = await parseJson<Pick<CreateChallengePayload, 'description'>>(request)
+
+  const bodyWithGameId = { ...body, gameId: id } as CreateChallengePayload
+
+  const validate = schema.validate(bodyWithGameId)
   if (validate.error) {
     logger.warn(`Invalid creation challenge object received: ${validate.error.message} (${JSON.stringify(body)}`)
     throw new InvalidRequestError(validate.error.message)
   }
 
-  const validatedBody = body as CreateChallengePayload
-
-  const game = await db.getGame(validatedBody.gameId)
+  const game = await db.getGame(bodyWithGameId.gameId)
 
   if (!game) {
     logger.error('Trying to create a challenge for a non existing game')
-    throw new InvalidRequestError(`${validatedBody.gameId} doesn't exist`)
+    throw new InvalidRequestError(`${bodyWithGameId.gameId} doesn't exist`)
   }
 
-  if (validatedBody.targetLevel > game.max_levels) {
-    logger.error('Trying to create a challenge that exceeds the max levels of the game')
-    throw new InvalidRequestError(`${validatedBody.targetLevel} exceeds the max levels of ${validatedBody.gameId} game`)
-  }
-
-  const challenge = await db.createGameChallenge(
-    validatedBody.gameId,
-    validatedBody.description,
-    validatedBody.targetLevel
-  )
+  const challenge = await db.createGameChallenge(bodyWithGameId.gameId, bodyWithGameId.description)
 
   return {
     status: 201,
     body: {
-      challenge
+      data: challenge
     }
   }
 }

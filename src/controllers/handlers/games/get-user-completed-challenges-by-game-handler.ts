@@ -2,11 +2,12 @@ import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
 import { HandlerContextWithPath } from '../../../types'
 import { uuidSchema } from '../../../utils'
 
-export async function getChallengesForGameHandler(
-  ctx: Pick<HandlerContextWithPath<'db' | 'logs', '/games/:id/challenges'>, 'components' | 'params'>
+export async function getUserCompletedChallengeByGame(
+  ctx: Pick<HandlerContextWithPath<'db' | 'logs', '/games/:id/challenges'>, 'components' | 'params' | 'verification'>
 ) {
   const {
     components: { db },
+    verification,
     params
   } = ctx
 
@@ -18,7 +19,7 @@ export async function getChallengesForGameHandler(
     throw new InvalidRequestError('Invalid UUID')
   }
 
-  const challenges = await db.getActiveChallengesForGame(id)
+  const challenges = await db.getUserCompletedChallengeByGame(id, verification!.auth)
 
   return {
     status: 200,

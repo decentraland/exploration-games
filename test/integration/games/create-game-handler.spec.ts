@@ -8,10 +8,9 @@ test('POST /api/games', ({ components }) => {
     const payload = {
       name: 'Test Game',
       x: 10,
-      y: 10,
-      maxLevels: 4
+      y: 10
     }
-
+    console.log(localFetch)
     const response = await makeRequest(localFetch, '/api/games', {
       method: 'POST',
       body: JSON.stringify(payload)
@@ -21,10 +20,9 @@ test('POST /api/games', ({ components }) => {
 
     const body = await response.json()
 
-    expect(body.game).not.toBe(undefined)
-    expect(body.game.name).toBe('Test Game')
-    expect(body.game.parcel).toBe('10,10')
-    expect(body.game.max_levels).toBe(4)
+    expect(body.data).not.toBe(undefined)
+    expect(body.data.name).toBe('Test Game')
+    expect(body.data.parcel).toBe('10,10')
   })
 
   it('should return 400 when no auth', async () => {
@@ -33,8 +31,7 @@ test('POST /api/games', ({ components }) => {
     const payload = {
       name: 'Test Game',
       x: 10,
-      y: 10,
-      maxLevels: 4
+      y: 10
     }
 
     const response = await localFetch.fetch('/api/games', {
@@ -49,10 +46,9 @@ test('POST /api/games', ({ components }) => {
     const { localFetch } = components
 
     const payload = {
-      name: 'Test Game',
+      name: 123,
       x: 10,
-      y: 10,
-      maxLevels: '4a'
+      y: 10
     }
 
     const response = await makeRequest(localFetch, '/api/games', {
@@ -68,8 +64,7 @@ test('POST /api/games', ({ components }) => {
     const payload = {
       name: 'Test Game',
       x: 10,
-      y: 10,
-      maxLevels: '4a'
+      y: 10
     }
 
     const newIdentity = await getIdentity()
