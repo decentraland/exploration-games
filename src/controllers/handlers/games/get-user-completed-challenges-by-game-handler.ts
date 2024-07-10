@@ -2,7 +2,7 @@ import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
 import { HandlerContextWithPath } from '../../../types'
 import { uuidSchema } from '../../../utils'
 
-export async function getUserCompletedChallengeByGame(
+export async function getUserCompletedChallengesByGame(
   ctx: Pick<HandlerContextWithPath<'db' | 'logs', '/games/:id/challenges'>, 'components' | 'params' | 'verification'>
 ) {
   const {

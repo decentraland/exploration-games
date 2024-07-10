@@ -10,7 +10,6 @@ test('POST /api/games', ({ components }) => {
       x: 10,
       y: 10
     }
-    console.log(localFetch)
     const response = await makeRequest(localFetch, '/api/games', {
       method: 'POST',
       body: JSON.stringify(payload)

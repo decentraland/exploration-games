@@ -46,9 +46,7 @@ export async function newProgressInGameHandler(
     throw new InvalidRequestError(validatePayload.error.message)
   }
 
-  const validatedBody = body
-
-  const progress = await db.upsertProgressInGame(id, verification!.auth, validatedBody.score, validatedBody.data)
+  const progress = await db.upsertProgressInGame(id, verification!.auth, body.score, body.data)
 
   return {
     status: 201,

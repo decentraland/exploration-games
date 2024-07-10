@@ -5,10 +5,13 @@ import { HandlerContextWithPath } from '../../../types'
 
 type CreateChallengePayload = {
   description: string
+}
+
+type CreateChallengeWithGame = CreateChallengePayload & {
   gameId: string
 }
 
-const schema = Joi.object<CreateChallengePayload>().keys({
+const schema = Joi.object<CreateChallengeWithGame>().keys({
   description: Joi.string().required(),
   gameId: Joi.string().required().uuid()
 })
@@ -26,9 +29,9 @@ export async function createChallengeHandler(
 
   const { id } = params
 
-  const body = await parseJson<Pick<CreateChallengePayload, 'description'>>(request)
+  const body = await parseJson<CreateChallengePayload>(request)
 
-  const bodyWithGameId = { ...body, gameId: id } as CreateChallengePayload
+  const bodyWithGameId: CreateChallengeWithGame = { ...body, gameId: id }
 
   const validate = schema.validate(bodyWithGameId)
   if (validate.error) {

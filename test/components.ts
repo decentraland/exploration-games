@@ -1,12 +1,12 @@
 // This file is the "test-environment" analogous for src/components.ts
 // Here we define the test components to be used in the testing environment
 
-import { createRunner, createLocalFetchCompoment } from "@well-known-components/test-helpers"
+import { createRunner, createLocalFetchCompoment } from '@well-known-components/test-helpers'
 
-import { main } from "../src/service"
-import { TestComponents } from "../src/types"
-import { initComponents as originalInitComponents } from "../src/components"
-import { createDotEnvConfigComponent } from "@well-known-components/env-config-provider"
+import { main } from '../src/service'
+import { TestComponents } from '../src/types'
+import { initComponents as originalInitComponents } from '../src/components'
+import { createDotEnvConfigComponent } from '@well-known-components/env-config-provider'
 
 /**
  * Behaves like Jest "describe" function, used to describe a test for a
@@ -17,7 +17,7 @@ import { createDotEnvConfigComponent } from "@well-known-components/env-config-p
  */
 export const test = createRunner<TestComponents>({
   main,
-  initComponents,
+  initComponents
 })
 
 async function initComponents(): Promise<TestComponents> {
@@ -33,6 +33,6 @@ async function initComponents(): Promise<TestComponents> {
   return {
     ...components,
     config,
-    localFetch: await createLocalFetchCompoment(config),
+    localFetch: await createLocalFetchCompoment(config)
   }
 }
