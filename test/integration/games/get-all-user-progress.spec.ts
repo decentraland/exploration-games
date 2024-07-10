@@ -9,8 +9,8 @@ test('GET /api/games/progress', ({ components }) => {
 
     const identity = await getIdentity()
 
-    await db.upsertProgressInGame(game1.id, identity.authChain[0].payload.toLowerCase(), 5)
-    await db.upsertProgressInGame(game2.id, identity.authChain[0].payload.toLowerCase(), 3)
+    await db.upsertProgressInGame(game1.id, identity.authChain[0].payload.toLowerCase(), 1, 5)
+    await db.upsertProgressInGame(game2.id, identity.authChain[0].payload.toLowerCase(), 2, 3)
 
     const response = await makeRequest(localFetch, '/api/games/progress', {}, identity)
 
@@ -22,8 +22,10 @@ test('GET /api/games/progress', ({ components }) => {
     expect(json.data[0].name).toBe('TEST')
     expect(json.data[0].parcel).toBe('10,10')
     expect(json.data[0].score).toBe(5)
+    expect(json.data[0].level).toBe(1)
     expect(json.data[1].name).toBe('TEST 2')
     expect(json.data[1].parcel).toBe('15,10')
     expect(json.data[1].score).toBe(3)
+    expect(json.data[1].level).toBe(2)
   })
 })

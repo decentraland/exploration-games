@@ -5,11 +5,13 @@ import { HandlerContextWithPath } from '../../../types'
 import { uuidSchema } from '../../../utils'
 
 type NewProgressInGamePayload = {
+  level: number
   score: number
   data?: Record<string, any>
 }
 
 const schema = Joi.object<NewProgressInGamePayload>().keys({
+  level: Joi.number().required().min(1),
   score: Joi.number().required(),
   data: Joi.object().optional()
 })
@@ -46,7 +48,7 @@ export async function newProgressInGameHandler(
     throw new InvalidRequestError(validatePayload.error.message)
   }
 
-  const progress = await db.upsertProgressInGame(id, verification!.auth, body.score, body.data)
+  const progress = await db.upsertProgressInGame(id, verification!.auth, body.level, body.score, body.data)
 
   return {
     status: 201,
