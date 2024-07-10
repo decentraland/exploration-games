@@ -10,8 +10,8 @@ test('GET /api/games', ({ components }) => {
 
     const json = await response.json()
 
-    expect(json.games.length).toBeGreaterThan(0)
-    expect(json.games.every(({ active }) => active)).toBe(true)
+    expect(json.data.length).toBeGreaterThan(0)
+    expect(json.data.every(({ active }) => active)).toBe(true)
   })
 
   it('should return 200 with all games', async () => {
@@ -27,7 +27,7 @@ test('GET /api/games', ({ components }) => {
 
     const json = await response.json()
 
-    expect(json.games.length).toBeGreaterThan(0)
-    expect(json.games.some(({ active }) => !active)).toBe(true)
+    expect(json.data.length).toBeGreaterThan(0)
+    expect(json.data.some(({ active }) => !active)).toBe(true)
   })
 })

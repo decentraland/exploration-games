@@ -24,7 +24,7 @@ export async function getProgressInGameHandler(
   return {
     status: 200,
     body: {
-      progress: progress || null
+      data: progress || null
     }
   }
 }

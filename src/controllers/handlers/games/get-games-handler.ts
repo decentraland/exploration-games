@@ -15,7 +15,7 @@ export async function getGamesHandler(
     return {
       status: 200,
       body: {
-        games
+        data: games
       }
     }
   }
@@ -25,7 +25,7 @@ export async function getGamesHandler(
   return {
     status: 200,
     body: {
-      games
+      data: games
     }
   }
 }

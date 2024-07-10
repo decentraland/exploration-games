@@ -7,7 +7,7 @@ test('PUT /api/games/:id/deactivate', ({ components }) => {
   it('should return 204 updated', async () => {
     const { localFetch, db, pg } = components
 
-    const { id } = await db.createGame('test', '10,10', 10)
+    const { id } = await db.createGame('test', '10,10')
 
     const response = await makeRequest(localFetch, `/api/games/${id}/deactivate`, {
       method: 'PATCH'

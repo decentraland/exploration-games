@@ -17,7 +17,7 @@ export async function getAllUserProgressInGamesHandler(
   return {
     status: 200,
     body: {
-      playedGames: gamesPlayedByUser
+      data: gamesPlayedByUser
     }
   }
 }
