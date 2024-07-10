@@ -7,7 +7,7 @@ test('POST /api/challenges/:id', ({ components }) => {
     const { localFetch, db } = components
 
     const { id: gameId } = await db.createGame('TEST', '10,10')
-    const { id: challengeId } = await db.createGameChallenge(gameId, 'Reach Level 4')
+    const { id: challengeId } = await db.createGameChallenge(gameId, 'Reach Level 4', 4)
 
     const response = await makeRequest(localFetch, `/api/challenges/${challengeId}`, {
       method: 'POST'

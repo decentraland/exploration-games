@@ -9,7 +9,8 @@ test('POST /api/challenges', ({ components }) => {
     const { id } = await db.createGame('TEST', '10,10')
 
     const payload = {
-      description: 'Reach level 2'
+      description: 'Reach level 2',
+      targetLevel: 2
     }
 
     const response = await makeRequest(localFetch, `/api/games/${id}/challenges`, {
@@ -24,13 +25,15 @@ test('POST /api/challenges', ({ components }) => {
     expect(body.data).not.toBe(undefined)
     expect(body.data.game_id).toBe(id)
     expect(body.data.description).toBe('Reach level 2')
+    expect(body.data.description).toBe('Reach level 2')
   })
 
   it('should return 400 when no auth', async () => {
     const { localFetch } = components
 
     const payload = {
-      description: 'Reach level 2'
+      description: 'Reach level 2',
+      targetLevel: 2
     }
 
     const response = await localFetch.fetch(`/api/games/${randomUUID()}/challenges`, {
@@ -45,7 +48,8 @@ test('POST /api/challenges', ({ components }) => {
     const { localFetch } = components
 
     const payload = {
-      description: 2
+      description: 2,
+      targetLevel: 2
     }
 
     const response = await makeRequest(localFetch, `/api/games/${randomUUID()}/challenges`, {
@@ -61,7 +65,8 @@ test('POST /api/challenges', ({ components }) => {
     const gameId = randomUUID()
 
     const payload = {
-      description: 'Reach Level 2'
+      description: 'Reach Level 2',
+      targetLevel: 2
     }
 
     const response = await makeRequest(localFetch, `/api/games/${gameId}/challenges`, {
@@ -81,7 +86,8 @@ test('POST /api/challenges', ({ components }) => {
     const gameId = randomUUID()
 
     const payload = {
-      description: 'Reach Level 2'
+      description: 'Reach Level 2',
+      targetLevel: 2
     }
     const newIdentity = await getIdentity()
 

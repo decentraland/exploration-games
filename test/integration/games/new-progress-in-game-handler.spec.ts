@@ -8,7 +8,8 @@ test('POST /api/games/:id/progress', ({ components }) => {
     const game = await db.createGame('TEST', '10,10')
 
     const payload = {
-      score: 10
+      score: 10,
+      level: 1
     }
 
     const response = await makeRequest(localFetch, `/api/games/${game.id}/progress`, {
@@ -22,6 +23,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
 
     expect(body.data).not.toBe(undefined)
     expect(body.data.score).toBe(10)
+    expect(body.data.level).toBe(1)
     expect(body.data.data).toBe(null)
   })
 
@@ -32,6 +34,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
 
     const payload = {
       score: 10,
+      level: 1,
       data: {
         metadata: true
       }
@@ -48,6 +51,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
 
     expect(body.data).not.toBe(undefined)
     expect(body.data.score).toBe(10)
+    expect(body.data.level).toBe(1)
     expect(body.data.data).toEqual({ metadata: true })
   })
 
@@ -58,6 +62,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
 
     const payload = {
       score: 10,
+      level: 1,
       data: {
         metadata: true
       }

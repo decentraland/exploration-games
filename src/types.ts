@@ -64,6 +64,7 @@ export type Game = {
 export type UserProgress = {
   game_id: string
   user_address: string
+  level: number
   score: number
   data: Record<string, any>
   updated_at: string
@@ -73,12 +74,14 @@ export type Challenge = {
   id: string
   description: string
   game_id: string
+  target_level: number
   active: boolean
 }
 
 export type GamePlayedByUser = {
   name: string
   parcel: string
+  level: number
   score: number
   data: Record<string, any>
 }

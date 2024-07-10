@@ -12,11 +12,12 @@ export interface IDatabaseComponent {
   upsertProgressInGame(
     gameId: string,
     userAddress: string,
+    level: number,
     score: number,
     data?: Record<string, any> | null
   ): Promise<UserProgress>
   getAllGamesBeingPlayedByUser(userAddress: string): Promise<GamePlayedByUser[]>
-  createGameChallenge(gameId: string, description: string): Promise<Challenge>
+  createGameChallenge(gameId: string, description: string, targetLevel: number): Promise<Challenge>
   getActiveChallengesForGame(gameId: string): Promise<Challenge[]>
   deactivateGameChallenge(challengeId: string): Promise<void>
   userCompletedChallenge(userAddress: string, challengeId: string): Promise<void>
@@ -64,22 +65,22 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       return results.rows[0]
     },
-    async upsertProgressInGame(gameId, userAddress, score, data) {
+    async upsertProgressInGame(gameId, userAddress, level, score, data) {
       const results = await pg.query<UserProgress>(
-        SQL`INSERT INTO progress (game_id, user_address, score, data) 
-            VALUES (${gameId}, ${userAddress}, ${score}, ${data})
+        SQL`INSERT INTO progress (game_id, user_address, level, score, data) 
+            VALUES (${gameId}, ${userAddress}, ${level}, ${score}, ${data})
             ON CONFLICT (user_address,game_id)
-            DO UPDATE SET score = ${score}, data = ${data || null}, updated_at = now()
+            DO UPDATE SET level = ${level}, score = ${score}, data = ${data || null}, updated_at = now()
             RETURNING *
           `
       )
 
       return results.rows[0]
     },
-    async createGameChallenge(gameId, description) {
+    async createGameChallenge(gameId, description, targetLevel) {
       const uuid = randomUUID()
       const results = await pg.query<Challenge>(
-        SQL`INSERT INTO challenges (id, game_id, description) VALUES (${uuid}, ${gameId}, ${description}) RETURNING *`
+        SQL`INSERT INTO challenges (id, game_id, description, target_level) VALUES (${uuid}, ${gameId}, ${description}, ${targetLevel}) RETURNING *`
       )
 
       return results.rows[0]
@@ -104,7 +105,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         description: string
         game_id: string
       }>(
-        SQL`SELECT c.game_id, c.id , c.description 
+        SQL`SELECT c.game_id, c.id , c.description, c.target_level
         FROM challenges c
         JOIN user_challenges uc on c.id = uc.challenge_id
         WHERE c.game_id = ${gameId} 
@@ -115,7 +116,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getAllGamesBeingPlayedByUser(userAddress) {
       const results = await pg.query<GamePlayedByUser>(
-        SQL`SELECT g.id, g.name, g.parcel, p.score, p.data 
+        SQL`SELECT g.id, g.name, g.parcel, p.level, p.score, p.data 
           FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE p.user_address = ${userAddress}`
       )
 
