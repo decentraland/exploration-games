@@ -1,14 +1,18 @@
 import { InvalidRequestError } from '@dcl/platform-server-commons'
-import { HandlerContextWithPath } from '../../../types'
+import { HandlerContextWithPath, progressOption } from '../../../types'
 import { uuidSchema } from '../../../utils'
 
 export async function getProgressInGameHandler(
-  ctx: Pick<HandlerContextWithPath<'db' | 'logs', '/games/:id/progress'>, 'components' | 'params' | 'verification'>
+  ctx: Pick<
+    HandlerContextWithPath<'db' | 'logs', '/games/:id/progress'>,
+    'components' | 'params' | 'verification' | 'url'
+  >
 ) {
   const {
     components: { db },
     params,
-    verification
+    verification,
+    url
   } = ctx
 
   const { id } = params
@@ -19,7 +23,18 @@ export async function getProgressInGameHandler(
     throw new InvalidRequestError('Invalid UUID')
   }
 
-  const progress = await db.getUserProgressInGame(id, verification!.auth)
+  const searchOption = url.searchParams.get('option') as progressOption | null
+
+  let progress = null
+  if (searchOption === progressOption.ALL) {
+    progress = await db.getAllUserProgressInGame(id, verification!.auth)
+  } else {
+    progress = await db.getUserProgressInGame(
+      id,
+      verification!.auth,
+      searchOption === progressOption.MAX ? progressOption.MAX : progressOption.LAST
+    )
+  }
 
   return {
     status: 200,

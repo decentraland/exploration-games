@@ -12,19 +12,22 @@ export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.addColumn('progress', {
     level: {
       type: PgType.INT,
-      notNull: true
+      notNull: true,
+      default: 1
     }
   })
   pgm.addColumn('challenges', {
     target_level: {
       type: PgType.INTEGER,
-      notNull: true
+      notNull: true,
+      default: 1
     }
   })
   pgm.addColumn('games', {
     max_levels: {
       type: PgType.INT,
-      notNull: true
+      notNull: true,
+      default: 1
     }
   })
 }

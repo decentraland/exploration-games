@@ -1,6 +1,6 @@
 import SQL from 'sql-template-strings'
 import { randomUUID } from 'crypto'
-import { AppComponents, Challenge, Game, GamePlayedByUser, UserProgress } from '../types'
+import { AppComponents, Challenge, Game, GamePlayedByUser, progressOption, UserProgress } from '../types'
 
 export interface IDatabaseComponent {
   createGame(name: string, parcel: string): Promise<Game>
@@ -8,7 +8,8 @@ export interface IDatabaseComponent {
   getAllGames(): Promise<Game[]>
   getActiveGames(): Promise<Game[]>
   deactivateGame(gameId: string): Promise<void>
-  getUserProgressInGame(gameId: string, userAddress: string): Promise<UserProgress>
+  getUserProgressInGame(gameId: string, userAddress: string, option?: progressOption): Promise<UserProgress>
+  getAllUserProgressInGame(gameId: string, userAddress: string): Promise<UserProgress[]>
   upsertProgressInGame(
     gameId: string,
     userAddress: string,
@@ -58,19 +59,47 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async deactivateGame(gameId) {
       await pg.query(SQL`UPDATE games SET active = false WHERE id = ${gameId}`)
     },
-    async getUserProgressInGame(gameId, userAddress) {
-      const results = await pg.query<UserProgress>(
-        SQL`SELECT * FROM progress WHERE game_id = ${gameId} AND user_address = ${userAddress}`
-      )
+    async getUserProgressInGame(gameId, userAddress, option = progressOption.LAST) {
+      let query
+      if (option === progressOption.MAX) {
+        query = SQL`
+          SELECT * 
+          FROM progress 
+          WHERE game_id = ${gameId} 
+            AND user_address = ${userAddress} 
+          ORDER BY level DESC 
+          LIMIT 1;
+        `
+      } else {
+        query = SQL`
+          SELECT * 
+          FROM progress 
+          WHERE game_id = ${gameId} 
+            AND user_address = ${userAddress} 
+          ORDER BY updated_at DESC 
+          LIMIT 1;
+        `
+      }
 
+      const results = await pg.query<UserProgress>(query)
       return results.rows[0]
+    },
+    async getAllUserProgressInGame(gameId, userAddress) {
+      const results = await pg.query<UserProgress>(
+        SQL`
+          SELECT * 
+          FROM progress 
+          WHERE game_id = ${gameId} 
+            AND user_address = ${userAddress} 
+          ORDER BY updated_at DESC 
+        `
+      )
+      return results.rows
     },
     async upsertProgressInGame(gameId, userAddress, level, score, data) {
       const results = await pg.query<UserProgress>(
         SQL`INSERT INTO progress (game_id, user_address, level, score, data) 
             VALUES (${gameId}, ${userAddress}, ${level}, ${score}, ${data})
-            ON CONFLICT (user_address,game_id)
-            DO UPDATE SET level = ${level}, score = ${score}, data = ${data || null}, updated_at = now()
             RETURNING *
           `
       )
