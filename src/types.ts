@@ -85,3 +85,9 @@ export type GamePlayedByUser = {
   score: number
   data: Record<string, any>
 }
+
+export enum progressOption {
+  ALL = 'all',
+  MAX = 'max',
+  LAST = 'last'
+}
