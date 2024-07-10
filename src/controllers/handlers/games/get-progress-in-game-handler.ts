@@ -32,7 +32,7 @@ export async function getProgressInGameHandler(
     progress = await db.getUserProgressInGame(
       id,
       verification!.auth,
-      searchOption ? progressOption.MAX : progressOption.LAST
+      searchOption === progressOption.MAX ? progressOption.MAX : progressOption.LAST
     )
   }
 
