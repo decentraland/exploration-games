@@ -3,10 +3,13 @@ import { HandlerContextWithPath } from '../../../types'
 import { uuidSchema } from '../../../utils'
 
 export async function userCompletedChallengeHandler(
-  ctx: Pick<HandlerContextWithPath<'db' | 'logs', '/challenges/:id'>, 'components' | 'params' | 'verification'>
+  ctx: Pick<
+    HandlerContextWithPath<'db' | 'reward' | 'logs', '/challenges/:id'>,
+    'components' | 'params' | 'verification'
+  >
 ) {
   const {
-    components: { db },
+    components: { db, reward },
     verification,
     params
   } = ctx
@@ -27,8 +30,13 @@ export async function userCompletedChallengeHandler(
 
   await db.userCompletedChallenge(verification!.auth, id)
 
+  let rewardResponse
+  if (challenge.campaign_key && challenge.campaign_key !== '') {
+    rewardResponse = await reward.sendReward(challenge.campaign_key, verification!.auth)
+  }
+
   return {
     status: 201,
-    body: {}
+    body: rewardResponse
   }
 }

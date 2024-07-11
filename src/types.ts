@@ -10,6 +10,7 @@ import { IPgComponent } from '@well-known-components/pg-component'
 import { metricDeclarations } from './metrics'
 import { IDatabaseComponent } from './adapters/db'
 import { DecentralandSignatureContext } from '@dcl/platform-crypto-middleware/dist/types'
+import { IRewardComponent } from './adapters/rewards'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -24,6 +25,7 @@ export type BaseComponents = {
   fetcher: IFetchComponent
   pg: IPgComponent
   db: IDatabaseComponent
+  reward: IRewardComponent
 }
 
 // components used in runtime
@@ -75,6 +77,7 @@ export type Challenge = {
   description: string
   game_id: string
   target_level: number
+  campaign_key: string
   active: boolean
 }
 

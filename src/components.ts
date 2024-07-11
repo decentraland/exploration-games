@@ -12,6 +12,7 @@ import { createFetchComponent } from '@well-known-components/fetch-component'
 import { createPgComponent } from '@well-known-components/pg-component'
 import { resolve } from 'path'
 import { createDBComponent } from './adapters/db'
+import { createRewardComponent } from './adapters/rewards'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {
@@ -49,6 +50,7 @@ export async function initComponents(): Promise<AppComponents> {
   )
 
   const db = createDBComponent({ pg })
+  const reward = createRewardComponent({ fetcher, logs, config })
 
   await instrumentHttpServerWithPromClientRegistry({ metrics, server, config, registry: metrics.registry! })
 
@@ -60,6 +62,7 @@ export async function initComponents(): Promise<AppComponents> {
     metrics,
     fetcher,
     pg,
-    db
+    db,
+    reward
   }
 }
