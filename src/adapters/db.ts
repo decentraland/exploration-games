@@ -18,7 +18,7 @@ export interface IDatabaseComponent {
     data?: Record<string, any> | null
   ): Promise<UserProgress>
   getAllGamesBeingPlayedByUser(userAddress: string): Promise<GamePlayedByUser[]>
-  createGameChallenge(gameId: string, description: string, targetLevel: number): Promise<Challenge>
+  createGameChallenge(gameId: string, description: string, targetLevel: number, campaignKey: string): Promise<Challenge>
   getActiveChallengesForGame(gameId: string): Promise<Challenge[]>
   deactivateGameChallenge(challengeId: string): Promise<void>
   userCompletedChallenge(userAddress: string, challengeId: string): Promise<void>
@@ -106,10 +106,10 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       return results.rows[0]
     },
-    async createGameChallenge(gameId, description, targetLevel) {
+    async createGameChallenge(gameId, description, targetLevel, campaignKey) {
       const uuid = randomUUID()
       const results = await pg.query<Challenge>(
-        SQL`INSERT INTO challenges (id, game_id, description, target_level) VALUES (${uuid}, ${gameId}, ${description}, ${targetLevel}) RETURNING *`
+        SQL`INSERT INTO challenges (id, game_id, description, target_level, campaign_key) VALUES (${uuid}, ${gameId}, ${description}, ${targetLevel}, ${campaignKey}) RETURNING *`
       )
 
       return results.rows[0]
