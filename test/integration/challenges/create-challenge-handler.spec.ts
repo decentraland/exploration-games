@@ -5,12 +5,13 @@ import { getIdentity, makeRequest } from '../../utils'
 test('POST /api/challenges', ({ components }) => {
   it('should return 201 created', async () => {
     const { localFetch, db } = components
-
     const { id } = await db.createGame('TEST', '10,10')
+    const campaignKey = randomUUID()
 
     const payload = {
       description: 'Reach level 2',
-      targetLevel: 2
+      targetLevel: 2,
+      campaignKey: campaignKey
     }
 
     const response = await makeRequest(localFetch, `/api/games/${id}/challenges`, {
@@ -25,7 +26,7 @@ test('POST /api/challenges', ({ components }) => {
     expect(body.data).not.toBe(undefined)
     expect(body.data.game_id).toBe(id)
     expect(body.data.description).toBe('Reach level 2')
-    expect(body.data.description).toBe('Reach level 2')
+    expect(body.data.campaign_key).toBe(campaignKey)
   })
 
   it('should return 400 when no auth', async () => {
@@ -66,7 +67,8 @@ test('POST /api/challenges', ({ components }) => {
 
     const payload = {
       description: 'Reach Level 2',
-      targetLevel: 2
+      targetLevel: 2,
+      campaignKey: randomUUID()
     }
 
     const response = await makeRequest(localFetch, `/api/games/${gameId}/challenges`, {

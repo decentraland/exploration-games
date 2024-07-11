@@ -1,13 +1,13 @@
 import { randomUUID } from 'crypto'
 import { test } from '../../components'
-import { getIdentity, makeRequest } from '../../utils'
+import { makeRequest } from '../../utils'
 
 test('POST /api/challenges/:id', ({ components }) => {
   it('should return 201 - challenge completed', async () => {
     const { localFetch, db } = components
-
+    const campaignKey = randomUUID()
     const { id: gameId } = await db.createGame('TEST', '10,10')
-    const { id: challengeId } = await db.createGameChallenge(gameId, 'Reach Level 4', 4)
+    const { id: challengeId } = await db.createGameChallenge(gameId, 'Reach Level 4', 4, campaignKey)
 
     const response = await makeRequest(localFetch, `/api/challenges/${challengeId}`, {
       method: 'POST'

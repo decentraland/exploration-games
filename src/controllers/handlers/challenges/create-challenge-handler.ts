@@ -6,6 +6,7 @@ import { HandlerContextWithPath } from '../../../types'
 type CreateChallengePayload = {
   description: string
   targetLevel: number
+  campaignKey: string
 }
 
 type CreateChallengeWithGame = CreateChallengePayload & {
@@ -15,6 +16,7 @@ type CreateChallengeWithGame = CreateChallengePayload & {
 const schema = Joi.object<CreateChallengeWithGame>().keys({
   description: Joi.string().required(),
   targetLevel: Joi.number().required().min(1),
+  campaignKey: Joi.string().required(),
   gameId: Joi.string().required().uuid()
 })
 
@@ -51,7 +53,8 @@ export async function createChallengeHandler(
   const challenge = await db.createGameChallenge(
     bodyWithGameId.gameId,
     bodyWithGameId.description,
-    bodyWithGameId.targetLevel
+    bodyWithGameId.targetLevel,
+    bodyWithGameId.campaignKey
   )
 
   return {
