@@ -10,7 +10,7 @@ export interface IDatabaseComponent {
   deactivateGame(gameId: string): Promise<void>
   getUserProgressInGame(gameId: string, userAddress: string, option?: progressOption): Promise<UserProgress>
   getAllUserProgressInGame(gameId: string, userAddress: string): Promise<UserProgress[]>
-  upsertProgressInGame(
+  createProgressInGame(
     gameId: string,
     userAddress: string,
     level: number,
@@ -96,7 +96,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       )
       return results.rows
     },
-    async upsertProgressInGame(gameId, userAddress, level, score, data) {
+    async createProgressInGame(gameId, userAddress, level, score, data) {
       const uuid = randomUUID()
       const results = await pg.query<UserProgress>(
         SQL`INSERT INTO progress (id, game_id, user_address, level, score, data) 

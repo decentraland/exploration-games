@@ -9,8 +9,8 @@ test('GET /api/games/progress', ({ components }) => {
 
     const identity = await getIdentity()
 
-    await db.upsertProgressInGame(game1.id, identity.authChain[0].payload.toLowerCase(), 1, 5)
-    await db.upsertProgressInGame(game2.id, identity.authChain[0].payload.toLowerCase(), 2, 3)
+    await db.createProgressInGame(game1.id, identity.authChain[0].payload.toLowerCase(), 1, 5)
+    await db.createProgressInGame(game2.id, identity.authChain[0].payload.toLowerCase(), 2, 3)
 
     const response = await makeRequest(localFetch, '/api/games/progress', {}, identity)
 

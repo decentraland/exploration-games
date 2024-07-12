@@ -6,7 +6,7 @@ test('GET /api/games/:id/progress', ({ components }) => {
     const { localFetch, db } = components
 
     const game = await db.createGame('TEST', '10,10')
-    await db.upsertProgressInGame(game.id, '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', 4, 2, {
+    await db.createProgressInGame(game.id, '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', 4, 2, {
       metadata: true
     })
 
@@ -26,10 +26,10 @@ test('GET /api/games/:id/progress', ({ components }) => {
     const { localFetch, db } = components
 
     const game = await db.createGame('TEST', '10,10')
-    await db.upsertProgressInGame(game.id, '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', 10, 2, {
+    await db.createProgressInGame(game.id, '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', 10, 2, {
       metadata: true
     })
-    await db.upsertProgressInGame(game.id, '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', 3, 2, {
+    await db.createProgressInGame(game.id, '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', 3, 2, {
       metadata: true
     })
 
@@ -49,9 +49,9 @@ test('GET /api/games/:id/progress', ({ components }) => {
     const { localFetch, db } = components
 
     const game = await db.createGame('TEST', '10,10')
-    await db.upsertProgressInGame(game.id, '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', 10, 2)
-    await db.upsertProgressInGame(game.id, '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', 3, 2)
-    await db.upsertProgressInGame(game.id, '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', 15, 2)
+    await db.createProgressInGame(game.id, '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', 10, 2)
+    await db.createProgressInGame(game.id, '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', 3, 2)
+    await db.createProgressInGame(game.id, '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', 15, 2)
 
     const response = await makeRequest(localFetch, `/api/games/${game.id}/progress?option=all`)
 
