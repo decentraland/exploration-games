@@ -1,13 +1,14 @@
 import { randomUUID } from 'crypto'
 import { test } from '../../components'
 import { getIdentity, makeRequest } from '../../utils'
-import { RewardL2Status } from '../../../src/adapters/rewards'
+import { RewardL2Status } from '../../../src/types'
+import { NON_EXISTING_CAMPAIGN_KEY, VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
 
 test('POST /api/challenges', ({ components }) => {
   it('should return 201 created with a reward in progress', async () => {
     const { localFetch, db, rewardFetch } = components
     const { id } = await db.createGame('TEST', '10,10')
-    const campaignKey = '00000000-0000-0000-0000-000000000000'
+    const campaignKey = VALID_CAMPAIGN_KEY
 
     const payload = {
       description: 'Reach level 2',
@@ -37,12 +38,11 @@ test('POST /api/challenges', ({ components }) => {
   it('should return 201 created without a reward', async () => {
     const { localFetch, db, rewardFetch } = components
     const { id } = await db.createGame('TEST', '10,10')
-    const campaignKey = randomUUID()
 
     const payload = {
       description: 'Reach level 2',
       targetLevel: 2,
-      campaignKey: campaignKey
+      campaignKey: NON_EXISTING_CAMPAIGN_KEY
     }
 
     const response = await makeRequest(localFetch, `/api/games/${id}/challenges`, {
@@ -50,16 +50,15 @@ test('POST /api/challenges', ({ components }) => {
       body: JSON.stringify(payload)
     })
 
-    const rewardResponde = await rewardFetch.sendReward(campaignKey, '0x123')
+    const rewardResponde = await rewardFetch.sendReward(NON_EXISTING_CAMPAIGN_KEY, '0x123')
 
     expect(response.status).toBe(201)
 
     const body = await response.json()
-    console.log(rewardResponde)
     expect(body.data).not.toBe(undefined)
     expect(body.data.game_id).toBe(id)
     expect(body.data.description).toBe('Reach level 2')
-    expect(body.data.campaign_key).toBe(campaignKey)
+    expect(body.data.campaign_key).toBe(NON_EXISTING_CAMPAIGN_KEY)
     expect(rewardResponde.data.length).toBe(0)
   })
 

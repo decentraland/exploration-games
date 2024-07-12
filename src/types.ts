@@ -10,7 +10,7 @@ import { IPgComponent } from '@well-known-components/pg-component'
 import { metricDeclarations } from './metrics'
 import { IDatabaseComponent } from './adapters/db'
 import { DecentralandSignatureContext } from '@dcl/platform-crypto-middleware/dist/types'
-import { IRewardComponent } from './adapters/rewards'
+import { ChainId } from '@dcl/schemas/dist/dapps/chain-id'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -25,7 +25,7 @@ export type BaseComponents = {
   fetcher: IFetchComponent
   pg: IPgComponent
   db: IDatabaseComponent
-  reward: IRewardComponent
+  rewardService: IRewardComponent
 }
 
 // components used in runtime
@@ -95,4 +95,55 @@ export enum progressOption {
   ALL = 'all',
   MAX = 'max',
   LAST = 'last'
+}
+
+export enum RewardL2Status {
+  unassigned = 'unassigned',
+
+  // assigned and waiting for a confirmation (example: blockchain confirmation)
+  pending = 'pending',
+
+  assigned = 'assigned',
+  sending = 'sending',
+  success = 'success',
+  rejected = 'rejected',
+  confirmed = 'confirmed'
+}
+
+export type RewardAttributes = {
+  id: string
+  user: string | null
+  from_referral: string | null
+  airdrop_type: string
+  campaign_id: string
+  campaign_key: string | null
+  status: RewardL2Status
+  chain_id: ChainId | 0
+  target: string
+  value: string
+  token: string
+  image: string | null
+
+  /**
+   * Assign attributes
+   */
+  group: string | null
+  priority: number
+
+  /**
+   * Transaction status attributes
+   */
+  transaction_id: string | null
+  transaction_hash: string | null
+
+  /**
+   * Date attributes
+   */
+  created_at: Date
+  updated_at: Date
+  assigned_at: Date | null
+}
+
+export type IRewardComponent = IBaseComponent & {
+  sendReward(campaignKey: string, beneficiary: string): Promise<{ ok: boolean; data: RewardAttributes[]; code?: Error }>
 }

@@ -1,11 +1,14 @@
-import { IRewardComponent, RewardAttributes, RewardL2Status } from '../../src/adapters/rewards'
+import { RewardAttributes, RewardL2Status, IRewardComponent } from '../../src/types'
+
+export const VALID_CAMPAIGN_KEY = '00000000-0000-0000-0000-000000000000'
+export const NON_EXISTING_CAMPAIGN_KEY = '11111111-1111-1111-1111-000000000000'
 
 const rewards: RewardAttributes[] = [
   {
     id: '00000000-0000-0000-0000-000000000000',
     user: '0x0000000000000000000000000000000000000000',
     campaign_id: '00000000-0000-0000-0000-000000000000',
-    campaign_key: '00000000-0000-0000-0000-000000000000',
+    campaign_key: VALID_CAMPAIGN_KEY,
     from_referral: null,
     status: RewardL2Status.pending,
     chain_id: 137,

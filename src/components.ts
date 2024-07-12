@@ -50,7 +50,7 @@ export async function initComponents(): Promise<AppComponents> {
   )
 
   const db = createDBComponent({ pg })
-  const reward = createRewardComponent({ fetcher, logs, config })
+  const rewardService = createRewardComponent({ fetcher, config })
 
   await instrumentHttpServerWithPromClientRegistry({ metrics, server, config, registry: metrics.registry! })
 
@@ -63,6 +63,6 @@ export async function initComponents(): Promise<AppComponents> {
     fetcher,
     pg,
     db,
-    reward
+    rewardService
   }
 }
