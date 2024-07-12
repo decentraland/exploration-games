@@ -64,6 +64,7 @@ export type Game = {
 }
 
 export type UserProgress = {
+  id: string
   game_id: string
   user_address: string
   level: number

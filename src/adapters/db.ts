@@ -97,9 +97,10 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       return results.rows
     },
     async upsertProgressInGame(gameId, userAddress, level, score, data) {
+      const uuid = randomUUID()
       const results = await pg.query<UserProgress>(
-        SQL`INSERT INTO progress (game_id, user_address, level, score, data) 
-            VALUES (${gameId}, ${userAddress}, ${level}, ${score}, ${data})
+        SQL`INSERT INTO progress (id, game_id, user_address, level, score, data) 
+            VALUES (${uuid}, ${gameId}, ${userAddress}, ${level}, ${score}, ${data})
             RETURNING *
           `
       )
