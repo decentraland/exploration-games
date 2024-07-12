@@ -105,7 +105,8 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
 }
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
-  pgm.dropTable('games')
-  pgm.dropTable('progress')
+  pgm.dropTable('user_challenges')
   pgm.dropTable('challenges')
+  pgm.dropTable('progress')
+  pgm.dropTable('games')
 }

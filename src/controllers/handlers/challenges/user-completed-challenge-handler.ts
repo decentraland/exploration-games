@@ -30,10 +30,7 @@ export async function userCompletedChallengeHandler(
 
   await db.userCompletedChallenge(verification!.auth, id)
 
-  let rewardResponse
-  if (challenge.campaign_key && challenge.campaign_key !== '') {
-    rewardResponse = await reward.sendReward(challenge.campaign_key, verification!.auth)
-  }
+  const rewardResponse = await reward.sendReward(challenge.campaign_key, verification!.auth)
 
   return {
     status: 201,

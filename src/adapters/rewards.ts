@@ -41,11 +41,6 @@ export type RewardAttributes = {
   transaction_id: string | null
   transaction_hash: string | null
 
-  payload: string | null // only for L1
-  signature: string | null // only for L1
-  block_number: number | null // only for L1
-  expires_at: Date | null // only for L1
-
   /**
    * Date attributes
    */
