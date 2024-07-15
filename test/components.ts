@@ -35,6 +35,6 @@ async function initComponents(): Promise<TestComponents> {
     ...components,
     config,
     localFetch: await createLocalFetchCompoment(config),
-    rewardFetch: createRewardFetchComponent()
+    rewardService: createRewardFetchComponent()
   }
 }

@@ -37,11 +37,19 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
     },
     level: {
       type: PgType.INT,
-      notNull: true
+      notNull: false
+    },
+    time: {
+      type: PgType.INT,
+      notNull: false
+    },
+    moves: {
+      type: PgType.INT,
+      notNull: false
     },
     score: {
       type: PgType.INT,
-      notNull: true
+      notNull: false
     },
     data: {
       type: PgType.JSON,

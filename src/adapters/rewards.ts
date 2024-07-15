@@ -17,8 +17,8 @@ export function createRewardComponent(components: Pick<BaseComponents, 'fetcher'
       body: JSON.stringify(body)
     })
 
-    if (response.ok) {
-      return await response.json()
+    if (response.ok === true) {
+      return response.json()
     }
 
     throw new Error(`Failed to fetch ${url}: ${response.status} ${await response.text()}`)
