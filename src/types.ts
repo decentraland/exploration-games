@@ -113,6 +113,13 @@ export type GamePlayedByUser = GameMetrics & {
   data: Record<string, any>
 }
 
+export type Leaderboard = GameMetrics & {
+  name: string
+  parcel: string
+  user_address: string
+  data: Record<string, any>
+}
+
 export enum ProgressSort {
   SCORE = 'score',
   LASTEST = 'updated_at',

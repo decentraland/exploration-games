@@ -81,7 +81,7 @@ test('GET /api/games/:id/progress', ({ components }) => {
     expect(response.status).toBe(200)
 
     const body = await response.json()
-    console.log(body.data)
+
     expect(body.data).not.toBe(undefined)
     expect(body.data[0].level).toBe(15)
     expect(body.data[0].score).toBe(3)

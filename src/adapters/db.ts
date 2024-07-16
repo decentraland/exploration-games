@@ -29,6 +29,7 @@ export interface IDatabaseComponent {
     data?: Record<string, any> | null
   ): Promise<UserProgress>
   getAllGamesBeingPlayedByUser(userAddress: string): Promise<GamePlayedByUser[]>
+  getGameLeaderboard(gameId: string): Promise<GamePlayedByUser[]>
   createGameChallenge(gameId: string, description: string, targetLevel: number, campaignKey: string): Promise<Challenge>
   getActiveChallengesForGame(gameId: string): Promise<Challenge[]>
   deactivateGameChallenge(challengeId: string): Promise<void>
@@ -142,6 +143,14 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const results = await pg.query<GamePlayedByUser>(
         SQL`SELECT g.id, g.name, g.parcel, p.level, p.score, p.time, p.moves, p.data 
           FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE p.user_address = ${userAddress}`
+      )
+
+      return results.rows
+    },
+    async getGameLeaderboard(gameId) {
+      const results = await pg.query<GamePlayedByUser>(
+        SQL`SELECT g.id, g.name, g.parcel, p.user_address, p.level, p.score, p.time, p.moves, p.data 
+          FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE g.id = ${gameId}`
       )
 
       return results.rows
