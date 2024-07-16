@@ -1,17 +1,7 @@
 import Joi from 'joi'
 import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
 import { parseJson } from '@dcl/platform-server-commons/dist/utils'
-import { HandlerContextWithPath } from '../../../types'
-
-type CreateChallengePayload = {
-  description: string
-  targetLevel: number
-  campaignKey: string
-}
-
-type CreateChallengeWithGame = CreateChallengePayload & {
-  gameId: string
-}
+import { CreateChallengePayload, CreateChallengeWithGame, HandlerContextWithPath } from '../../../types'
 
 const schema = Joi.object<CreateChallengeWithGame>().keys({
   description: Joi.string().required(),

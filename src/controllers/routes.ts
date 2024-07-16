@@ -14,6 +14,7 @@ import { getProgressInGameHandler } from './handlers/games/get-progress-in-game-
 import { getAllUserProgressInGamesHandler } from './handlers/games/get-all-user-progress-in-games-handler'
 import { userCompletedChallengeHandler } from './handlers/challenges/user-completed-challenge-handler'
 import { getUserCompletedChallengesByGame } from './handlers/games/get-user-completed-challenges-by-game-handler'
+import { getProgressLeaderboardInGamesHandler } from './handlers/games/get-progress-leaderboard-in-games-handler'
 
 // We return the entire router because it will be easier to test than a whole server
 export async function setupRouter(globalContext: GlobalContext): Promise<Router<GlobalContext>> {
@@ -35,6 +36,7 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
 
   router.get('/games', getGamesHandler) // get created games (backoffice or PX)
   router.get('/games/:id/challenges', getChallengesForGameHandler) // get challenges for a specific game (backoffice or PX)
+  router.get('/games/:id/leaderboard', getProgressLeaderboardInGamesHandler)
 
   router.get('/games/:id/progress', auth, getProgressInGameHandler) // get auth user progress for specific game
   router.post('/games/:id/progress', auth, newProgressInGameHandler) // upsert auth user progress for specific game

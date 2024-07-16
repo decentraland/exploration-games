@@ -7,6 +7,7 @@ import { main } from '../src/service'
 import { TestComponents } from '../src/types'
 import { initComponents as originalInitComponents } from '../src/components'
 import { createDotEnvConfigComponent } from '@well-known-components/env-config-provider'
+import { createRewardFetchComponent } from './mocks/send-reward-mock'
 
 /**
  * Behaves like Jest "describe" function, used to describe a test for a
@@ -33,6 +34,7 @@ async function initComponents(): Promise<TestComponents> {
   return {
     ...components,
     config,
-    localFetch: await createLocalFetchCompoment(config)
+    localFetch: await createLocalFetchCompoment(config),
+    rewardService: createRewardFetchComponent()
   }
 }

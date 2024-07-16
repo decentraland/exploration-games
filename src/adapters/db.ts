@@ -1,6 +1,15 @@
 import SQL from 'sql-template-strings'
 import { randomUUID } from 'crypto'
-import { AppComponents, Challenge, Game, GamePlayedByUser, progressOption, UserProgress } from '../types'
+import {
+  AppComponents,
+  Challenge,
+  Game,
+  GameMetrics,
+  GamePlayedByUser,
+  ProgressSort,
+  SortDirection,
+  UserProgress
+} from '../types'
 
 export interface IDatabaseComponent {
   createGame(name: string, parcel: string): Promise<Game>
@@ -8,20 +17,23 @@ export interface IDatabaseComponent {
   getAllGames(): Promise<Game[]>
   getActiveGames(): Promise<Game[]>
   deactivateGame(gameId: string): Promise<void>
-  getUserProgressInGame(gameId: string, userAddress: string, option?: progressOption): Promise<UserProgress>
-  getAllUserProgressInGame(gameId: string, userAddress: string): Promise<UserProgress[]>
-  upsertProgressInGame(
+  getUserProgressInGame(
     gameId: string,
     userAddress: string,
-    level: number,
-    score: number,
+    option: { sort: ProgressSort; direction: SortDirection; limit: number }
+  ): Promise<UserProgress[]>
+  createProgressInGame(
+    gameId: string,
+    userAddress: string,
+    gameMetrics: GameMetrics,
     data?: Record<string, any> | null
   ): Promise<UserProgress>
   getAllGamesBeingPlayedByUser(userAddress: string): Promise<GamePlayedByUser[]>
+  getGameLeaderboard(gameId: string): Promise<GamePlayedByUser[]>
   createGameChallenge(gameId: string, description: string, targetLevel: number, campaignKey: string): Promise<Challenge>
   getActiveChallengesForGame(gameId: string): Promise<Challenge[]>
   deactivateGameChallenge(challengeId: string): Promise<void>
-  userCompletedChallenge(userAddress: string, challengeId: string): Promise<void>
+  setChallengeAsComplete(userAddress: string, challengeId: string): Promise<void>
   getChallenge(challengeId: string): Promise<Challenge>
   getUserCompletedChallengeByGame(
     gameId: string,
@@ -59,47 +71,31 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async deactivateGame(gameId) {
       await pg.query(SQL`UPDATE games SET active = false WHERE id = ${gameId}`)
     },
-    async getUserProgressInGame(gameId, userAddress, option = progressOption.LAST) {
-      let query
-      if (option === progressOption.MAX) {
-        query = SQL`
-          SELECT * 
-          FROM progress 
-          WHERE game_id = ${gameId} 
-            AND user_address = ${userAddress} 
-          ORDER BY level DESC 
-          LIMIT 1;
-        `
-      } else {
-        query = SQL`
-          SELECT * 
-          FROM progress 
-          WHERE game_id = ${gameId} 
-            AND user_address = ${userAddress} 
-          ORDER BY updated_at DESC 
-          LIMIT 1;
-        `
-      }
+    async getUserProgressInGame(gameId, userAddress, option) {
+      const query = SQL`
+        SELECT * 
+        FROM progress 
+        WHERE game_id = ${gameId} 
+          AND user_address = ${userAddress} 
+      `
+
+      const orderOption: ProgressSort =
+        Object.values(ProgressSort).find((sort) => sort === option.sort) || ProgressSort.LATEST
+
+      const direction = option.direction === SortDirection.ASC ? SortDirection.ASC : SortDirection.DESC
+
+      query.append(`ORDER BY ${orderOption} ${direction} `)
+
+      query.append(SQL`LIMIT ${option.limit}`)
 
       const results = await pg.query<UserProgress>(query)
-      return results.rows[0]
-    },
-    async getAllUserProgressInGame(gameId, userAddress) {
-      const results = await pg.query<UserProgress>(
-        SQL`
-          SELECT * 
-          FROM progress 
-          WHERE game_id = ${gameId} 
-            AND user_address = ${userAddress} 
-          ORDER BY updated_at DESC 
-        `
-      )
       return results.rows
     },
-    async upsertProgressInGame(gameId, userAddress, level, score, data) {
+    async createProgressInGame(gameId, userAddress, gameMetrics, data) {
+      const uuid = randomUUID()
       const results = await pg.query<UserProgress>(
-        SQL`INSERT INTO progress (game_id, user_address, level, score, data) 
-            VALUES (${gameId}, ${userAddress}, ${level}, ${score}, ${data})
+        SQL`INSERT INTO progress (id, game_id, user_address, level, score, time, moves, data) 
+            VALUES (${uuid}, ${gameId}, ${userAddress}, ${gameMetrics.level}, ${gameMetrics.score}, ${gameMetrics.time}, ${gameMetrics.moves}, ${data})
             RETURNING *
           `
       )
@@ -123,7 +119,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async deactivateGameChallenge(challengeId) {
       await pg.query(SQL`UPDATE challenges SET active = false WHERE id = ${challengeId}`)
     },
-    async userCompletedChallenge(userAddress, challengeId) {
+    async setChallengeAsComplete(userAddress, challengeId) {
       await pg.query(
         SQL`INSERT INTO user_challenges (user_address, challenge_id) VALUES (${userAddress}, ${challengeId})`
       )
@@ -145,8 +141,16 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getAllGamesBeingPlayedByUser(userAddress) {
       const results = await pg.query<GamePlayedByUser>(
-        SQL`SELECT g.id, g.name, g.parcel, p.level, p.score, p.data 
+        SQL`SELECT g.id, g.name, g.parcel, p.level, p.score, p.time, p.moves, p.data 
           FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE p.user_address = ${userAddress}`
+      )
+
+      return results.rows
+    },
+    async getGameLeaderboard(gameId) {
+      const results = await pg.query<GamePlayedByUser>(
+        SQL`SELECT g.id, g.name, g.parcel, p.user_address, p.level, p.score, p.time, p.moves, p.data 
+          FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE g.id = ${gameId}`
       )
 
       return results.rows
