@@ -122,7 +122,7 @@ export type Leaderboard = GameMetrics & {
 
 export enum ProgressSort {
   SCORE = 'score',
-  LASTEST = 'updated_at',
+  LATEST = 'updated_at',
   LEVEL = 'level',
   MOVES = 'moves',
   TIME = 'time'

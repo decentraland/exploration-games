@@ -80,7 +80,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       `
 
       const orderOption: ProgressSort =
-        Object.values(ProgressSort).find((sort) => sort === option.sort) || ProgressSort.LASTEST
+        Object.values(ProgressSort).find((sort) => sort === option.sort) || ProgressSort.LATEST
 
       const direction = option.direction === SortDirection.ASC ? SortDirection.ASC : SortDirection.DESC
 
