@@ -113,12 +113,17 @@ export type GamePlayedByUser = GameMetrics & {
   data: Record<string, any>
 }
 
-export enum progressSort {
+export enum ProgressSort {
   SCORE = 'score',
-  LASTEST = 'lastest',
+  LASTEST = 'updated_at',
   LEVEL = 'level',
   MOVES = 'moves',
   TIME = 'time'
+}
+
+export enum SortDirection {
+  ASC = 'ASC',
+  DESC = 'DESC'
 }
 
 export enum RewardL2Status {

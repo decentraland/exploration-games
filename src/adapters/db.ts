@@ -1,6 +1,15 @@
 import SQL from 'sql-template-strings'
 import { randomUUID } from 'crypto'
-import { AppComponents, Challenge, Game, GameMetrics, GamePlayedByUser, progressSort, UserProgress } from '../types'
+import {
+  AppComponents,
+  Challenge,
+  Game,
+  GameMetrics,
+  GamePlayedByUser,
+  ProgressSort,
+  SortDirection,
+  UserProgress
+} from '../types'
 
 export interface IDatabaseComponent {
   createGame(name: string, parcel: string): Promise<Game>
@@ -11,9 +20,8 @@ export interface IDatabaseComponent {
   getUserProgressInGame(
     gameId: string,
     userAddress: string,
-    option: { sort: progressSort; limit?: number }
-  ): Promise<UserProgress>
-  getAllUserProgressInGame(gameId: string, userAddress: string): Promise<UserProgress[]>
+    option: { sort: ProgressSort; direction: SortDirection; limit: number }
+  ): Promise<UserProgress[]>
   createProgressInGame(
     gameId: string,
     userAddress: string,
@@ -69,31 +77,17 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         WHERE game_id = ${gameId} 
           AND user_address = ${userAddress} 
       `
-      const orderOption = option.sort === progressSort.LASTEST ? 'updated_at' : option.sort
 
-      query.append(SQL`ORDER BY ${orderOption} DESC `)
+      const orderOption: ProgressSort =
+        Object.values(ProgressSort).find((sort) => sort === option.sort) || ProgressSort.LASTEST
 
-      if (option.limit) {
-        query.append(SQL`LIMIT ${option.limit}`)
-      }
+      const direction = option.direction === SortDirection.ASC ? SortDirection.ASC : SortDirection.DESC
 
-      console.log(' > query.sql > ', query.sql)
-      console.log(' > query.text > ', query.text)
-      console.log(' > query.values > ', query.values)
+      query.append(`ORDER BY ${orderOption} ${direction} `)
+
+      query.append(SQL`LIMIT ${option.limit}`)
 
       const results = await pg.query<UserProgress>(query)
-      return results.rows[0]
-    },
-    async getAllUserProgressInGame(gameId, userAddress) {
-      const results = await pg.query<UserProgress>(
-        SQL`
-          SELECT * 
-          FROM progress 
-          WHERE game_id = ${gameId} 
-            AND user_address = ${userAddress} 
-          ORDER BY updated_at DESC 
-        `
-      )
       return results.rows
     },
     async createProgressInGame(gameId, userAddress, gameMetrics, data) {
