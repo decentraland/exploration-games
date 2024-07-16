@@ -1,5 +1,5 @@
 import { InvalidRequestError } from '@dcl/platform-server-commons'
-import { HandlerContextWithPath, progressOption } from '../../../types'
+import { HandlerContextWithPath, progressSort } from '../../../types'
 import { uuidSchema } from '../../../utils'
 
 export async function getProgressInGameHandler(
@@ -23,18 +23,18 @@ export async function getProgressInGameHandler(
     throw new InvalidRequestError('Invalid UUID')
   }
 
-  const searchOption = url.searchParams.get('option') as progressOption | null
+  const sortOption = url.searchParams.get('sort') as progressSort | null
+  const LimitOption = url.searchParams.get('limit') as 'all' | number | null
+  console.log(LimitOption)
 
-  let progress = null
-  if (searchOption === progressOption.ALL) {
-    progress = await db.getAllUserProgressInGame(id, verification!.auth)
-  } else {
-    progress = await db.getUserProgressInGame(
-      id,
-      verification!.auth,
-      searchOption === progressOption.MAX ? progressOption.MAX : progressOption.LAST
-    )
-  }
+  // if (sortOption === progressSort.ALL) {
+  // progress = await db.getAllUserProgressInGame(id, verification!.auth)
+  // } else {
+  const progress = await db.getUserProgressInGame(id, verification!.auth, {
+    sort: sortOption as progressSort,
+    limit: 1
+  })
+  // }
 
   return {
     status: 200,

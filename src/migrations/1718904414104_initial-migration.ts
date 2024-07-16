@@ -61,6 +61,9 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
     }
   })
 
+  pgm.createIndex('progress', ['game_id', 'user_address'])
+  pgm.createIndex('progress', ['game_id', 'user_address', 'updated_at'], { unique: true })
+
   pgm.createTable('challenges', {
     id: {
       type: PgType.UUID,
@@ -90,6 +93,8 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       default: true
     }
   })
+
+  pgm.createIndex('challenges', ['game_id'])
 
   pgm.createTable(
     'user_challenges',

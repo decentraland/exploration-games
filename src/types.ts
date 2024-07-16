@@ -56,6 +56,22 @@ export type Context<Path extends string = any> = IHttpServerComponent.PathAwareC
 export type ContextWithAuth<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path> &
   DecentralandSignatureContext<any>
 
+export type CreateChallengePayload = {
+  description: string
+  targetLevel: number
+  campaignKey: string
+}
+
+export type CreateChallengeWithGame = CreateChallengePayload & {
+  gameId: string
+}
+
+export type CreateGamePayload = {
+  name: string
+  x: number
+  y: number
+}
+
 export type Game = {
   id: string
   name: string
@@ -63,12 +79,21 @@ export type Game = {
   active: boolean
 }
 
-export type UserProgress = {
+export type GameMetrics = {
+  score?: number
+  level?: number
+  time?: number
+  moves?: number
+}
+
+export type NewProgressInGamePayload = GameMetrics & {
+  data?: Record<string, any>
+}
+
+export type UserProgress = GameMetrics & {
   id: string
   game_id: string
   user_address: string
-  level: number
-  score: number
   data: Record<string, any>
   updated_at: string
 }
@@ -82,18 +107,18 @@ export type Challenge = {
   active: boolean
 }
 
-export type GamePlayedByUser = {
+export type GamePlayedByUser = GameMetrics & {
   name: string
   parcel: string
-  level: number
-  score: number
   data: Record<string, any>
 }
 
-export enum progressOption {
-  ALL = 'all',
-  MAX = 'max',
-  LAST = 'last'
+export enum progressSort {
+  SCORE = 'score',
+  LASTEST = 'lastest',
+  LEVEL = 'level',
+  MOVES = 'moves',
+  TIME = 'time'
 }
 
 export enum RewardL2Status {

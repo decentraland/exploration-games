@@ -1,14 +1,8 @@
 import Joi from 'joi'
 import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
 import { parseJson } from '@dcl/platform-server-commons/dist/utils'
-import { HandlerContextWithPath } from '../../../types'
+import { HandlerContextWithPath, NewProgressInGamePayload } from '../../../types'
 import { uuidSchema } from '../../../utils'
-
-type NewProgressInGamePayload = {
-  level: number
-  score: number
-  data?: Record<string, any>
-}
 
 const schema = Joi.object<NewProgressInGamePayload>().keys({
   level: Joi.number().required().min(1),
@@ -48,7 +42,12 @@ export async function newProgressInGameHandler(
     throw new InvalidRequestError(validatePayload.error.message)
   }
 
-  const progress = await db.createProgressInGame(id, verification!.auth, body.level, body.score, body.data)
+  const progress = await db.createProgressInGame(
+    id,
+    verification!.auth,
+    { level: body.level, score: body.score, time: body.time, moves: body.moves },
+    body.data
+  )
 
   return {
     status: 201,
