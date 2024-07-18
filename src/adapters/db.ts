@@ -177,20 +177,23 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
           p.updated_at
         FROM 
           progress p
-        INNER JOIN (
-          SELECT 
-            user_address,
-            MAX(level) AS max_level
-          FROM 
-            progress
-          WHERE 
-            game_id = ${gameId}
-          GROUP BY 
-            user_address
-        ) max_levels 
-        ON p.user_address = max_levels.user_address 
-        AND p.level = max_levels.max_level
-        `
+          `
+      if (!options.level) {
+        query.append(SQL`INNER JOIN (
+            SELECT 
+              user_address,
+              MAX(level) AS max_level
+            FROM 
+              progress
+            WHERE 
+              game_id = ${gameId}
+            GROUP BY 
+              user_address
+          ) max_levels 
+          ON p.user_address = max_levels.user_address 
+          AND p.level = max_levels.max_level
+        `)
+      }
 
       query.append(`INNER JOIN (
           SELECT 
@@ -223,11 +226,11 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       )
 
       if (options.level) {
-        query.append(SQL`AND level = ${options.level} `)
+        query.append(SQL`AND p.level = ${Number(options.level)} `)
       }
 
-      query.append(`ORDER BY level DESC, ${orderOption} ${options.direction} LIMIT ${options.limit}`)
-
+      query.append(`ORDER BY p.level DESC, ${orderOption} ${options.direction} LIMIT ${options.limit}`)
+      console.log('query ', query.text, query.values)
       const results = await pg.query<GamePlayedByUser>(query)
 
       return results.rows
