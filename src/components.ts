@@ -19,7 +19,15 @@ export async function initComponents(): Promise<AppComponents> {
   const config = await createDotEnvConfigComponent({ path: ['.env.default', '.env.local', '.env'] })
   const metrics = await createMetricsComponent(metricDeclarations, { config })
   const logs = await createLogComponent({ metrics })
-  const server = await createServerComponent<GlobalContext>({ config, logs }, {})
+  const server = await createServerComponent<GlobalContext>(
+    { config, logs },
+    {
+      cors: {
+        methods: ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH'],
+        maxAge: 86400
+      }
+    }
+  )
   const statusChecks = await createStatusCheckComponent({ server, config })
 
   const fetcher = createFetchComponent()
