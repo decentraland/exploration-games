@@ -29,7 +29,15 @@ export interface IDatabaseComponent {
     data?: Record<string, any> | null
   ): Promise<UserProgress>
   getAllGamesBeingPlayedByUser(userAddress: string): Promise<GamePlayedByUser[]>
-  getGameLeaderboard(gameId: string): Promise<GamePlayedByUser[]>
+  getGameLeaderboard(
+    gameId: string,
+    options: {
+      sort: Omit<ProgressSort, 'level'>
+      direction: SortDirection
+      limit: number
+      level: number | null
+    }
+  ): Promise<GamePlayedByUser[]>
   createGameChallenge(gameId: string, description: string, targetLevel: number, campaignKey: string): Promise<Challenge>
   getActiveChallengesForGame(gameId: string): Promise<Challenge[]>
   deactivateGameChallenge(challengeId: string): Promise<void>
@@ -147,11 +155,80 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       return results.rows
     },
-    async getGameLeaderboard(gameId) {
-      const results = await pg.query<GamePlayedByUser>(
-        SQL`SELECT g.id, g.name, g.parcel, p.user_address, p.level, p.score, p.time, p.moves, p.data 
-          FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE g.id = ${gameId}`
+    async getGameLeaderboard(gameId, options) {
+      const orderOption: Omit<ProgressSort, 'LATEST'> =
+        Object.values(ProgressSort).find((sort) => sort === options.sort) || ProgressSort.SCORE
+
+      const sortField = options.direction === SortDirection.ASC ? `min_${orderOption}` : `max_${orderOption}`
+      const sortAlias =
+        options.direction === SortDirection.ASC
+          ? `MIN(${orderOption}) AS ${sortField}`
+          : `MAX(${orderOption}) AS ${sortField}`
+
+      const query = SQL`
+        SELECT 
+          p.game_id,
+          p.user_address,
+          p.level,
+          p.score,
+          p.time,
+          p.moves,
+          p.data,
+          p.updated_at
+        FROM 
+          progress p
+        INNER JOIN (
+          SELECT 
+            user_address,
+            MAX(level) AS max_level
+          FROM 
+            progress
+          WHERE 
+            game_id = ${gameId}
+          GROUP BY 
+            user_address
+        ) max_levels 
+        ON p.user_address = max_levels.user_address 
+        AND p.level = max_levels.max_level
+        `
+
+      query.append(`INNER JOIN (
+          SELECT 
+            user_address,
+            level,
+            ${sortAlias}
+          FROM 
+            progress`)
+
+      query.append(
+        SQL`
+          WHERE 
+            game_id = ${gameId}
+          `
       )
+      query.append(`GROUP BY 
+            user_address,
+            level
+        ) sort_${orderOption}
+        ON p.user_address = sort_${orderOption}.user_address
+        AND p.level = sort_${orderOption}.level
+        AND p.${orderOption} = sort_${orderOption}.${sortField}
+        `)
+
+      query.append(
+        SQL`
+        WHERE 
+          p.game_id = ${gameId}
+      `
+      )
+
+      if (options.level) {
+        query.append(SQL`AND level = ${options.level} `)
+      }
+
+      query.append(`ORDER BY level DESC, ${orderOption} ${options.direction} LIMIT ${options.limit}`)
+
+      const results = await pg.query<GamePlayedByUser>(query)
 
       return results.rows
     },

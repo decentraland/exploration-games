@@ -20,14 +20,16 @@ import { getProgressLeaderboardInGamesHandler } from './handlers/games/get-progr
 export async function setupRouter(globalContext: GlobalContext): Promise<Router<GlobalContext>> {
   const router = new Router<GlobalContext>()
 
-  const {
-    components: { fetcher }
-  } = globalContext
+  const { components } = globalContext
 
   const auth = authVerificationMiddleware({
-    fetcher,
+    fetcher: components.fetcher,
     optional: false
   })
+
+  components.server.use(router.middleware())
+  // register not implemented/method not allowed/cors response middleware
+  components.server.use(router.allowedMethods())
 
   router.use(errorHandler)
   router.get('/status', statusHandler)
