@@ -62,12 +62,13 @@ test('POST /api/games/:id/progress', ({ components }) => {
     expect(body.data.data).toEqual({ metadata: true })
   })
 
-  it('should return 201 created only with data', async () => {
+  it('should return 201 created only with data and level', async () => {
     const { localFetch, db } = components
 
     const game = await db.createGame('TEST', '10,10')
 
     const payload = {
+      level: 1,
       data: {
         metadata: true
       }
@@ -84,7 +85,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
 
     expect(body.data).not.toBe(undefined)
     expect(body.data.score).toBeNull()
-    expect(body.data.level).toBeNull()
+    expect(body.data.level).toBe(1)
     expect(body.data.time).toBeNull()
     expect(body.data.moves).toBeNull()
     expect(body.data.data).toEqual({ metadata: true })

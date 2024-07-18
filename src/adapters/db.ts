@@ -226,11 +226,10 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       )
 
       if (options.level) {
-        query.append(SQL`AND p.level = ${Number(options.level)} `)
+        query.append(SQL`AND p.level = ${options.level} `)
       }
 
       query.append(`ORDER BY p.level DESC, ${orderOption} ${options.direction} LIMIT ${options.limit}`)
-      console.log('query ', query.text, query.values)
       const results = await pg.query<GamePlayedByUser>(query)
 
       return results.rows

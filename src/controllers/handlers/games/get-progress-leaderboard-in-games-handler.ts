@@ -18,7 +18,7 @@ export async function getProgressLeaderboardInGamesHandler(
   if (validateUuid.error) {
     throw new InvalidRequestError('Invalid UUID')
   }
-  const level = url.searchParams.get('level') as number | null
+  const level = url.searchParams.get('level') as string | null
   const optionSortDirection = url.searchParams.get('direction')?.toLocaleUpperCase() as SortDirection | null
   let limitOption = Number(url.searchParams.get('limit') || 10)
   const optionSort = url.searchParams.get('sort') as Omit<ProgressSort, 'level'> | null
@@ -35,7 +35,7 @@ export async function getProgressLeaderboardInGamesHandler(
     sort: optionSort || ProgressSort.SCORE,
     direction: optionSortDirection || SortDirection.DESC,
     limit: limitOption,
-    level
+    level: level ? Number(level) : null
   }
   const leaderboard = await db.getGameLeaderboard(id, leaderOptions)
 
