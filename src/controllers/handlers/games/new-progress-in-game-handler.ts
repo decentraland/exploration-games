@@ -5,8 +5,10 @@ import { HandlerContextWithPath, NewProgressInGamePayload } from '../../../types
 import { uuidSchema } from '../../../utils'
 
 const schema = Joi.object<NewProgressInGamePayload>().keys({
-  level: Joi.number().required().min(1),
-  score: Joi.number().required(),
+  level: Joi.number().optional().min(1),
+  score: Joi.number().optional(),
+  time: Joi.number().optional(),
+  moves: Joi.number().optional(),
   data: Joi.object().optional()
 })
 

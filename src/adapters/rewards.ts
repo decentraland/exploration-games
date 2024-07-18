@@ -3,7 +3,7 @@ import { BaseComponents, IRewardComponent } from '../types'
 export function createRewardComponent(components: Pick<BaseComponents, 'fetcher' | 'config'>): IRewardComponent {
   const { fetcher, config } = components
 
-  const fetchJson = async (baseURL: URL, path: string, body = {}) => {
+  const fetchJson = async (baseURL: URL, path: string, body: { campaign_key: string; beneficiary: string }) => {
     let url = baseURL.toString()
     if (!url.endsWith('/')) {
       url += '/'
@@ -12,7 +12,8 @@ export function createRewardComponent(components: Pick<BaseComponents, 'fetcher'
     const response = await fetcher.fetch(url, {
       method: 'POST',
       headers: {
-        Accept: 'application/json'
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(body)
     })
@@ -26,7 +27,7 @@ export function createRewardComponent(components: Pick<BaseComponents, 'fetcher'
 
   async function sendReward(campaignKey: string, beneficiary: string) {
     const rewardUrl = new URL(await config.requireString('REWARD_SERVER_URL'))
-    return fetchJson(rewardUrl, 'rewards', { campaignKey, beneficiary })
+    return fetchJson(rewardUrl, 'rewards', { campaign_key: campaignKey, beneficiary })
   }
 
   return {
