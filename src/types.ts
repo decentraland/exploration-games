@@ -11,6 +11,7 @@ import { metricDeclarations } from './metrics'
 import { IDatabaseComponent } from './adapters/db'
 import { DecentralandSignatureContext } from '@dcl/platform-crypto-middleware/dist/types'
 import { ChainId } from '@dcl/schemas/dist/dapps/chain-id'
+import { Rarity, EmoteCategory, WearableCategory } from '@dcl/schemas'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -159,6 +160,9 @@ export type RewardAttributes = {
   value: string
   token: string
   image: string | null
+
+  rarity?: Rarity | null
+  category?: WearableCategory | EmoteCategory | null
 
   /**
    * Assign attributes
