@@ -22,7 +22,7 @@ export async function userCompletedChallengeHandler(
     throw new InvalidRequestError('Invalid UUID')
   }
 
-  const challenge = await db.getChallenge(id)
+  const challenge = await db.getChallengeWithCampaignKeyExposure(id)
 
   if (!challenge) {
     throw new InvalidRequestError(`${id} doesn't exist`)
