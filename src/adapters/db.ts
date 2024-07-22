@@ -42,7 +42,7 @@ export interface IDatabaseComponent {
   getActiveChallengesForGame(gameId: string): Promise<Challenge[]>
   deactivateGameChallenge(challengeId: string): Promise<void>
   setChallengeAsComplete(userAddress: string, challengeId: string): Promise<void>
-  getChallenge(challengeId: string): Promise<Challenge>
+  getChallengeWithCampaignKeyExposure(challengeId: string): Promise<Challenge>
   getUserCompletedChallengeByGame(
     gameId: string,
     userAddress: string
@@ -120,7 +120,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getActiveChallengesForGame(gameId) {
       const results = await pg.query<Challenge>(
-        SQL`SELECT * FROM challenges WHERE active IS TRUE AND game_id = ${gameId}`
+        SQL`SELECT c.id, c.description, c.game_id, c.target_level, c.active FROM challenges c WHERE active IS TRUE AND game_id = ${gameId}`
       )
       return results.rows
     },
@@ -234,8 +234,10 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       return results.rows
     },
-    async getChallenge(challengeId: string) {
-      const results = await pg.query<Challenge>(SQL`SELECT * FROM challenges WHERE id = ${challengeId}`)
+    async getChallengeWithCampaignKeyExposure(challengeId: string) {
+      const results = await pg.query<Challenge>(
+        SQL`SELECT c.id, c.description, c.game_id, c.target_level, c.campaign_key, c.active FROM challenges c WHERE id = ${challengeId}`
+      )
 
       return results.rows[0]
     }
