@@ -58,12 +58,10 @@ export type ContextWithAuth<Path extends string = any> = IHttpServerComponent.Pa
   DecentralandSignatureContext<any>
 
 export type CreateChallengePayload = {
+  missionId: string
   description: string
   targetLevel: number
-  campaignKey: string
-}
-
-export type CreateChallengeWithGame = CreateChallengePayload & {
+  data?: Record<string, any>
   gameId: string
 }
 
@@ -77,6 +75,13 @@ export type Game = {
   id: string
   name: string
   parcel: string
+  active: boolean
+}
+
+export type Mission = {
+  id: string
+  description: string
+  campaign_key: string
   active: boolean
 }
 
@@ -95,6 +100,7 @@ export type UserProgress = GameMetrics & {
   id: string
   game_id: string
   user_address: string
+  user_name: string
   data: Record<string, any>
   updated_at: string
 }
@@ -103,8 +109,9 @@ export type Challenge = {
   id: string
   description: string
   game_id: string
+  mission_id: string
   target_level: number
-  campaign_key: string
+  data: Record<string, any>
   active: boolean
 }
 
@@ -119,6 +126,14 @@ export type Leaderboard = GameMetrics & {
   parcel: string
   user_address: string
   data: Record<string, any>
+}
+
+export type UserMission = {
+  user_address: string
+  mission_id: string
+  start_time: string
+  end_time: string | null
+  active: boolean
 }
 
 export enum ProgressSort {
