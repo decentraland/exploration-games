@@ -16,6 +16,7 @@ import {
 export interface IDatabaseComponent {
   createGame(name: string, parcel: string): Promise<Game>
   getGame(gameId: string): Promise<Game>
+  getGamesById(gamesId: string[]): Promise<Game[]>
   getAllGames(): Promise<Game[]>
   getActiveGames(): Promise<Game[]>
   deactivateGame(gameId: string): Promise<void>
@@ -60,6 +61,7 @@ export interface IDatabaseComponent {
   setMissionAsEnd(userAddress: string, missionId: string): Promise<void>
   getUserMissions(userAddress: string, options: { active?: boolean }): Promise<UserMission[]>
   getChallenge(challengeId: string): Promise<Challenge>
+  getChallengesForMission(missionId: string): Promise<Challenge[]>
   getMissionWithCampaignKeyExposure(missionId: string): Promise<Mission>
   getUserCompletedChallengeByGame(
     gameId: string,
@@ -83,6 +85,17 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const results = await pg.query<Game>(SQL`SELECT * FROM games WHERE id = ${gameId}`)
 
       return results.rows[0]
+    },
+    async getGamesById(gamesId) {
+      const query = SQL`SELECT * FROM games WHERE`
+
+      query.append(SQL` id = ${gamesId[0]}`)
+      for (let i = 1; i < gamesId.length; i++) {
+        query.append(SQL` OR id = ${gamesId[i]}`)
+      }
+      const results = await pg.query<Game>(query)
+
+      return results.rows
     },
     async getActiveGames() {
       const results = await pg.query<Game>(SQL`SELECT * FROM games WHERE active IS TRUE`)
@@ -312,6 +325,11 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const results = await pg.query<Challenge>(SQL`SELECT * FROM challenges WHERE id = ${challengeId}`)
 
       return results.rows[0]
+    },
+    async getChallengesForMission(missionId: string) {
+      const results = await pg.query<Challenge>(SQL`SELECT * FROM challenges WHERE mission_id = ${missionId}`)
+
+      return results.rows
     },
     async getMissionWithCampaignKeyExposure(missionId: string) {
       const results = await pg.query<Mission>(SQL`SELECT * FROM missions WHERE id = ${missionId}`)
