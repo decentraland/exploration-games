@@ -5,6 +5,7 @@ import { HandlerContextWithPath, NewProgressInGamePayload } from '../../../types
 import { uuidSchema } from '../../../utils'
 
 const schema = Joi.object<NewProgressInGamePayload>().keys({
+  user_name: Joi.string().required(),
   level: Joi.number().required().min(1),
   score: Joi.number().optional(),
   time: Joi.number().optional(),
@@ -43,10 +44,11 @@ export async function newProgressInGameHandler(
     )
     throw new InvalidRequestError(validatePayload.error.message)
   }
-
+  console.log(' > body > ', { body })
   const progress = await db.createProgressInGame(
     id,
     verification!.auth,
+    body.user_name,
     { level: body.level, score: body.score, time: body.time, moves: body.moves },
     body.data
   )

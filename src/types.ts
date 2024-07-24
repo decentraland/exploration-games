@@ -81,7 +81,7 @@ export type Game = {
 export type Mission = {
   id: string
   description: string
-  campaign_key: string
+  campaignKey: string
   active: boolean
 }
 
@@ -93,6 +93,7 @@ export type GameMetrics = {
 }
 
 export type NewProgressInGamePayload = GameMetrics & {
+  user_name: string
   data?: Record<string, any>
 }
 

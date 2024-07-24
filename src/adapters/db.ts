@@ -19,6 +19,7 @@ export interface IDatabaseComponent {
   getAllGames(): Promise<Game[]>
   getActiveGames(): Promise<Game[]>
   deactivateGame(gameId: string): Promise<void>
+  createMission(description: string, campaign_key: string): Promise<Mission>
   getMission(missionId: string): Promise<Mission>
   getMissions(): Promise<Mission[]>
   getActiveMissions(): Promise<Mission[]>
@@ -54,10 +55,10 @@ export interface IDatabaseComponent {
   getActiveChallengesForGame(gameId: string): Promise<Challenge[]>
   deactivateGameChallenge(challengeId: string): Promise<void>
   setChallengeAsComplete(userAddress: string, challengeId: string): Promise<void>
-  createMission(description: string, campaign_key: string): Promise<Mission>
   setMissionAsStart(userAddress: string, missionId: string): Promise<void>
   setMissionAsEnd(userAddress: string, missionId: string): Promise<void>
   getUserMissions(userAddress: string, options: { active?: boolean }): Promise<UserMission[]>
+  getChallenge(challengeId: string): Promise<Challenge>
   getMissionWithCampaignKeyExposure(missionId: string): Promise<Mission>
   getUserCompletedChallengeByGame(
     gameId: string,
@@ -300,6 +301,11 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const results = await pg.query<GamePlayedByUser>(query)
 
       return results.rows
+    },
+    async getChallenge(challengeId: string) {
+      const results = await pg.query<Challenge>(SQL`SELECT * FROM challenges WHERE id = ${challengeId}`)
+
+      return results.rows[0]
     },
     async getMissionWithCampaignKeyExposure(missionId: string) {
       const results = await pg.query<Mission>(SQL`SELECT * FROM missions WHERE id = ${missionId}`)
