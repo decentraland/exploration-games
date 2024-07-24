@@ -23,6 +23,7 @@ export interface IDatabaseComponent {
   getMission(missionId: string): Promise<Mission>
   getMissions(): Promise<Mission[]>
   getActiveMissions(): Promise<Mission[]>
+  deactivateMission(missionId: string): Promise<void>
   getUserProgressInGame(
     gameId: string,
     userAddress: string,
@@ -104,7 +105,9 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       return results.rows[0]
     },
     async getActiveMissions() {
-      const results = await pg.query<Mission>(SQL`SELECT m.id, m.description FROM missions m WHERE m.active IS TRUE`)
+      const results = await pg.query<Mission>(
+        SQL`SELECT m.id, m.description, m.active FROM missions m WHERE m.active IS TRUE`
+      )
 
       return results.rows
     },
@@ -112,6 +115,9 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const results = await pg.query<Mission>(SQL`SELECT m.id, m.description, m.active FROM missions m`)
 
       return results.rows
+    },
+    async deactivateMission(missionId) {
+      await pg.query(SQL`UPDATE missions SET active = false WHERE id = ${missionId}`)
     },
     async getUserProgressInGame(gameId, userAddress, option) {
       const query = SQL`
