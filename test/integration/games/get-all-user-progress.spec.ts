@@ -9,13 +9,13 @@ test('GET /api/games/progress', ({ components }) => {
 
     const identity = await getIdentity()
 
-    await db.createProgressInGame(game1.id, identity.authChain[0].payload.toLowerCase(), {
+    await db.createProgressInGame(game1.id, identity.authChain[0].payload.toLowerCase(), 'UserName', {
       level: 3,
       score: 10,
       time: 1200,
       moves: 350
     })
-    await db.createProgressInGame(game2.id, identity.authChain[0].payload.toLowerCase(), {
+    await db.createProgressInGame(game2.id, identity.authChain[0].payload.toLowerCase(), 'UserName', {
       level: 9,
       score: 2,
       time: 120,
