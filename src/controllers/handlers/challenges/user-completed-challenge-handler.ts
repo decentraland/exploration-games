@@ -3,13 +3,10 @@ import { HandlerContextWithPath } from '../../../types'
 import { uuidSchema } from '../../../utils'
 
 export async function userCompletedChallengeHandler(
-  ctx: Pick<
-    HandlerContextWithPath<'db' | 'rewardService' | 'logs', '/challenges/:id'>,
-    'components' | 'params' | 'verification'
-  >
+  ctx: Pick<HandlerContextWithPath<'db' | 'logs', '/challenges/:id'>, 'components' | 'params' | 'verification'>
 ) {
   const {
-    components: { db, rewardService },
+    components: { db },
     verification,
     params
   } = ctx
@@ -22,7 +19,7 @@ export async function userCompletedChallengeHandler(
     throw new InvalidRequestError('Invalid UUID')
   }
 
-  const challenge = await db.getChallengeWithCampaignKeyExposure(id)
+  const challenge = await db.getChallenge(id)
 
   if (!challenge) {
     throw new InvalidRequestError(`${id} doesn't exist`)
@@ -30,10 +27,7 @@ export async function userCompletedChallengeHandler(
 
   await db.setChallengeAsComplete(verification!.auth, id)
 
-  const rewardResponse = await rewardService.sendReward(challenge.campaign_key, verification!.auth)
-
   return {
-    status: 201,
-    body: rewardResponse
+    status: 204
   }
 }
