@@ -6,7 +6,12 @@ test('GET /api/games/:id/challenges', ({ components }) => {
     const { localFetch, db } = components
     const { id } = await db.createGame('TEST', '10,10')
     const mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY)
-    const challenge = await db.createGameChallenge(id, 'Reach level 6', 6, mission.id)
+    const challenge = await db.createGameChallenge({
+      gameId: id,
+      description: 'Reach level 6',
+      targetLevel: 6,
+      missionId: mission.id
+    })
 
     const response = await localFetch.fetch(`/api/games/${id}/challenges`)
 

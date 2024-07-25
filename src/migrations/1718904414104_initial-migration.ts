@@ -60,8 +60,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       notNull: false
     },
     updated_at: {
-      type: PgType.TIMESTAMP,
-      default: pgm.func('now()')
+      type: PgType.BIGINT
     }
   })
 
@@ -104,11 +103,10 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       references: 'missions'
     },
     start_time: {
-      type: PgType.TIMESTAMP,
-      default: pgm.func('now()')
+      type: PgType.BIGINT
     },
     end_time: {
-      type: PgType.TIMESTAMP,
+      type: PgType.BIGINT,
       notNull: false
     },
     active: {

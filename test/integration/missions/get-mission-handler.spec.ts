@@ -9,9 +9,24 @@ test('GET /api/missions/:id', ({ components }) => {
     const game1 = await db.createGame('TEST 1', '10,10')
     const game2 = await db.createGame('TEST 2', '10,10')
     mission = await db.createMission('Mission Test1', VALID_CAMPAIGN_KEY)
-    await db.createGameChallenge(game.id, 'Reach level 6', 6, mission.id)
-    await db.createGameChallenge(game1.id, 'Reach level 6', 6, mission.id)
-    await db.createGameChallenge(game2.id, 'Reach level 6', 6, mission.id)
+    await db.createGameChallenge({
+      gameId: game.id,
+      description: 'Reach level 6',
+      targetLevel: 6,
+      missionId: mission.id
+    })
+    await db.createGameChallenge({
+      gameId: game1.id,
+      description: 'Reach level 6',
+      targetLevel: 6,
+      missionId: mission.id
+    })
+    await db.createGameChallenge({
+      gameId: game2.id,
+      description: 'Reach level 6',
+      targetLevel: 6,
+      missionId: mission.id
+    })
   })
 
   it('should return 200 with a mission and the games and challenges associated', async () => {

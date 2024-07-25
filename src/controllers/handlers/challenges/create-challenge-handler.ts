@@ -36,13 +36,13 @@ export async function createChallengeHandler(
     throw new InvalidRequestError(`${body.gameId} doesn't exist`)
   }
 
-  const challenge = await db.createGameChallenge(
-    body.gameId,
-    body.description,
-    body.targetLevel,
-    body.missionId,
-    body.data
-  )
+  const challenge = await db.createGameChallenge({
+    gameId: body.gameId,
+    description: body.description,
+    targetLevel: body.targetLevel,
+    missionId: body.missionId,
+    data: body.data
+  })
 
   return {
     status: 201,
