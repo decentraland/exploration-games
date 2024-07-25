@@ -11,7 +11,8 @@ test('POST /api/games/:id/progress', ({ components }) => {
       score: 10,
       level: 1,
       time: 150,
-      moves: 10
+      moves: 10,
+      user_name: 'user_name'
     }
 
     const response = await makeRequest(localFetch, `/api/games/${game.id}/progress`, {
@@ -28,6 +29,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
     expect(body.data.level).toBe(1)
     expect(body.data.time).toBe(150)
     expect(body.data.moves).toBe(10)
+    expect(body.data.user_name).toBe('user_name')
     expect(body.data.data).toBe(null)
   })
 
@@ -40,6 +42,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
       score: 10,
       level: 1,
       time: 150,
+      user_name: 'user_name',
       data: {
         metadata: true
       }
@@ -59,6 +62,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
     expect(body.data.level).toBe(1)
     expect(body.data.time).toBe(150)
     expect(body.data.moves).toBeNull()
+    expect(body.data.user_name).toBe('user_name')
     expect(body.data.data).toEqual({ metadata: true })
   })
 
@@ -69,6 +73,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
 
     const payload = {
       level: 1,
+      user_name: 'user_name',
       data: {
         metadata: true
       }
@@ -88,6 +93,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
     expect(body.data.level).toBe(1)
     expect(body.data.time).toBeNull()
     expect(body.data.moves).toBeNull()
+    expect(body.data.user_name).toBe('user_name')
     expect(body.data.data).toEqual({ metadata: true })
   })
 
