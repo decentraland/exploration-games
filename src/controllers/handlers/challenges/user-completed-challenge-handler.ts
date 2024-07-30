@@ -9,22 +9,26 @@ export async function userCompletedChallengeHandler(
   >
 ) {
   const {
-    components: { db, rewardService },
+    components: { db, rewardService, logs },
     verification,
     params
   } = ctx
 
   const { id } = params
 
+  const logger = logs.getLogger('user-completed-challenge-handler')
+
   const validateId = uuidSchema.validate(id)
 
   if (validateId.error) {
+    logger.error(`Invalid UUID: ${validateId.error}`)
     throw new InvalidRequestError('Invalid UUID')
   }
 
   const challenge = await db.getChallenge(id)
 
   if (!challenge) {
+    logger.error(`Challenge id ${id} doesn't exist`)
     throw new InvalidRequestError(`${id} doesn't exist`)
   }
 
@@ -38,23 +42,38 @@ export async function userCompletedChallengeHandler(
 
   const completedChallengeIds = new Set(completedChallenges.map(({ challenge_id }) => challenge_id))
   const allChallengesCompleted = challengesByMission.every(({ id }) => completedChallengeIds.has(id))
+  const userMission = await db.getUserMissions(verification!.auth, { missionId: challenge.mission_id, active: true })
+  const { campaign_key, ...mission } = await db.getMissionWithCampaignKeyExposure(challenge.mission_id)
 
   if (completedChallenges.length >= challengesByMission.length && allChallengesCompleted) {
-    const userMission = await db.getUserMissions(verification!.auth, { missionId: challenge.mission_id, active: true })
+    const ended = await db.setMissionAsEnd(userMission[0].id)
 
-    await db.setMissionAsEnd(userMission[0].id)
+    if (ended.rowCount === 0) {
+      logger.error(`There was an error ending the user's mission: ${userMission[0].id}}`)
+      throw new InvalidRequestError(`There was an error ending the user's mission`)
+    }
 
-    const mission = await db.getMissionWithCampaignKeyExposure(challenge.mission_id)
-
-    const rewardResponse = await rewardService.sendReward(mission.campaignKey, verification!.auth)
+    const rewardResponse = await rewardService.sendReward(campaign_key, verification!.auth)
 
     return {
-      status: 201,
-      body: rewardResponse
+      status: 200,
+      body: {
+        data: {
+          reward: rewardResponse.data,
+          mission,
+          user_mission: userMission[0]
+        }
+      }
     }
   }
 
   return {
-    status: 204
+    status: 200,
+    body: {
+      data: {
+        mission,
+        user_mission: userMission[0]
+      }
+    }
   }
 }
