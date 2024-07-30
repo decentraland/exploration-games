@@ -17,6 +17,13 @@ test('POST /api/challenges/:id', ({ components }) => {
       missionId: mission.id
     })
 
+    await db.createGameChallenge({
+      gameId,
+      description: 'Reach Level 4',
+      targetLevel: 4,
+      missionId: mission.id
+    })
+
     const response = await makeRequest(localFetch, `/api/challenges/${challengeId}`, {
       method: 'POST'
     })
