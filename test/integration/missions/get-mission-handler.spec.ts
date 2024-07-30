@@ -37,7 +37,7 @@ test('GET /api/missions/:id', ({ components }) => {
     expect(response.status).toBe(200)
 
     const json = await response.json()
-    console.log(mission.id)
+
     expect(json.data.mission.id).toBe(mission.id)
     expect(json.data.mission.description).toBe(mission.description)
     expect(json.data.challenges.length).toBe(3)

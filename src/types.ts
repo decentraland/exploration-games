@@ -116,6 +116,13 @@ export type Challenge = {
   active: boolean
 }
 
+export type UserChallenge = {
+  id: string
+  user_address: string
+  challenge_id: string
+  challenge_uncompleted: boolean
+}
+
 export type GamePlayedByUser = GameMetrics & {
   name: string
   parcel: string
@@ -130,6 +137,7 @@ export type Leaderboard = GameMetrics & {
 }
 
 export type UserMission = {
+  id: string
   user_address: string
   mission_id: string
   start_time: string

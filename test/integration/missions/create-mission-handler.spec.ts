@@ -22,7 +22,6 @@ test('POST /api/missions', ({ components }) => {
     expect(response.status).toBe(201)
 
     const body = await response.json()
-    console.log(body)
 
     expect(body.data).not.toBe(undefined)
     expect(body.data.description).toBe(payload.description)
