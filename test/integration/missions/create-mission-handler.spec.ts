@@ -7,7 +7,7 @@ test('POST /api/missions', ({ components }) => {
   beforeAll(async () => {
     payload = {
       description: 'Mission Test',
-      campaignKey: VALID_CAMPAIGN_KEY
+      campaign_key: VALID_CAMPAIGN_KEY
     }
   })
 
@@ -25,7 +25,7 @@ test('POST /api/missions', ({ components }) => {
 
     expect(body.data).not.toBe(undefined)
     expect(body.data.description).toBe(payload.description)
-    expect(body.data.campaign_key).toBe(payload.campaignKey)
+    expect(body.data.campaign_key).toBe(VALID_CAMPAIGN_KEY)
   })
 
   it('should return 400 when no auth', async () => {
