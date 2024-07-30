@@ -1,4 +1,5 @@
 import { RewardAttributes, RewardL2Status, IRewardComponent } from '../../src/types'
+import { Rarity, WearableCategory } from '@dcl/schemas'
 
 export const VALID_CAMPAIGN_KEY = '00000000-0000-0000-0000-000000000000'
 export const NON_EXISTING_CAMPAIGN_KEY = '11111111-1111-1111-1111-000000000000'
@@ -20,6 +21,8 @@ const rewards: RewardAttributes[] = [
     transaction_id: null,
     transaction_hash: null,
     token: 'Polygon sunglasses',
+    rarity: Rarity.RARE,
+    category: WearableCategory.EYEWEAR,
     image:
       'https://peer.decentraland.zone/lambdas/collections/contents/urn:decentraland:mumbai:collections-v2:0x7434a847c5e1ff250db456c55f99d1612e93d6a3:0/thumbnail',
     assigned_at: new Date(),

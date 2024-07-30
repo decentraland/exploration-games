@@ -11,7 +11,7 @@ export async function getMissionHandler(
   const { id } = params
 
   const mission = await db.getMission(id)
-  const challenges = await db.getChallengesForMission(id)
+  const challenges = await db.getChallengesByMission(id)
   const ids = challenges.map(({ game_id }) => game_id)
   const games = await db.getGamesById(ids)
 

@@ -10,7 +10,6 @@ export async function getMissionsHandler(
 
   const allMissions = url.searchParams.has('all')
 
-  console.log('allMissions', allMissions)
   let missions = []
   if (allMissions) {
     missions = await db.getMissions()
