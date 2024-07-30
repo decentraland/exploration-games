@@ -21,14 +21,14 @@ export async function userCompletedChallengeHandler(
   const validateId = uuidSchema.validate(id)
 
   if (validateId.error) {
-    logger.error(`Invalid UUID: ${validateId.error}`)
+    logger.warn(`Invalid UUID: ${validateId.error}`)
     throw new InvalidRequestError('Invalid UUID')
   }
 
   const challenge = await db.getChallenge(id)
 
   if (!challenge) {
-    logger.error(`Challenge id ${id} doesn't exist`)
+    logger.warn(`Challenge id ${id} doesn't exist`)
     throw new InvalidRequestError(`${id} doesn't exist`)
   }
 
@@ -49,7 +49,7 @@ export async function userCompletedChallengeHandler(
     const ended = await db.setMissionAsEnd(userMission[0].id)
 
     if (ended.rowCount === 0) {
-      logger.error(`There was an error ending the user's mission: ${userMission[0].id}}`)
+      logger.warn(`There was an error ending the user's mission: ${userMission[0].id}}`)
       throw new InvalidRequestError(`There was an error ending the user's mission`)
     }
 
