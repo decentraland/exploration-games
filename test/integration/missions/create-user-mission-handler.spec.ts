@@ -31,9 +31,8 @@ test('POST /api/missions/:id/start', ({ components }) => {
 
     const json = await response.json()
 
-    console.log({ json })
-
     expect(response.status).toBe(400)
+    expect(json.message).toBe('Invalid Auth Chain')
   })
 
   it('should return 400 when Invalid ID', async () => {

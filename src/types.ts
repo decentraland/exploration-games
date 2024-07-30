@@ -81,7 +81,7 @@ export type Game = {
 export type Mission = {
   id: string
   description: string
-  campaignKey: string
+  campaign_key: string
   active: boolean
 }
 

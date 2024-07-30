@@ -61,7 +61,7 @@ export interface IDatabaseComponent {
   deactivateGameChallenge(challengeId: string): Promise<void>
   setChallengeAsComplete(userAddress: string, challengeId: string): Promise<void>
   setMissionAsStart(userAddress: string, missionId: string): Promise<void>
-  setMissionAsEnd(userMissionId: string): Promise<void>
+  setMissionAsEnd(userMissionId: string): Promise<Record<'rows' | 'rowCount', any>>
   setIncompleteMission(userMissionId: string): Promise<void>
   getUserMissions(userAddress: string, options?: { active?: boolean; missionId?: string }): Promise<UserMission[]>
   getChallenge(challengeId: string): Promise<Challenge>
@@ -231,7 +231,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       )
     },
     async setMissionAsEnd(userMissionId: string) {
-      await pg.query(SQL`UPDATE user_missions SET end_time = ${Date.now()} WHERE id = ${userMissionId}`)
+      return await pg.query(SQL`UPDATE user_missions SET end_time = ${Date.now()} WHERE id = ${userMissionId}`)
     },
     async setIncompleteMission(userMissionId: string) {
       await pg.query(SQL`UPDATE user_missions SET active = false WHERE id = ${userMissionId}`)
