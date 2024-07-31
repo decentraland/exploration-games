@@ -211,3 +211,7 @@ export type RewardAttributes = {
 export type IRewardComponent = IBaseComponent & {
   sendReward(campaignKey: string, beneficiary: string): Promise<{ ok: boolean; data: RewardAttributes[]; code?: Error }>
 }
+
+export type IMissionChecker = {
+  start: () => Promise<void>
+}
