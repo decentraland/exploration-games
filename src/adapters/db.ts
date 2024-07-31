@@ -309,6 +309,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         SELECT 
           p.game_id,
           p.user_address,
+          p.user_name,
           p.level,
           p.score,
           p.time,
