@@ -60,10 +60,12 @@ export interface IDatabaseComponent {
   getActiveChallengesForGame(gameId: string): Promise<Challenge[]>
   deactivateGameChallenge(challengeId: string): Promise<void>
   setChallengeAsComplete(userAddress: string, challengeId: string): Promise<void>
+  setChallengesAsExpired(userAddress: string, challengesId: string[]): Promise<void>
   setMissionAsStart(userAddress: string, missionId: string): Promise<void>
   setMissionAsEnd(userMissionId: string): Promise<Record<'rows' | 'rowCount', any>>
   setIncompleteMission(userMissionId: string): Promise<void>
   getUserMissions(userAddress: string, options?: { active?: boolean; missionId?: string }): Promise<UserMission[]>
+  getAllUserMissionsActiveStartedOn(date: number): Promise<UserMission[]>
   getChallenge(challengeId: string): Promise<Challenge>
   getChallengesByMission(missionId: string): Promise<Challenge[]>
   getMissionWithCampaignKeyExposure(missionId: string): Promise<Mission>
@@ -210,6 +212,14 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         SQL`INSERT INTO user_challenges (id, user_address, challenge_id) VALUES (${uuid}, ${userAddress}, ${challengeId})`
       )
     },
+    async setChallengesAsExpired(userAddress: string, challengeIds: string[]) {
+      await pg.query(
+        SQL`
+          UPDATE user_challenges uc SET uc.challenge_uncompleted = true 
+          WHERE uc.user_address = ${userAddress} AND uc.challenge_id = ANY(${challengeIds}::uuid[])
+        `
+      )
+    },
     async createMission(description: string, campaign_key: string) {
       const uuid = randomUUID()
 
@@ -250,6 +260,12 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       if (options?.active) {
         query.append(SQL` AND um.active IS TRUE and um.end_time IS NULL`)
       }
+
+      const result = await pg.query<UserMission>(query)
+      return result.rows
+    },
+    async getAllUserMissionsActiveStartedOn(date) {
+      const query = SQL`SELECT * FROM user_missions um WHERE um.active IS TRUE and um.end_time IS NULL and um.start_time < ${date}`
 
       const result = await pg.query<UserMission>(query)
       return result.rows

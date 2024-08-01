@@ -25,7 +25,7 @@ async function initComponents(): Promise<TestComponents> {
   const components = await originalInitComponents()
 
   const config = await createDotEnvConfigComponent(
-    { path: ['.env.default', '.env.local', '.env'] },
+    { path: ['.env.default', '.env'] },
     {
       PG_COMPONENT_PSQL_CONNECTION_STRING: 'postgresql://usr:pwd@localhost:5432/exploration_games'
     }

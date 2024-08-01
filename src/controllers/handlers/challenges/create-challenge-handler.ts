@@ -32,7 +32,7 @@ export async function createChallengeHandler(
   const game = await db.getGame(body.gameId)
 
   if (!game) {
-    logger.error('Trying to create a challenge for a non existing game')
+    logger.warn('Trying to create a challenge for a non existing game')
     throw new InvalidRequestError(`${body.gameId} doesn't exist`)
   }
 

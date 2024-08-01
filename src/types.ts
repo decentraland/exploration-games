@@ -17,6 +17,8 @@ export type GlobalContext = {
   components: BaseComponents
 }
 
+export type IMissionChecker = IBaseComponent
+
 // components used in every environment
 export type BaseComponents = {
   config: IConfigComponent
@@ -27,6 +29,7 @@ export type BaseComponents = {
   pg: IPgComponent
   db: IDatabaseComponent
   rewardService: IRewardComponent
+  missionChecker: IMissionChecker
 }
 
 // components used in runtime
