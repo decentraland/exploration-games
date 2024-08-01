@@ -45,8 +45,8 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: create .env
         run: |
-          echo "PG_COMPONENT_PSQL_CONNECTION_STRING=postgresql://usr:pwd@localhost:5432/exploration_games" >> .env.local
-          echo "ADMINS=0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5" >> .env.local
+          echo "PG_COMPONENT_PSQL_CONNECTION_STRING=postgresql://usr:pwd@localhost:5432/exploration_games" >> .env
+          echo "ADMINS=0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5" >> .env
       - name: build
         run: yarn build
       - name: test
