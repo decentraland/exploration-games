@@ -13,8 +13,6 @@ test('PUT /api/games/:id/deactivate', ({ components }) => {
       method: 'PATCH'
     })
 
-    console.log(' > deactivate response: ', { response })
-
     expect(response.status).toBe(204)
 
     const { rows } = await pg.query(SQL`SELECT active FROM games where id = ${id}`)

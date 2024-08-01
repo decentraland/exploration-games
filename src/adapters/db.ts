@@ -115,7 +115,6 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       return results.rows
     },
     async deactivateGame(gameId: string) {
-      console.log(' > QUERY: > ', `UPDATE games SET active = false WHERE id = ${gameId}`)
       await pg.query(SQL`UPDATE games SET active = false WHERE id = ${gameId}`)
     },
     async getMission(missionId) {
