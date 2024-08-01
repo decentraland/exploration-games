@@ -13,10 +13,11 @@ import { createPgComponent } from '@well-known-components/pg-component'
 import { resolve } from 'path'
 import { createDBComponent } from './adapters/db'
 import { createRewardComponent } from './adapters/rewards'
+import { createMissionChecker } from './adapters/mission-checker'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {
-  const config = await createDotEnvConfigComponent({ path: ['.env.default', '.env.local', '.env'] })
+  const config = await createDotEnvConfigComponent({ path: ['.env.default', '.env'] })
   const metrics = await createMetricsComponent(metricDeclarations, { config })
   const logs = await createLogComponent({ metrics })
   const server = await createServerComponent<GlobalContext>(
@@ -59,8 +60,7 @@ export async function initComponents(): Promise<AppComponents> {
 
   const db = createDBComponent({ pg })
   const rewardService = createRewardComponent({ fetcher, config })
-
-  await instrumentHttpServerWithPromClientRegistry({ metrics, server, config, registry: metrics.registry! })
+  const missionChecker = await createMissionChecker({ logs, db })
 
   return {
     config,
@@ -71,6 +71,7 @@ export async function initComponents(): Promise<AppComponents> {
     fetcher,
     pg,
     db,
-    rewardService
+    rewardService,
+    missionChecker
   }
 }
