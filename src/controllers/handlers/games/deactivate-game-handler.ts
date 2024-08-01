@@ -11,8 +11,9 @@ export async function deactivateGameHandler(
   } = ctx
 
   const { id } = params
-
+  console.log(' > game id: > ', id)
   const validationResult = uuidSchema.validate(id)
+  console.log(' > validationResult: > ', validationResult)
   if (validationResult.error) {
     throw new InvalidRequestError('Invalid UUID')
   }
