@@ -10,12 +10,11 @@ export async function createMissionChecker(components: Pick<AppComponents, 'logs
       '0 * * * * *',
       async function () {
         try {
-          const yesterday = new Date()
-          yesterday.setDate(yesterday.getDate() - 1)
+          const yesterday = Date.now() - 86400000
 
-          logger.info(`Looking into missions that user stared before ${yesterday.toDateString()}.`)
+          logger.info(`Looking into missions that user stared before ${new Date(yesterday).toDateString()}.`)
 
-          const userMissions = await db.getAllUserMissionsActive()
+          const userMissions = await db.getAllUserMissionsActiveStartedOn(yesterday)
           for (const userMission of userMissions) {
             const challenges = await db.getChallengesByMission(userMission.mission_id)
             if (challenges.length > 0) {

@@ -65,7 +65,7 @@ export interface IDatabaseComponent {
   setMissionAsEnd(userMissionId: string): Promise<Record<'rows' | 'rowCount', any>>
   setIncompleteMission(userMissionId: string): Promise<void>
   getUserMissions(userAddress: string, options?: { active?: boolean; missionId?: string }): Promise<UserMission[]>
-  getAllUserMissionsActive(): Promise<UserMission[]>
+  getAllUserMissionsActiveStartedOn(date: number): Promise<UserMission[]>
   getChallenge(challengeId: string): Promise<Challenge>
   getChallengesByMission(missionId: string): Promise<Challenge[]>
   getMissionWithCampaignKeyExposure(missionId: string): Promise<Mission>
@@ -264,9 +264,8 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const result = await pg.query<UserMission>(query)
       return result.rows
     },
-    async getAllUserMissionsActive() {
-      const minusOneDay = Date.now() - 86400000
-      const query = SQL`SELECT * FROM user_missions um WHERE um.active IS TRUE and um.end_time IS NULL and um.start_time < ${minusOneDay}`
+    async getAllUserMissionsActiveStartedOn(date) {
+      const query = SQL`SELECT * FROM user_missions um WHERE um.active IS TRUE and um.end_time IS NULL and um.start_time < ${date}`
 
       const result = await pg.query<UserMission>(query)
       return result.rows
