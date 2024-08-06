@@ -16,6 +16,7 @@ import {
 
 export interface IDatabaseComponent {
   createGame(name: string, parcel: string): Promise<Game>
+  updateGame(id: string, name: string, parcel: string): Promise<void>
   getGame(gameId: string): Promise<Game>
   getGamesById(gamesId: string[]): Promise<Game[]>
   getAllGames(): Promise<Game[]>
@@ -91,6 +92,9 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       )
 
       return results.rows[0]
+    },
+    async updateGame(id: string, name: string, parcel: string) {
+      await pg.query<Game>(SQL`UPDATE games SET name = ${name}, parcel=${parcel} WHERE id=${id}`)
     },
     async getGame(gameId: string) {
       const results = await pg.query<Game>(SQL`SELECT * FROM games WHERE id = ${gameId}`)
