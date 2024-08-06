@@ -21,6 +21,7 @@ import { getMissionHandler } from './handlers/missions/get-mission-handler'
 import { createUserMissionHandler } from './handlers/missions/create-user-mission-handler'
 import { getMissionsAvailableHandler } from './handlers/missions/get-missions-user-handler'
 import { getMissionsInProgressHandler } from './handlers/missions/get-missions-user-in-progress-handler'
+import { updateMissionHandler } from './handlers/missions/update-mission-handler'
 
 // We return the entire router because it will be easier to test than a whole server
 export async function setupRouter(globalContext: GlobalContext): Promise<Router<GlobalContext>> {
@@ -61,6 +62,7 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   router.patch('/games/:id/deactivate', auth, isAdminMiddleware, deactivateGameHandler)
   router.post('/challenges', auth, isAdminMiddleware, createChallengeHandler)
   router.post('/missions', auth, isAdminMiddleware, createMissionHandler)
+  router.patch('/missions/:id', auth, isAdminMiddleware, updateMissionHandler)
 
   return router
 }

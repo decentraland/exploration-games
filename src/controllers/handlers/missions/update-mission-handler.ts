@@ -1,0 +1,45 @@
+import Joi from 'joi'
+import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
+import { parseJson } from '@dcl/platform-server-commons/dist/utils'
+import { HandlerContextWithPath, Mission } from '../../../types'
+
+const schema = Joi.object<Mission>().keys({
+  description: Joi.string().required(),
+  campaign_key: Joi.string().required()
+})
+
+export async function updateMissionHandler(
+  ctx: Pick<HandlerContextWithPath<'db' | 'logs', '/missions:id'>, 'components' | 'request' | 'params'>
+) {
+  const {
+    components: { logs, db },
+    params,
+    request
+  } = ctx
+
+  const logger = logs.getLogger('update-mission-handler')
+  const { id } = params
+
+  const body = await parseJson(request)
+
+  const validate = schema.validate(body)
+  if (validate.error) {
+    logger.warn(`Invalid mission object received when updating: ${validate.error.message} (${JSON.stringify(body)}`)
+    throw new InvalidRequestError(validate.error.message)
+  }
+
+  const validatedBody = body as Mission
+
+  const mission = await db.getMission(id)
+
+  if (!mission) {
+    logger.warn(`Mission not found when updating id: ${id}`)
+    throw new InvalidRequestError('Mission not found')
+  }
+
+  await db.updateMission(mission.id, validatedBody.description, validatedBody.campaign_key)
+
+  return {
+    status: 204
+  }
+}
