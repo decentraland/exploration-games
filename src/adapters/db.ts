@@ -61,6 +61,16 @@ export interface IDatabaseComponent {
     missionId: string
     data?: Record<string, any> | null
   }): Promise<Challenge>
+  updateGameChallenge(
+    challengeId: string,
+    gameValues: {
+      gameId: string
+      description: string
+      targetLevel: number
+      missionId: string
+      data?: Record<string, any> | null
+    }
+  ): Promise<void>
   getActiveChallengesForGame(gameId: string): Promise<Challenge[]>
   deactivateGameChallenge(challengeId: string): Promise<void>
   setChallengeAsComplete(userAddress: string, challengeId: string): Promise<void>
@@ -232,6 +242,25 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       )
 
       return results.rows[0]
+    },
+    async updateGameChallenge(
+      challengeId: string,
+      gameValues: {
+        gameId: string
+        description: string
+        targetLevel: number
+        missionId: string
+        data?: Record<string, any> | null
+      }
+    ) {
+      const { gameId, description, targetLevel, missionId, data } = gameValues
+      await pg.query(
+        SQL`
+          UPDATE challenges 
+          SET game_id = ${gameId}, description = ${description}, target_level = ${targetLevel}, mission_id = ${missionId}, data = ${data}
+          WHERE id = ${challengeId}
+        `
+      )
     },
     async getActiveChallengesForGame(gameId: string) {
       const results = await pg.query<Challenge>(
