@@ -37,7 +37,12 @@ export async function updateMissionHandler(
     throw new InvalidRequestError('Mission not found')
   }
 
-  await db.updateMission(mission.id, validatedBody.description, validatedBody.campaign_key)
+  try {
+    await db.updateMission(mission.id, validatedBody.description, validatedBody.campaign_key)
+  } catch (error) {
+    logger.error(`Error updating mission: ${error}`)
+    throw new InvalidRequestError('Error updating mission')
+  }
 
   return {
     status: 204
