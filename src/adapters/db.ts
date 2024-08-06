@@ -26,6 +26,7 @@ export interface IDatabaseComponent {
   getMissions(): Promise<Mission[]>
   getActiveMissions(): Promise<Mission[]>
   getMissionsAvailableForUser(userAddress: string): Promise<Mission[]>
+  getMissionsInProgressForUser(userAddress: string): Promise<Mission[]>
   deactivateMission(missionId: string): Promise<void>
   getUserProgressInGame(
     gameId: string,
@@ -69,6 +70,7 @@ export interface IDatabaseComponent {
   getAllUserMissionsActiveStartedOn(date: number): Promise<UserMission[]>
   getChallenge(challengeId: string): Promise<Challenge>
   getChallengesByMission(missionId: string): Promise<Challenge[]>
+  getChallengesByMissions(missionsId: string[]): Promise<Challenge[]>
   getMissionWithCampaignKeyExposure(missionId: string): Promise<Mission>
   getUserCompletedChallengeByGame(
     gameId: string,
@@ -139,8 +141,22 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
           WHERE m.active is true 
           AND m.id not in 
           (
-            SELECT um.id FROM user_missions um 
+            SELECT um.mission_id FROM user_missions um 
             WHERE um.active IS TRUE and um.end_time IS not NULL and um.user_address = ${$userAddress}
+          )`
+      )
+
+      return results.rows
+    },
+    async getMissionsInProgressForUser($userAddress: string) {
+      const results = await pg.query<Mission>(
+        SQL`
+          SELECT * FROM missions m 
+          WHERE m.active is true 
+          AND m.id in 
+          (
+            SELECT um.mission_id FROM user_missions um 
+            WHERE um.active IS TRUE and um.end_time IS NULL and um.user_address = ${$userAddress}
           )`
       )
 
@@ -413,6 +429,13 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getChallengesByMission(missionId: string) {
       const results = await pg.query<Challenge>(SQL`SELECT * FROM challenges WHERE mission_id = ${missionId}`)
+
+      return results.rows
+    },
+    async getChallengesByMissions(missionsId: string[]) {
+      const results = await pg.query<Challenge>(
+        SQL`SELECT * FROM challenges WHERE mission_id  = ANY(${missionsId}::uuid[])`
+      )
 
       return results.rows
     },

@@ -20,6 +20,7 @@ import { createMissionHandler } from './handlers/missions/create-mission-handler
 import { getMissionHandler } from './handlers/missions/get-mission-handler'
 import { createUserMissionHandler } from './handlers/missions/create-user-mission-handler'
 import { getMissionsAvailableHandler } from './handlers/missions/get-missions-user-handler'
+import { getMissionsInProgressHandler } from './handlers/missions/get-missions-user-in-progress-handler'
 
 // We return the entire router because it will be easier to test than a whole server
 export async function setupRouter(globalContext: GlobalContext): Promise<Router<GlobalContext>> {
@@ -46,6 +47,7 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   router.get('/games/:id/leaderboard', getProgressLeaderboardInGamesHandler)
   router.get('/missions', getMissionsHandler)
   router.get('/missions/available', auth, getMissionsAvailableHandler)
+  router.get('/missions/in_progress', auth, getMissionsInProgressHandler)
   router.get('/missions/:id', getMissionHandler)
 
   router.get('/games/:id/progress', auth, getProgressInGameHandler)
