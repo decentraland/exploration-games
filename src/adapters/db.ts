@@ -16,12 +16,14 @@ import {
 
 export interface IDatabaseComponent {
   createGame(name: string, parcel: string): Promise<Game>
+  updateGame(id: string, name: string, parcel: string): Promise<void>
   getGame(gameId: string): Promise<Game>
   getGamesById(gamesId: string[]): Promise<Game[]>
   getAllGames(): Promise<Game[]>
   getActiveGames(): Promise<Game[]>
   deactivateGame(gameId: string): Promise<void>
   createMission(description: string, campaign_key: string): Promise<Mission>
+  updateMission(id: string, description: string, campaign_key: string): Promise<void>
   getMission(missionId: string): Promise<Mission>
   getMissions(): Promise<Mission[]>
   getActiveMissions(): Promise<Mission[]>
@@ -91,6 +93,9 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       return results.rows[0]
     },
+    async updateGame(id: string, name: string, parcel: string) {
+      await pg.query<Game>(SQL`UPDATE games SET name = ${name}, parcel=${parcel} WHERE id=${id}`)
+    },
     async getGame(gameId: string) {
       const results = await pg.query<Game>(SQL`SELECT * FROM games WHERE id = ${gameId}`)
 
@@ -137,7 +142,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async getMissionsAvailableForUser($userAddress: string) {
       const results = await pg.query<Mission>(
         SQL`
-          SELECT * FROM missions m 
+          SELECT m.id, m.description, m.active FROM missions m 
           WHERE m.active is true 
           AND m.id not in 
           (
@@ -151,7 +156,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async getMissionsInProgressForUser($userAddress: string) {
       const results = await pg.query<Mission>(
         SQL`
-          SELECT * FROM missions m 
+          SELECT m.id, m.description, m.active FROM missions m 
           WHERE m.active is true 
           AND m.id in 
           (
@@ -261,6 +266,14 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       )
 
       return results.rows[0]
+    },
+    async updateMission(id: string, description: string, campaign_key: string) {
+      await pg.query<Mission>(
+        SQL`
+          UPDATE missions SET description = ${description}, campaign_key = ${campaign_key} 
+          WHERE id = ${id}
+        `
+      )
     },
     async setMissionAsStart(userAddress: string, missionId: string) {
       const uuid = randomUUID()
