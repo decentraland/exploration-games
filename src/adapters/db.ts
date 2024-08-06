@@ -138,7 +138,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async getMissionsAvailableForUser($userAddress: string) {
       const results = await pg.query<Mission>(
         SQL`
-          SELECT * FROM missions m 
+          SELECT m.id, m.description, m.active FROM missions m 
           WHERE m.active is true 
           AND m.id not in 
           (
@@ -152,7 +152,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async getMissionsInProgressForUser($userAddress: string) {
       const results = await pg.query<Mission>(
         SQL`
-          SELECT * FROM missions m 
+          SELECT m.id, m.description, m.active FROM missions m 
           WHERE m.active is true 
           AND m.id in 
           (
