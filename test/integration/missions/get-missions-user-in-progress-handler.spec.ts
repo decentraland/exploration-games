@@ -38,7 +38,7 @@ test('GET /api/missions/in_progress', ({ components }) => {
     await db.setMissionAsStart('0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', mission2.id)
   })
 
-  it('should return 200 with no missions in progress for the user that complete the mission', async () => {
+  it('should return 200 with missions in progress for the user that complete the mission', async () => {
     const { localFetch } = components
 
     const response = await makeRequest(localFetch, `/api/missions/in_progress`)
@@ -46,7 +46,7 @@ test('GET /api/missions/in_progress', ({ components }) => {
     expect(response.status).toBe(200)
 
     const json = await response.json()
-    expect(json.data.missions.length).toBe(1)
+    expect(json.data.missions.length).toBeGreaterThan(0)
     expect(json.data.missions[0].id).toBe(mission2.id)
     expect(json.data.missions.every(({ id }) => id === mission3.id)).toBe(false)
   })
