@@ -157,7 +157,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
           AND m.id not in 
           (
             SELECT um.mission_id FROM user_missions um 
-            WHERE um.active IS TRUE and um.end_time IS not NULL and um.user_address = ${$userAddress}
+            WHERE um.active IS TRUE and um.end_time IS not NULL and um.user_address = ${$userAddress.toLocaleLowerCase()}
           )`
       )
 
@@ -171,7 +171,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
           AND m.id in 
           (
             SELECT um.mission_id FROM user_missions um 
-            WHERE um.active IS TRUE and um.end_time IS NULL and um.user_address = ${$userAddress}
+            WHERE um.active IS TRUE and um.end_time IS NULL and um.user_address = ${$userAddress.toLocaleLowerCase()}
           )`
       )
 
@@ -190,7 +190,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         SELECT * 
         FROM progress 
         WHERE game_id = ${gameId} 
-          AND user_address = ${userAddress} 
+          AND user_address = ${userAddress.toLocaleLowerCase()} 
       `
 
       const orderOption: ProgressSort =
@@ -219,7 +219,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const { level, score, time, moves } = gameMetrics
       const results = await pg.query<UserProgress>(
         SQL`INSERT INTO progress (id, game_id, user_address, user_name, level, score, time, moves, data, updated_at) 
-            VALUES (${uuid}, ${gameId}, ${userAddress}, ${userName}, ${level}, ${score}, ${time}, ${moves}, ${data}, ${Date.now()})
+            VALUES (${uuid}, ${gameId}, ${userAddress.toLocaleLowerCase()}, ${userName}, ${level}, ${score}, ${time}, ${moves}, ${data}, ${Date.now()})
             RETURNING *
           `
       )
@@ -274,14 +274,14 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async setChallengeAsComplete(userAddress: string, challengeId: string) {
       const uuid = randomUUID()
       await pg.query(
-        SQL`INSERT INTO user_challenges (id, user_address, challenge_id) VALUES (${uuid}, ${userAddress}, ${challengeId})`
+        SQL`INSERT INTO user_challenges (id, user_address, challenge_id) VALUES (${uuid}, ${userAddress.toLocaleLowerCase()}, ${challengeId})`
       )
     },
     async setChallengesAsExpired(userAddress: string, challengeIds: string[]) {
       await pg.query(
         SQL`
           UPDATE user_challenges uc SET uc.challenge_uncompleted = true 
-          WHERE uc.user_address = ${userAddress} AND uc.challenge_id = ANY(${challengeIds}::uuid[])
+          WHERE uc.user_address = ${userAddress.toLocaleLowerCase()} AND uc.challenge_id = ANY(${challengeIds}::uuid[])
         `
       )
     },
@@ -309,7 +309,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       await pg.query(
         SQL`
           INSERT INTO user_missions (id, user_address, mission_id, start_time) 
-          VALUES (${uuid}, ${userAddress}, ${missionId}, ${Date.now()})
+          VALUES (${uuid}, ${userAddress.toLocaleLowerCase()}, ${missionId}, ${Date.now()})
         `
       )
     },
@@ -326,7 +326,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         missionId?: string
       }
     ) {
-      const query = SQL`SELECT * FROM user_missions um WHERE um.user_address = ${userAddress}`
+      const query = SQL`SELECT * FROM user_missions um WHERE um.user_address = ${userAddress.toLocaleLowerCase()}`
       if (options?.missionId) {
         query.append(SQL` AND um.mission_id = ${options.missionId}`)
       }
@@ -353,7 +353,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         FROM challenges c
         JOIN user_challenges uc on c.id = uc.challenge_id
         WHERE c.game_id = ${gameId} 
-          and uc.user_address = ${userAddress} 
+          and uc.user_address = ${userAddress.toLocaleLowerCase()} 
         `
       )
       return result.rows
@@ -361,7 +361,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async getUserChallengeCompleted(userAddress: string, challengeIds: string[]) {
       const query = SQL`SELECT uc.id, uc.user_address , uc.challenge_id, uc.challenge_uncompleted
       FROM user_challenges uc
-      WHERE uc.user_address = ${userAddress} 
+      WHERE uc.user_address = ${userAddress.toLocaleLowerCase()} 
         AND uc.challenge_id = ANY(${challengeIds}::uuid[])
         and uc.challenge_uncompleted IS FALSE
       `
@@ -371,7 +371,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async getAllGamesBeingPlayedByUser(userAddress: string) {
       const results = await pg.query<GamePlayedByUser>(
         SQL`SELECT g.id, g.name, g.parcel, p.level, p.score, p.time, p.moves, p.data 
-          FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE p.user_address = ${userAddress}`
+          FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE p.user_address = ${userAddress.toLocaleLowerCase()}`
       )
 
       return results.rows
