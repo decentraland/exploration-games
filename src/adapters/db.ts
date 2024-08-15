@@ -280,8 +280,8 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async setChallengesAsExpired(userAddress: string, challengeIds: string[]) {
       await pg.query(
         SQL`
-          UPDATE user_challenges uc SET uc.challenge_uncompleted = true 
-          WHERE uc.user_address = ${userAddress.toLocaleLowerCase()} AND uc.challenge_id = ANY(${challengeIds}::uuid[])
+          UPDATE user_challenges SET challenge_uncompleted = true 
+          WHERE user_address = ${userAddress.toLocaleLowerCase()} AND challenge_id = ANY(${challengeIds}::uuid[])
         `
       )
     },
