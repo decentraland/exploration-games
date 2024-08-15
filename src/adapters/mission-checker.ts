@@ -13,7 +13,7 @@ export async function createMissionChecker(components: Pick<AppComponents, 'logs
           const yesterday = Date.now() - 86400000
 
           logger.info(
-            `Looking into missions that user stared before ${new Date(yesterday).toDateString()} - ${new Date(yesterday).toTimeString()}.`
+            `Looking into missions that user started before ${new Date(yesterday).toDateString()} - ${new Date(yesterday).toTimeString()}.`
           )
 
           const userMissions = await db.getAllUserMissionsActiveStartedOn(yesterday)
