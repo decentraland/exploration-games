@@ -123,6 +123,10 @@ export type Challenge = {
   active: boolean
 }
 
+export type ChallengeWithCompletion = Challenge & {
+  completed: boolean
+}
+
 export type UserChallenge = {
   id: string
   user_address: string

@@ -12,7 +12,8 @@ import {
   SortDirection,
   UserProgress,
   UserChallenge,
-  MissionInProgress
+  MissionInProgress,
+  ChallengeWithCompletion
 } from '../types'
 
 export interface IDatabaseComponent {
@@ -83,7 +84,7 @@ export interface IDatabaseComponent {
   getAllUserMissionsActiveStartedOn(date: number): Promise<UserMission[]>
   getChallenge(challengeId: string): Promise<Challenge>
   getChallengesByMission(missionId: string): Promise<Challenge[]>
-  getChallengesByMissions(missionsId: string[]): Promise<Challenge[]>
+  getUserChallengesByMissions(missionsId: string[], userAddress: string): Promise<ChallengeWithCompletion[]>
   getMissionWithCampaignKeyExposure(missionId: string): Promise<Mission>
   getUserCompletedChallengeByGame(
     gameId: string,
@@ -348,6 +349,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         description: string
         game_id: string
       }>(
+        // TODO: Isn't the `uc.challenge_uncompleted IS FALSE` missing?
         SQL`SELECT c.game_id, c.id , c.description, c.target_level
         FROM challenges c
         JOIN user_challenges uc on c.id = uc.challenge_id
@@ -358,7 +360,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       return result.rows
     },
     async getUserChallengeCompleted(userAddress: string, challengeIds: string[]) {
-      const query = SQL`SELECT uc.id, uc.user_address , uc.challenge_id, uc.challenge_uncompleted
+      const query = SQL`SELECT uc.id, uc.user_address, uc.challenge_id, uc.challenge_uncompleted
       FROM user_challenges uc
       WHERE uc.user_address = ${userAddress.toLocaleLowerCase()} 
         AND uc.challenge_id = ANY(${challengeIds}::uuid[])
@@ -473,9 +475,13 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       return results.rows
     },
-    async getChallengesByMissions(missionsId: string[]) {
-      const results = await pg.query<Challenge>(
-        SQL`SELECT * FROM challenges WHERE mission_id  = ANY(${missionsId}::uuid[])`
+    async getUserChallengesByMissions(missionsId: string[], userAddress: string) {
+      const results = await pg.query<ChallengeWithCompletion>(
+        SQL`SELECT c.*, NOT uc.challenge_uncompleted AS completed
+            FROM challenges c
+            JOIN user_challenges uc on c.id = uc.challenge_id
+            WHERE mission_id = ANY(${missionsId}::uuid[])
+              AND uc.user_address = ${userAddress.toLocaleLowerCase()}`
       )
 
       return results.rows
