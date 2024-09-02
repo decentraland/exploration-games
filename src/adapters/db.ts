@@ -349,12 +349,12 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         description: string
         game_id: string
       }>(
-        // TODO: Isn't the `uc.challenge_uncompleted IS FALSE` missing?
         SQL`SELECT c.game_id, c.id , c.description, c.target_level
         FROM challenges c
         JOIN user_challenges uc on c.id = uc.challenge_id
         WHERE c.game_id = ${gameId} 
           and uc.user_address = ${userAddress.toLocaleLowerCase()} 
+          and uc.challenge_uncompleted IS FALSE
         `
       )
       return result.rows
