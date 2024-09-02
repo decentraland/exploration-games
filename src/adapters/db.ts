@@ -11,7 +11,8 @@ import {
   ProgressSort,
   SortDirection,
   UserProgress,
-  UserChallenge
+  UserChallenge,
+  MissionInProgress
 } from '../types'
 
 export interface IDatabaseComponent {
@@ -28,7 +29,7 @@ export interface IDatabaseComponent {
   getMissions(): Promise<Mission[]>
   getActiveMissions(): Promise<Mission[]>
   getMissionsAvailableForUser(userAddress: string): Promise<Mission[]>
-  getMissionsInProgressForUser(userAddress: string): Promise<Mission[]>
+  getMissionsInProgressForUser(userAddress: string): Promise<MissionInProgress[]>
   deactivateMission(missionId: string): Promise<void>
   getUserProgressInGame(
     gameId: string,
@@ -164,15 +165,13 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       return results.rows
     },
     async getMissionsInProgressForUser($userAddress: string) {
-      const results = await pg.query<Mission>(
+      const results = await pg.query<MissionInProgress>(
         SQL`
-          SELECT m.id, m.description, m.active FROM missions m 
-          WHERE m.active is true 
-          AND m.id in 
-          (
-            SELECT um.mission_id FROM user_missions um 
-            WHERE um.active IS TRUE and um.end_time IS NULL and um.user_address = ${$userAddress.toLocaleLowerCase()}
-          )`
+          SELECT m.id, m.description, m.active, um.start_time
+          FROM missions m
+          JOIN user_missions um ON m.id = um.mission_id
+          WHERE m.active is TRUE
+            AND um.active IS TRUE AND um.end_time IS NULL AND um.user_address = ${$userAddress.toLocaleLowerCase()}`
       )
 
       return results.rows

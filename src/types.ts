@@ -88,6 +88,10 @@ export type Mission = {
   active: boolean
 }
 
+export type MissionInProgress = Mission & {
+  start_time: string
+}
+
 export type GameMetrics = {
   score?: number
   level?: number
