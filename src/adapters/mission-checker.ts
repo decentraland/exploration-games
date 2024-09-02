@@ -18,14 +18,18 @@ export async function createMissionChecker(components: Pick<AppComponents, 'logs
 
           const userMissions = await db.getAllUserMissionsActiveStartedOn(yesterday)
           for (const userMission of userMissions) {
-            const challenges = await db.getChallengesByMission(userMission.mission_id)
-            if (challenges.length > 0) {
-              await db.setChallengesAsExpired(
-                userMission.user_address,
-                challenges.map((challenge) => challenge.id)
-              )
+            try {
+              const challenges = await db.getChallengesByMission(userMission.mission_id)
+              if (challenges.length > 0) {
+                await db.setChallengesAsExpired(
+                  userMission.user_address,
+                  challenges.map((challenge) => challenge.id)
+                )
+              }
+              await db.setIncompleteMission(userMission.id)
+            } catch (error) {
+              logger.warn(`Error while checking mission ${userMission.mission_id}: ${error}`)
             }
-            await db.setIncompleteMission(userMission.id)
           }
         } catch (error) {
           logger.warn(`Error while checking missions: ${error}`)
