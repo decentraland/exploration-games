@@ -477,9 +477,9 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getChallengesByMissions(missionsId: string[]) {
       const results = await pg.query<ChallengeWithCompletion>(
-        SQL`SELECT c.*, NOT uc.challenge_uncompleted AS completed
+        SQL`SELECT c.*, COALESCE(NOT uc.challenge_uncompleted, FALSE) AS completed
             FROM challenges c
-            JOIN user_challenges uc on c.id = uc.challenge_id
+            LEFT JOIN user_challenges uc on c.id = uc.challenge_id
             WHERE mission_id = ANY(${missionsId}::uuid[])`
       )
 
