@@ -84,7 +84,7 @@ export interface IDatabaseComponent {
   getAllUserMissionsActiveStartedOn(date: number): Promise<UserMission[]>
   getChallenge(challengeId: string): Promise<Challenge>
   getChallengesByMission(missionId: string): Promise<Challenge[]>
-  getUserChallengesByMissions(missionsId: string[]): Promise<ChallengeWithCompletion[]>
+  getChallengesByMissions(missionsId: string[]): Promise<ChallengeWithCompletion[]>
   getMissionWithCampaignKeyExposure(missionId: string): Promise<Mission>
   getUserCompletedChallengeByGame(
     gameId: string,
@@ -475,7 +475,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       return results.rows
     },
-    async getUserChallengesByMissions(missionsId: string[]) {
+    async getChallengesByMissions(missionsId: string[]) {
       const results = await pg.query<ChallengeWithCompletion>(
         SQL`SELECT c.*, NOT uc.challenge_uncompleted AS completed
             FROM challenges c

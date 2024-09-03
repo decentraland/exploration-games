@@ -9,7 +9,7 @@ export async function getMissionsInProgressHandler(
   } = ctx
 
   const missions = await db.getMissionsInProgressForUser(verification!.auth)
-  const challenges = await db.getUserChallengesByMissions(missions.map(({ id }) => id))
+  const challenges = await db.getChallengesByMissions(missions.map(({ id }) => id))
   const ids = challenges.map(({ game_id }) => game_id)
   const games = await db.getGamesById(ids)
 
