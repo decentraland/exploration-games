@@ -88,6 +88,10 @@ export type Mission = {
   active: boolean
 }
 
+export type MissionInProgress = Mission & {
+  start_time: string
+}
+
 export type GameMetrics = {
   score?: number
   level?: number
@@ -117,6 +121,10 @@ export type Challenge = {
   target_level: number
   data: Record<string, any>
   active: boolean
+}
+
+export type ChallengeWithCompletion = Challenge & {
+  completed: boolean
 }
 
 export type UserChallenge = {

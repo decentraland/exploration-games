@@ -17,15 +17,24 @@ export async function createMissionChecker(components: Pick<AppComponents, 'logs
           )
 
           const userMissions = await db.getAllUserMissionsActiveStartedOn(yesterday)
-          for (const userMission of userMissions) {
-            const challenges = await db.getChallengesByMission(userMission.mission_id)
-            if (challenges.length > 0) {
-              await db.setChallengesAsExpired(
-                userMission.user_address,
-                challenges.map((challenge) => challenge.id)
-              )
-            }
-            await db.setIncompleteMission(userMission.id)
+
+          // Avoid exiting the process if one of the checks fails
+          const results = await Promise.allSettled(
+            userMissions.map(async (userMission) => {
+              const challenges = await db.getChallengesByMission(userMission.mission_id)
+              if (challenges.length > 0) {
+                await db.setChallengesAsExpired(
+                  userMission.user_address,
+                  challenges.map((challenge) => challenge.id)
+                )
+              }
+              await db.setIncompleteMission(userMission.id)
+            })
+          )
+
+          const failed = results.filter((result) => result.status === 'rejected')
+          if (failed.length > 0) {
+            logger.warn(`Error while checking ${failed.length} missions.`)
           }
         } catch (error) {
           logger.warn(`Error while checking missions: ${error}`)
