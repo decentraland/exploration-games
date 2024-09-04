@@ -479,7 +479,15 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const results = await pg.query<ChallengeWithCompletion>(
         SQL`SELECT c.*, COALESCE(NOT uc.challenge_uncompleted, FALSE) AS completed
             FROM challenges c
-            LEFT JOIN user_challenges uc on c.id = uc.challenge_id
+            LEFT JOIN (
+                SELECT 
+                    challenge_id, 
+                    BOOL_AND(challenge_uncompleted) AS challenge_uncompleted
+                FROM 
+                    user_challenges
+                GROUP BY 
+                    challenge_id
+            ) uc ON c.id = uc.challenge_id
             WHERE mission_id = ANY(${missionsId}::uuid[])`
       )
 
