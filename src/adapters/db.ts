@@ -84,7 +84,7 @@ export interface IDatabaseComponent {
   getAllUserMissionsActiveStartedOn(date: number): Promise<UserMission[]>
   getChallenge(challengeId: string): Promise<Challenge>
   getChallengesByMission(missionId: string): Promise<Challenge[]>
-  getChallengesByMissions(missionsId: string[]): Promise<ChallengeWithCompletion[]>
+  getUserChallengesByMissions(missionsId: string[], userAddress: string): Promise<ChallengeWithCompletion[]>
   getMissionWithCampaignKeyExposure(missionId: string): Promise<Mission>
   getUserCompletedChallengeByGame(
     gameId: string,
@@ -475,20 +475,13 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       return results.rows
     },
-    async getChallengesByMissions(missionsId: string[]) {
+    async getUserChallengesByMissions(missionsId: string[], userAddress: string) {
       const results = await pg.query<ChallengeWithCompletion>(
-        SQL`SELECT c.*, COALESCE(NOT uc.challenge_uncompleted, FALSE) AS completed
+        SQL`SELECT c.*, COALESCE(NOT BOOL_AND(uc.challenge_uncompleted), FALSE) AS completed
             FROM challenges c
-            LEFT JOIN (
-                SELECT 
-                    challenge_id, 
-                    BOOL_AND(challenge_uncompleted) AS challenge_uncompleted
-                FROM 
-                    user_challenges
-                GROUP BY 
-                    challenge_id
-            ) uc ON c.id = uc.challenge_id
-            WHERE mission_id = ANY(${missionsId}::uuid[])`
+            LEFT JOIN user_challenges uc ON c.id = uc.challenge_id AND uc.user_address = ${userAddress.toLocaleLowerCase()}
+            WHERE mission_id = ANY(${missionsId}::uuid[])
+            GROUP BY c.id`
       )
 
       return results.rows
