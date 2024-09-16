@@ -287,13 +287,13 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async setChallengeAsComplete(userAddress: string, challengeId: string) {
       const uuid = randomUUID()
       await pg.query(
-        SQL`INSERT INTO user_challenges (id, user_address, challenge_id) VALUES (${uuid}, ${userAddress.toLocaleLowerCase()}, ${challengeId})`
+        SQL`INSERT INTO user_challenges (id, user_address, challenge_id, challenge_uncompleted, completed_at) VALUES (${uuid}, ${userAddress.toLocaleLowerCase()}, ${challengeId}, FALSE, ${Date.now()})`
       )
     },
     async setChallengesAsExpired(userAddress: string, challengeIds: string[]) {
       await pg.query(
         SQL`
-          UPDATE user_challenges SET challenge_uncompleted = true 
+          UPDATE user_challenges SET challenge_uncompleted = true, completed_at = null
           WHERE user_address = ${userAddress.toLocaleLowerCase()} AND challenge_id = ANY(${challengeIds}::uuid[])
         `
       )
@@ -490,7 +490,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getUserChallengesByMissions(missionsId: string[], userAddress: string) {
       const results = await pg.query<ChallengeWithCompletionTime>(
-        SQL`SELECT c.*, COALESCE(NOT BOOL_AND(uc.challenge_uncompleted), FALSE) AS completed
+        SQL`SELECT c.*, COALESCE(NOT BOOL_AND(uc.challenge_uncompleted), FALSE) AS completed, MAX(uc.completed_at) AS completed_at
             FROM challenges c
             LEFT JOIN user_challenges uc ON c.id = uc.challenge_id AND uc.user_address = ${userAddress.toLocaleLowerCase()}
             WHERE mission_id = ANY(${missionsId}::uuid[])

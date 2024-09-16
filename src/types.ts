@@ -129,6 +129,7 @@ export type Challenge = {
 }
 
 export type ChallengeWithCompletionTime = Challenge & {
+  completed: boolean
   completed_at: string
 }
 

@@ -18,5 +18,6 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropIndex(tableName, newColumns, newOptions)
+  // If there are already some data that violates the unique constraint, the index creation will fail
   pgm.createIndex(tableName, oldColumns, oldOptions)
 }
