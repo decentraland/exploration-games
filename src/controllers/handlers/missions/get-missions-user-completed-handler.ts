@@ -1,8 +1,8 @@
 import { HandlerContextWithPath } from '../../../types'
 import { getMissionsByStatus, MissionStatus } from '../../utils/get-missions-by-status'
 
-export async function getMissionsInProgressHandler(
-  ctx: Pick<HandlerContextWithPath<'db', '/missions/in_progress'>, 'components' | 'verification'>
+export async function getMissionsCompletedHandler(
+  ctx: Pick<HandlerContextWithPath<'db', '/missions/completed'>, 'components' | 'verification'>
 ) {
   const {
     components: { db },
@@ -11,7 +11,7 @@ export async function getMissionsInProgressHandler(
 
   const userAddress = verification!.auth
 
-  const { missions, challenges, games } = await getMissionsByStatus(MissionStatus.IN_PROGRESS, userAddress, db)
+  const { missions, challenges, games } = await getMissionsByStatus(MissionStatus.COMPLETED, userAddress, db)
 
   return {
     status: 200,

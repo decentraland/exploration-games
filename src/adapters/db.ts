@@ -13,7 +13,8 @@ import {
   UserProgress,
   UserChallenge,
   MissionInProgress,
-  ChallengeWithCompletion
+  ChallengeWithCompletionTime,
+  MissionCompleted
 } from '../types'
 
 export interface IDatabaseComponent {
@@ -31,6 +32,7 @@ export interface IDatabaseComponent {
   getActiveMissions(): Promise<Mission[]>
   getMissionsAvailableForUser(userAddress: string): Promise<Mission[]>
   getMissionsInProgressForUser(userAddress: string): Promise<MissionInProgress[]>
+  getMissionsCompletedForUser(userAddress: string): Promise<MissionCompleted[]>
   deactivateMission(missionId: string): Promise<void>
   getUserProgressInGame(
     gameId: string,
@@ -84,7 +86,7 @@ export interface IDatabaseComponent {
   getAllUserMissionsActiveStartedOn(date: number): Promise<UserMission[]>
   getChallenge(challengeId: string): Promise<Challenge>
   getChallengesByMission(missionId: string): Promise<Challenge[]>
-  getUserChallengesByMissions(missionsId: string[], userAddress: string): Promise<ChallengeWithCompletion[]>
+  getUserChallengesByMissions(missionsId: string[], userAddress: string): Promise<ChallengeWithCompletionTime[]>
   getMissionWithCampaignKeyExposure(missionId: string): Promise<Mission>
   getUserCompletedChallengeByGame(
     gameId: string,
@@ -173,6 +175,17 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
           JOIN user_missions um ON m.id = um.mission_id
           WHERE m.active is TRUE
             AND um.active IS TRUE AND um.end_time IS NULL AND um.user_address = ${$userAddress.toLocaleLowerCase()}`
+      )
+
+      return results.rows
+    },
+    async getMissionsCompletedForUser($userAddress: string) {
+      const results = await pg.query<MissionCompleted>(
+        SQL`
+          SELECT m.id, m.description, m.active, um.start_time, um.end_time
+          FROM missions m
+          JOIN user_missions um ON m.id = um.mission_id
+          WHERE m.active is TRUE AND um.active IS TRUE AND um.end_time IS NOT NULL AND um.user_address = ${$userAddress.toLocaleLowerCase()}`
       )
 
       return results.rows
@@ -476,7 +489,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       return results.rows
     },
     async getUserChallengesByMissions(missionsId: string[], userAddress: string) {
-      const results = await pg.query<ChallengeWithCompletion>(
+      const results = await pg.query<ChallengeWithCompletionTime>(
         SQL`SELECT c.*, COALESCE(NOT BOOL_AND(uc.challenge_uncompleted), FALSE) AS completed
             FROM challenges c
             LEFT JOIN user_challenges uc ON c.id = uc.challenge_id AND uc.user_address = ${userAddress.toLocaleLowerCase()}
