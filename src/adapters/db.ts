@@ -13,7 +13,8 @@ import {
   UserProgress,
   UserChallenge,
   MissionInProgress,
-  ChallengeWithCompletion
+  ChallengeWithCompletionTime,
+  MissionCompleted
 } from '../types'
 
 export interface IDatabaseComponent {
@@ -31,6 +32,7 @@ export interface IDatabaseComponent {
   getActiveMissions(): Promise<Mission[]>
   getMissionsAvailableForUser(userAddress: string): Promise<Mission[]>
   getMissionsInProgressForUser(userAddress: string): Promise<MissionInProgress[]>
+  getMissionsCompletedForUser(userAddress: string): Promise<MissionCompleted[]>
   deactivateMission(missionId: string): Promise<void>
   getUserProgressInGame(
     gameId: string,
@@ -84,13 +86,16 @@ export interface IDatabaseComponent {
   getAllUserMissionsActiveStartedOn(date: number): Promise<UserMission[]>
   getChallenge(challengeId: string): Promise<Challenge>
   getChallengesByMission(missionId: string): Promise<Challenge[]>
-  getUserChallengesByMissions(missionsId: string[], userAddress: string): Promise<ChallengeWithCompletion[]>
+  getUserChallengesByMissions(missionsId: string[], userAddress: string): Promise<ChallengeWithCompletionTime[]>
   getMissionWithCampaignKeyExposure(missionId: string): Promise<Mission>
   getUserCompletedChallengeByGame(
     gameId: string,
     userAddress: string
   ): Promise<Pick<Challenge, 'game_id' | 'id' | 'description'>[]>
   getUserChallengeCompleted(userAddress: string, challengeId: string[]): Promise<UserChallenge[]>
+  deleteMissions(missionIds: string[]): Promise<void>
+  deleteChallenges(challengeIds: string[]): Promise<void>
+  deleteGames(gameIds: string[]): Promise<void>
 }
 
 export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatabaseComponent {
@@ -173,6 +178,17 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
           JOIN user_missions um ON m.id = um.mission_id
           WHERE m.active is TRUE
             AND um.active IS TRUE AND um.end_time IS NULL AND um.user_address = ${$userAddress.toLocaleLowerCase()}`
+      )
+
+      return results.rows
+    },
+    async getMissionsCompletedForUser($userAddress: string) {
+      const results = await pg.query<MissionCompleted>(
+        SQL`
+          SELECT m.id, m.description, m.active, um.start_time, um.end_time
+          FROM missions m
+          JOIN user_missions um ON m.id = um.mission_id
+          WHERE m.active is TRUE AND um.active IS TRUE AND um.end_time IS NOT NULL AND um.user_address = ${$userAddress.toLocaleLowerCase()}`
       )
 
       return results.rows
@@ -274,13 +290,13 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async setChallengeAsComplete(userAddress: string, challengeId: string) {
       const uuid = randomUUID()
       await pg.query(
-        SQL`INSERT INTO user_challenges (id, user_address, challenge_id) VALUES (${uuid}, ${userAddress.toLocaleLowerCase()}, ${challengeId})`
+        SQL`INSERT INTO user_challenges (id, user_address, challenge_id, challenge_uncompleted, completed_at) VALUES (${uuid}, ${userAddress.toLocaleLowerCase()}, ${challengeId}, FALSE, ${Date.now()})`
       )
     },
     async setChallengesAsExpired(userAddress: string, challengeIds: string[]) {
       await pg.query(
         SQL`
-          UPDATE user_challenges SET challenge_uncompleted = true 
+          UPDATE user_challenges SET challenge_uncompleted = true, completed_at = null
           WHERE user_address = ${userAddress.toLocaleLowerCase()} AND challenge_id = ANY(${challengeIds}::uuid[])
         `
       )
@@ -476,8 +492,8 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       return results.rows
     },
     async getUserChallengesByMissions(missionsId: string[], userAddress: string) {
-      const results = await pg.query<ChallengeWithCompletion>(
-        SQL`SELECT c.*, COALESCE(NOT BOOL_AND(uc.challenge_uncompleted), FALSE) AS completed
+      const results = await pg.query<ChallengeWithCompletionTime>(
+        SQL`SELECT c.*, COALESCE(NOT BOOL_AND(uc.challenge_uncompleted), FALSE) AS completed, MAX(uc.completed_at) AS completed_at
             FROM challenges c
             LEFT JOIN user_challenges uc ON c.id = uc.challenge_id AND uc.user_address = ${userAddress.toLocaleLowerCase()}
             WHERE mission_id = ANY(${missionsId}::uuid[])
@@ -490,6 +506,18 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const results = await pg.query<Mission>(SQL`SELECT * FROM missions WHERE id = ${missionId}`)
 
       return results.rows[0]
+    },
+    async deleteMissions(missionIds: string[]) {
+      await pg.query(SQL`DELETE FROM user_missions um WHERE um.mission_id = ANY(${missionIds}::uuid[])`)
+      await pg.query(SQL`DELETE FROM missions m WHERE m.id = ANY(${missionIds}::uuid[])`)
+    },
+    async deleteChallenges(challengeIds: string[]) {
+      await pg.query(SQL`DELETE FROM user_challenges uc WHERE uc.challenge_id = ANY(${challengeIds}::uuid[])`)
+      await pg.query(SQL`DELETE FROM challenges c WHERE c.id = ANY(${challengeIds}::uuid[])`)
+    },
+    async deleteGames(gameIds: string[]) {
+      await pg.query(SQL`DELETE FROM progress p WHERE p.game_id = ANY(${gameIds}::uuid[])`)
+      await pg.query(SQL`DELETE FROM games g WHERE g.id = ANY(${gameIds}::uuid[])`)
     }
   }
 }
