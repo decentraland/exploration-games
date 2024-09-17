@@ -93,6 +93,9 @@ export interface IDatabaseComponent {
     userAddress: string
   ): Promise<Pick<Challenge, 'game_id' | 'id' | 'description'>[]>
   getUserChallengeCompleted(userAddress: string, challengeId: string[]): Promise<UserChallenge[]>
+  deleteMissions(missionIds: string[]): Promise<void>
+  deleteChallenges(challengeIds: string[]): Promise<void>
+  deleteGames(gameIds: string[]): Promise<void>
 }
 
 export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatabaseComponent {
@@ -503,6 +506,18 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const results = await pg.query<Mission>(SQL`SELECT * FROM missions WHERE id = ${missionId}`)
 
       return results.rows[0]
+    },
+    async deleteMissions(missionIds: string[]) {
+      await pg.query(SQL`DELETE FROM user_missions um WHERE um.mission_id = ANY(${missionIds}::uuid[])`)
+      await pg.query(SQL`DELETE FROM missions m WHERE m.id = ANY(${missionIds}::uuid[])`)
+    },
+    async deleteChallenges(challengeIds: string[]) {
+      await pg.query(SQL`DELETE FROM user_challenges uc WHERE uc.challenge_id = ANY(${challengeIds}::uuid[])`)
+      await pg.query(SQL`DELETE FROM challenges c WHERE c.id = ANY(${challengeIds}::uuid[])`)
+    },
+    async deleteGames(gameIds: string[]) {
+      await pg.query(SQL`DELETE FROM progress p WHERE p.game_id = ANY(${gameIds}::uuid[])`)
+      await pg.query(SQL`DELETE FROM games g WHERE g.id = ANY(${gameIds}::uuid[])`)
     }
   }
 }
