@@ -4,9 +4,9 @@ import { CronJob } from 'cron'
 export async function createMissionChecker(components: Pick<AppComponents, 'logs' | 'db'>): Promise<IMissionChecker> {
   const { logs, db } = components
   const logger = logs.getLogger(`mission-checker`)
-
+  let job: CronJob
   async function start(): Promise<void> {
-    const job = new CronJob(
+    job = new CronJob(
       '0 * * * * *',
       async function () {
         try {
@@ -48,6 +48,9 @@ export async function createMissionChecker(components: Pick<AppComponents, 'logs
   }
 
   return {
-    start
+    start,
+    async stop() {
+      job.stop()
+    }
   }
 }

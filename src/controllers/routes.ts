@@ -34,7 +34,8 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
 
   const auth = authVerificationMiddleware({
     fetcher: components.fetcher,
-    optional: false
+    optional: false,
+    metadataValidator: (metadata) => metadata.signer === 'decentraland-kernel-scene'
   })
 
   components.server.use(router.middleware())
