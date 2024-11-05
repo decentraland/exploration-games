@@ -1,10 +1,9 @@
 import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
-import { BaseComponents, HandlerContextWithPath } from '../../../types'
+import { HandlerContextWithPath } from '../../../types'
 import { uuidSchema } from '../../../utils'
-import { validateSignedFetch } from '../../middlewares/validate-signed-fetch'
 
 export async function getUserCompletedChallengesByGame(
-  ctx: HandlerContextWithPath<keyof BaseComponents, '/games/:id/challenges'>
+  ctx: HandlerContextWithPath<'db' | 'logs', '/games/:id/challenges'>
 ) {
   const {
     components: { db },

@@ -1,7 +1,7 @@
 import Joi from 'joi'
 import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
 import { parseJson } from '@dcl/platform-server-commons/dist/utils'
-import { AppComponents, BaseComponents, HandlerContextWithPath, NewProgressInGamePayload } from '../../../types'
+import { HandlerContextWithPath, NewProgressInGamePayload } from '../../../types'
 import { uuidSchema } from '../../../utils'
 import { validateSignedFetch } from '../../middlewares/validate-signed-fetch'
 
@@ -14,9 +14,7 @@ const schema = Joi.object<NewProgressInGamePayload>().keys({
   data: Joi.object().optional()
 })
 
-export async function newProgressInGameHandler(
-  ctx: HandlerContextWithPath<keyof BaseComponents, '/games/:id/progress'>
-) {
+export async function newProgressInGameHandler(ctx: HandlerContextWithPath<'db' | 'logs', '/games/:id/progress'>) {
   const {
     components: { logs, db },
     request,

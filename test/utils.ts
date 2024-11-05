@@ -2,6 +2,7 @@ import { AuthChain, AuthIdentity, AuthLinkType, Authenticator, IdentityType } fr
 import { computeAddress, createUnsafeIdentity } from '@dcl/crypto/dist/crypto'
 import { AUTH_CHAIN_HEADER_PREFIX, AUTH_METADATA_HEADER, AUTH_TIMESTAMP_HEADER } from '@dcl/platform-crypto-middleware'
 import { IFetchComponent } from '@well-known-components/interfaces'
+import { hashSha256 } from '../src/controllers/middlewares/validate-signed-fetch'
 
 export type Identity = { authChain: AuthIdentity; realAccount: IdentityType; ephemeralIdentity: IdentityType }
 
@@ -58,17 +59,55 @@ export function makeRequest(localFetch: IFetchComponent, path: string, options: 
   return localFetch.fetch(path, {
     ...options,
     headers: {
-      ...getAuthHeaders(options.method || 'GET', url.pathname, {}, (payload) =>
-        Authenticator.signPayload(
-          {
-            ephemeralIdentity: identity.ephemeralIdentity,
-            expiration: new Date(),
-            authChain: identity.authChain
-          },
-          payload
+      ...getAuthHeaders(
+        options.method || 'GET',
+        url.pathname,
+        {
+          signer: "decentraland-kernel-scene",
+          parcel: options.parcel ?? '10,10',
+          realm: { hostname: 'localhost' },
+          hashPayload: options.body ? hashSha256(options.body) : undefined
+         },
+          (payload) =>
+          Authenticator.signPayload(
+            {
+              ephemeralIdentity: identity.ephemeralIdentity,
+              expiration: new Date(),
+              authChain: identity.authChain
+            },
+            payload
+          )
         )
-      )
-    }
+      }
+  })
+}
+
+export function makeRequestWithBodyModified(localFetch: IFetchComponent, path: string, options: any = {}, identity = admin) {
+  const url = new URL(path, 'http://localhost:3000')
+
+  return localFetch.fetch(path, {
+    ...options,
+    headers: {
+      ...getAuthHeaders(
+        options.method || 'GET',
+        url.pathname,
+        {
+          signer: "decentraland-kernel-scene",
+          parcel: options.parcel ?? '10,10',
+          realm: { hostname: 'localhost' },
+          hashPayload: options.bodyModified ? hashSha256(options.bodyModified) : undefined
+         },
+          (payload) =>
+          Authenticator.signPayload(
+            {
+              ephemeralIdentity: identity.ephemeralIdentity,
+              expiration: new Date(),
+              authChain: identity.authChain
+            },
+            payload
+          )
+        )
+      }
   })
 }
 
