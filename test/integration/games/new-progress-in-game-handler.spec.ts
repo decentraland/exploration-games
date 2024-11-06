@@ -1,5 +1,5 @@
 import { test } from '../../components'
-import { makeRequest } from '../../utils'
+import { makeRequest, makeRequestWithBodyModified } from '../../utils'
 
 test('POST /api/games/:id/progress', ({ components }) => {
   it('should return 201 created without data', async () => {
@@ -131,6 +131,45 @@ test('POST /api/games/:id/progress', ({ components }) => {
     }
 
     const response = await makeRequest(localFetch, `/api/games/${game.id}/progress`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+    expect(response.status).toBe(400)
+  })
+
+  it('should return 400 when payload was modified', async () => {
+    const { localFetch, db } = components
+
+    const game = await db.createGame('TEST', '10,10')
+    const payload = {
+      score: 10,
+      level: 1,
+      time: 150,
+      moves: 10,
+      user_name: 'user_name'
+    }
+
+    const response = await makeRequestWithBodyModified(localFetch, `/api/games/${game.id}/progress`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      bodyModified: JSON.stringify({ ...payload, score: 888888 })
+    })
+    expect(response.status).toBe(400)
+  })
+
+  it('should return 400 when the user is in another scene', async () => {
+    const { localFetch, db } = components
+
+    const game = await db.createGame('TEST', '11,10')
+    const payload = {
+      score: 10,
+      level: 1,
+      time: 150,
+      moves: 10,
+      user_name: 'user_name'
+    }
+
+    const response = await makeRequestWithBodyModified(localFetch, `/api/games/${game.id}/progress`, {
       method: 'POST',
       body: JSON.stringify(payload)
     })

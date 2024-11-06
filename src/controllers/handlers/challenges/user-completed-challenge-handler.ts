@@ -1,6 +1,7 @@
 import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
 import { HandlerContextWithPath } from '../../../types'
 import { uuidSchema } from '../../../utils'
+import { validateSignedFetch } from '../../middlewares/validate-signed-fetch'
 
 export async function userCompletedChallengeHandler(
   ctx: Pick<
@@ -17,8 +18,9 @@ export async function userCompletedChallengeHandler(
   const { id } = params
 
   const logger = logs.getLogger('user-completed-challenge-handler')
-
   const validateId = uuidSchema.validate(id)
+
+  await validateSignedFetch(ctx)
 
   if (validateId.error) {
     logger.warn(`Invalid UUID: ${validateId.error}`)

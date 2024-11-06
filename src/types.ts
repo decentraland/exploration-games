@@ -58,7 +58,23 @@ export type HandlerContextWithPath<
 export type Context<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path>
 
 export type ContextWithAuth<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path> &
-  DecentralandSignatureContext<any>
+  DecentralandSignatureContext<DecentralandSignatureMetadata>
+
+export type DecentralandSignatureMetadata = {
+  origin: string
+  sceneId: string
+  parcel: string
+  tld: string
+  network: string
+  signer: string
+  isGuest: boolean
+  realm: {
+    hostname: string
+    protocol: string
+    serverName: string
+  }
+  hashPayload?: string
+}
 
 export type CreateChallengePayload = {
   missionId: string
