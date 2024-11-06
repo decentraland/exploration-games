@@ -3,7 +3,7 @@ import { HandlerContextWithPath } from '../../../types'
 import { uuidSchema } from '../../../utils'
 
 export async function getUserCompletedChallengesByGame(
-  ctx: HandlerContextWithPath<'db' | 'logs', '/games/:id/challenges'>
+  ctx: Pick<HandlerContextWithPath<'db' | 'logs', '/games/:id/challenges'>, 'components' | 'params' | 'verification'>
 ) {
   const {
     components: { db },
@@ -13,12 +13,6 @@ export async function getUserCompletedChallengesByGame(
 
   const { id } = params
 
-  // TODO: which endpoints need to be verified ?
-  // Because the requests made from the global portable experience can't be validated this way
-  // because the PX doesn't have a parcel.
-  // Maybe we can validate that is inside genesis ? IDK.
-
-  // await validateSignedFetch(ctx, {})
   const validateUuid = uuidSchema.validate(id)
 
   if (validateUuid.error) {

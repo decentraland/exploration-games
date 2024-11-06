@@ -48,7 +48,7 @@ export async function createMissionChecker(components: Pick<AppComponents, 'logs
   }
 
   async function stop() {
-    job.stop()
+    job?.stop()
   }
 
   return {
