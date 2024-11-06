@@ -21,14 +21,25 @@ export async function validateSignedFetch(ctx: SingedFetchContext, opts?: { game
 export async function validateGameParcel(ctx: SingedFetchContext, gameId: string) {
   const { components } = ctx
   const game = await components.db.getGame(gameId)
+  const gameCoords = getCoords(game.parcel)
+  const authCoords = ctx.verification?.authMetadata.parcel && getCoords(ctx.verification?.authMetadata.parcel)
 
-  if (game.parcel !== ctx.verification?.authMetadata.parcel) {
+  if (!authCoords || !sameCoords(gameCoords, authCoords)) {
     throw new InvalidRequestError('Invalid request. User must be inside the scene')
   }
 }
 
 export function hashSha256(value: string) {
   return createHash('sha256').update(value).digest('hex')
+}
+
+function getCoords(parcel: string): [number, number] {
+  const [x, y] = parcel.split(',').map((item: string) => parseInt(item, 10))
+  return [x, y]
+}
+
+function sameCoords(coordsA: [number, number], coordsB: [number, number]) {
+  return coordsA[0] === coordsB[0] && coordsA[1] === coordsB[1]
 }
 
 export async function validateBody(ctx: SingedFetchContext, body: unknown) {
@@ -75,9 +86,8 @@ export async function validateUserInDCL(ctx: SingedFetchContext) {
   const player = (data?.peers ?? []).find(
     (peer) => peer.address && peer.address.toLowerCase() === userAddress.toLowerCase()
   )
-  const parcelNumber = parcel.split(',').map((item: string) => parseInt(item, 10))
 
-  if (!data.ok || !player || player.parcel[0] !== parcelNumber[0] || player.parcel[1] !== parcelNumber[1]) {
+  if (!data.ok || !player || !sameCoords(getCoords(parcel), player.parcel)) {
     throw new InvalidRequestError('Player outside Scene')
   }
 }
