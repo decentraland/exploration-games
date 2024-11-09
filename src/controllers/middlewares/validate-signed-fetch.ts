@@ -7,7 +7,10 @@ type SingedFetchContext = DecentralandSignatureContext<DecentralandSignatureMeta
   components: Pick<AppComponents, 'db'>
 }
 
-export async function validateSignedFetch(ctx: SingedFetchContext, opts?: { gameId?: string; body?: unknown }) {
+export async function validateSignedFetch(
+  ctx: SingedFetchContext,
+  opts?: { gameId?: string; body?: unknown; validateParcel?: boolean }
+) {
   if (opts?.gameId) {
     await validateGameParcel(ctx, opts.gameId)
   }
@@ -15,7 +18,7 @@ export async function validateSignedFetch(ctx: SingedFetchContext, opts?: { game
     await validateBody(ctx, opts.body)
   }
 
-  await validateUserInDCL(ctx)
+  await validateUserInDCL(ctx, !!opts?.validateParcel)
 }
 
 export async function validateGameParcel(ctx: SingedFetchContext, gameId: string) {
@@ -53,7 +56,7 @@ export async function validateBody(ctx: SingedFetchContext, body: unknown) {
   }
 }
 
-export async function validateUserInDCL(ctx: SingedFetchContext) {
+export async function validateUserInDCL(ctx: SingedFetchContext, validateParcel: boolean) {
   const userAddress = ctx.verification?.auth
   const parcel = ctx.verification?.authMetadata?.parcel
 
@@ -87,9 +90,11 @@ export async function validateUserInDCL(ctx: SingedFetchContext) {
     (peer) => peer.address && peer.address.toLowerCase() === userAddress.toLowerCase()
   )
 
-  if (!data.ok || !player || !sameCoords(getCoords(parcel), player.parcel)) {
-    throw new InvalidRequestError('Player outside Scene')
+  if (data.ok && player && (!validateParcel || sameCoords(getCoords(parcel), player.parcel))) {
+    return
   }
+
+  throw new InvalidRequestError('Player outside Scene')
 }
 
 export type PeerResponse = {
