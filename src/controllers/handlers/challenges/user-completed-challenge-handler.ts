@@ -20,7 +20,7 @@ export async function userCompletedChallengeHandler(
   const logger = logs.getLogger('user-completed-challenge-handler')
   const validateId = uuidSchema.validate(id)
 
-  await validateSignedFetch(ctx)
+  await validateSignedFetch(ctx, { validateParcel: false })
 
   if (validateId.error) {
     logger.warn(`Invalid UUID: ${validateId.error}`)

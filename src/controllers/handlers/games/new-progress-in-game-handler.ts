@@ -40,7 +40,7 @@ export async function newProgressInGameHandler(ctx: HandlerContextWithPath<'db' 
   }
 
   // Validate signed fetch
-  await validateSignedFetch(ctx, { body, gameId: validateGameId.value })
+  await validateSignedFetch(ctx, { body, gameId: validateGameId.value, validateParcel: true })
 
   const progress = await db.createProgressInGame(
     id,
