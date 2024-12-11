@@ -18,7 +18,7 @@ export async function validateSignedFetch(
     await validateBody(ctx, opts.body)
   }
 
-  await validateUserInDCL(ctx, !!opts?.validateParcel)
+  // await validateUserInDCL(ctx, !!opts?.validateParcel)
 }
 
 export async function validateGameParcel(ctx: SingedFetchContext, gameId: string) {
