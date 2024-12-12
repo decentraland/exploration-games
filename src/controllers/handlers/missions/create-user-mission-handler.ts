@@ -28,9 +28,16 @@ export async function createUserMissionHandler(
     throw new InvalidRequestError('No mission found with this UUID')
   }
 
-  await db.setMissionAsStart(verification!.auth, missionId)
+  try {
+    await db.setMissionAsStart(verification!.auth, missionId)
 
-  return {
-    status: 204
+    return {
+      status: 204
+    }
+  } catch (error) {
+    logger.warn(`Error trying to start the mission: ${missionId} for the user: ${verification!.auth}`)
+    throw new InvalidRequestError(
+      `Error trying to start the mission id ${missionId} for the user ${verification!.auth}: ${error}`
+    )
   }
 }

@@ -6,7 +6,7 @@ import { hashSha256 } from '../src/controllers/middlewares/validate-signed-fetch
 
 export type Identity = { authChain: AuthIdentity; realAccount: IdentityType; ephemeralIdentity: IdentityType }
 
-const admin: AuthIdentity = {
+export const admin: AuthIdentity = {
   ephemeralIdentity: {
     address: '0x84452bbFA4ca14B7828e2F3BBd106A2bD495CD34',
     publicKey:
@@ -63,12 +63,12 @@ export function makeRequest(localFetch: IFetchComponent, path: string, options: 
         options.method || 'GET',
         url.pathname,
         {
-          signer: "decentraland-kernel-scene",
+          signer: 'decentraland-kernel-scene',
           parcel: options.parcel ?? '10,10',
           realm: { hostname: 'localhost' },
           hashPayload: options.body ? hashSha256(options.body) : undefined
-         },
-          (payload) =>
+        },
+        (payload) =>
           Authenticator.signPayload(
             {
               ephemeralIdentity: identity.ephemeralIdentity,
@@ -77,12 +77,17 @@ export function makeRequest(localFetch: IFetchComponent, path: string, options: 
             },
             payload
           )
-        )
-      }
+      )
+    }
   })
 }
 
-export function makeRequestWithBodyModified(localFetch: IFetchComponent, path: string, options: any = {}, identity = admin) {
+export function makeRequestWithBodyModified(
+  localFetch: IFetchComponent,
+  path: string,
+  options: any = {},
+  identity = admin
+) {
   const url = new URL(path, 'http://localhost:3000')
 
   return localFetch.fetch(path, {
@@ -92,12 +97,12 @@ export function makeRequestWithBodyModified(localFetch: IFetchComponent, path: s
         options.method || 'GET',
         url.pathname,
         {
-          signer: "decentraland-kernel-scene",
+          signer: 'decentraland-kernel-scene',
           parcel: options.parcel ?? '10,10',
           realm: { hostname: 'localhost' },
           hashPayload: options.bodyModified ? hashSha256(options.bodyModified) : undefined
-         },
-          (payload) =>
+        },
+        (payload) =>
           Authenticator.signPayload(
             {
               ephemeralIdentity: identity.ephemeralIdentity,
@@ -106,8 +111,8 @@ export function makeRequestWithBodyModified(localFetch: IFetchComponent, path: s
             },
             payload
           )
-        )
-      }
+      )
+    }
   })
 }
 
