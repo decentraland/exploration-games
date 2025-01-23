@@ -4,6 +4,9 @@ import { parseJson } from '@dcl/platform-server-commons/dist/utils'
 import { HandlerContextWithPath, NewProgressInGamePayload } from '../../../types'
 import { uuidSchema } from '../../../utils'
 import { validateSignedFetch } from '../../middlewares/validate-signed-fetch'
+import { isScoreMetCondition } from '../../utils/challenge-condition'
+import { getMissionsByStatus, MissionStatus } from '../../utils/get-missions-by-status'
+import { checkCompleteMission } from '../../utils/check-mission-complete'
 
 const schema = Joi.object<NewProgressInGamePayload>().keys({
   user_name: Joi.string().required(),
@@ -14,9 +17,11 @@ const schema = Joi.object<NewProgressInGamePayload>().keys({
   data: Joi.object().optional()
 })
 
-export async function newProgressInGameHandler(ctx: HandlerContextWithPath<'db' | 'logs', '/games/:id/progress'>) {
+export async function newProgressInGameHandler(
+  ctx: HandlerContextWithPath<'db' | 'rewardService' | 'logs', '/games/:id/progress'>
+) {
   const {
-    components: { logs, db },
+    components: { logs, db, rewardService },
     request,
     params,
     verification
@@ -51,6 +56,23 @@ export async function newProgressInGameHandler(ctx: HandlerContextWithPath<'db' 
     { level: body.level, score: body.score, time: body.time, moves: body.moves },
     body.data
   )
+
+  const { challenges } = await getMissionsByStatus(MissionStatus.IN_PROGRESS, verification!.auth, db)
+
+  const gameChallenges = challenges.filter((challenge) => challenge.game_id === id && !challenge.completed)
+
+  if (gameChallenges.length) {
+    for (const challenge of gameChallenges) {
+      const conditionMet = isScoreMetCondition(body, challenge.data, logger)
+
+      if (conditionMet) {
+        console.log('marking challenge as completed: ', challenge.id)
+        await db.setChallengeAsComplete(verification!.auth, challenge.id)
+
+        return await checkCompleteMission(challenge.mission_id, verification!.auth, db, rewardService, logger)
+      }
+    }
+  }
 
   return {
     status: 201,
