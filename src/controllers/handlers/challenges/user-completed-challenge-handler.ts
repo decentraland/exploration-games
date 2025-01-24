@@ -11,7 +11,7 @@ export async function userCompletedChallengeHandler(
   >
 ) {
   const {
-    components: { db, rewardService, logs },
+    components: { db, logs },
     verification,
     params
   } = ctx
@@ -36,5 +36,5 @@ export async function userCompletedChallengeHandler(
   }
 
   await db.setChallengeAsComplete(verification!.auth, id)
-  return await checkCompleteMission(challenge.mission_id, verification!.auth, db, rewardService, logger)
+  return await checkCompleteMission(ctx.components, challenge.mission_id, verification!.auth)
 }

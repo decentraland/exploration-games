@@ -21,7 +21,7 @@ export async function newProgressInGameHandler(
   ctx: HandlerContextWithPath<'db' | 'rewardService' | 'logs', '/games/:id/progress'>
 ) {
   const {
-    components: { logs, db, rewardService },
+    components: { logs, db },
     request,
     params,
     verification
@@ -61,16 +61,14 @@ export async function newProgressInGameHandler(
 
   const gameChallenges = challenges.filter((challenge) => challenge.game_id === id && !challenge.completed)
 
-  if (gameChallenges.length) {
-    for (const challenge of gameChallenges) {
-      const conditionMet = isScoreMetCondition(body, challenge.data, logger)
+  for (const challenge of gameChallenges) {
+    const conditionMet = isScoreMetCondition(body, challenge.data, logger)
 
-      if (conditionMet) {
-        console.log('marking challenge as completed: ', challenge.id)
-        await db.setChallengeAsComplete(verification!.auth, challenge.id)
+    if (conditionMet) {
+      console.log('marking challenge as completed: ', challenge.id)
+      await db.setChallengeAsComplete(verification!.auth, challenge.id)
 
-        return await checkCompleteMission(challenge.mission_id, verification!.auth, db, rewardService, logger)
-      }
+      return await checkCompleteMission(ctx.components, challenge.mission_id, verification!.auth)
     }
   }
 

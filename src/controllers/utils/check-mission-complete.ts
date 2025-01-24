@@ -1,16 +1,16 @@
 import { InvalidRequestError } from '@dcl/platform-server-commons'
-import { ILoggerComponent } from '@well-known-components/interfaces'
-import { IDatabaseComponent } from '../../adapters/db'
-import { IRewardComponent } from '../../types'
+import { BaseComponents } from '../../types'
 
 export async function checkCompleteMission(
-  missionsId: string,
-  userAddress: string,
-  db: IDatabaseComponent,
-  rewardService: IRewardComponent,
-  logger: ILoggerComponent.ILogger
+  components: Pick<BaseComponents, 'db' | 'rewardService' | 'logs'>,
+  missionId: string,
+  userAddress: string
 ) {
-  const challengesByMission = await db.getChallengesByMission(missionsId)
+  const { logs, db, rewardService } = components
+
+  const logger = logs.getLogger('check-mission-complete')
+
+  const challengesByMission = await db.getChallengesByMission(missionId)
   const completedChallenges = await db.getUserChallengeCompleted(
     userAddress,
     challengesByMission.map(({ id }) => id)
@@ -18,13 +18,14 @@ export async function checkCompleteMission(
 
   const completedChallengeIds = new Set(completedChallenges.map(({ challenge_id }) => challenge_id))
   const allChallengesCompleted = challengesByMission.every(({ id }) => completedChallengeIds.has(id))
-  const userMission = await db.getUserMissions(userAddress, { missionId: missionsId, active: true })
-  const { campaign_key, ...mission } = await db.getMissionWithCampaignKeyExposure(missionsId)
+  const userMission = await db.getUserMissions(userAddress, { missionId, active: true })
+  const { campaign_key, ...mission } = await db.getMissionWithCampaignKeyExposure(missionId)
 
   if (completedChallenges.length >= challengesByMission.length && allChallengesCompleted) {
-    const ended = await db.setMissionAsEnd(userMission[0].id)
+    // const ended = await db.setMissionAsEnd(userMission[0].id)
+    const ended = await db.setMissionAsEnd(mission.id)
 
-    if (ended.rowCount === 0) {
+    if (!ended.rowCount) {
       logger.warn(`There was an error ending the user's mission: ${userMission[0].id}}`)
       throw new InvalidRequestError(`There was an error ending the user's mission`)
     }

@@ -47,8 +47,8 @@ function sameCoords(coordsA: [number, number], coordsB: [number, number]) {
 
 export async function validateBody(ctx: SingedFetchContext, body: unknown) {
   if (
-    ctx.verification?.authMetadata.hashPayload &&
-    hashSha256(JSON.stringify(body)) !== ctx.verification.authMetadata.hashPayload
+    // ctx.verification?.authMetadata.hashPayload &&
+    hashSha256(JSON.stringify(body)) !== ctx.verification?.authMetadata.hashPayload
   ) {
     throw new InvalidRequestError('Invalid body')
   }
