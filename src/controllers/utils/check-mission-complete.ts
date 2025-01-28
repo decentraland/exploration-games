@@ -41,8 +41,7 @@ export async function checkCompleteMission(
       body: {
         data: {
           reward: rewardResponse.data,
-          mission,
-          user_mission: userMission[0]
+          mission
         }
       }
     }
