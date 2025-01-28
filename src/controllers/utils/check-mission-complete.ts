@@ -21,9 +21,13 @@ export async function checkCompleteMission(
   const userMission = await db.getUserMissions(userAddress, { missionId, active: true })
   const { campaign_key, ...mission } = await db.getMissionWithCampaignKeyExposure(missionId)
 
+  if (!userMission.length) {
+    logger.warn(`There was an error ending the user's mission: ${mission.id}}, missing userMission`)
+    throw new InvalidRequestError(`There was an error ending the user's mission, missing userMission`)
+  }
+
   if (completedChallenges.length >= challengesByMission.length && allChallengesCompleted) {
-    // const ended = await db.setMissionAsEnd(userMission[0].id)
-    const ended = await db.setMissionAsEnd(mission.id)
+    const ended = await db.setMissionAsEnd(userMission[0].id)
 
     if (!ended.rowCount) {
       logger.warn(`There was an error ending the user's mission: ${userMission[0].id}}`)
@@ -38,7 +42,7 @@ export async function checkCompleteMission(
         data: {
           reward: rewardResponse.data,
           mission,
-          user_mission: userMission[0]
+          user_mission: userMission[0].id
         }
       }
     }
@@ -49,7 +53,7 @@ export async function checkCompleteMission(
     body: {
       data: {
         mission,
-        user_mission: userMission[0]
+        user_mission: mission
       }
     }
   }

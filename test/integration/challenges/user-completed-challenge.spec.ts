@@ -31,6 +31,13 @@ test('POST /api/challenges/:id', ({ components }) => {
     await db.setMissionAsStart('0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', mission.id)
   })
 
+  afterAll(async() => {
+    const { db } = components
+
+    await db.deleteMissions([mission.id])
+
+  })
+
   it('should return 200 - challenge completed', async () => {
     const { localFetch } = components
 

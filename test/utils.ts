@@ -6,7 +6,7 @@ import { hashSha256 } from '../src/controllers/middlewares/validate-signed-fetch
 
 export type Identity = { authChain: AuthIdentity; realAccount: IdentityType; ephemeralIdentity: IdentityType }
 
-const admin: AuthIdentity = {
+export const admin: AuthIdentity = {
   ephemeralIdentity: {
     address: '0x84452bbFA4ca14B7828e2F3BBd106A2bD495CD34',
     publicKey:

@@ -14,6 +14,11 @@ test('POST /api/missions', ({ components }) => {
     mission = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY)
   })
 
+  afterAll(async () => {
+    const { db } = components
+    await db.deleteMissions(mission.id)
+  })
+
   it('should return 204 when updating a mission', async () => {
     const { localFetch, db } = components
 

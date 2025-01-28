@@ -33,6 +33,7 @@ export interface IDatabaseComponent {
   getMissionsAvailableForUser(userAddress: string): Promise<Mission[]>
   getMissionsInProgressForUser(userAddress: string): Promise<MissionInProgress[]>
   getMissionsCompletedForUser(userAddress: string): Promise<MissionCompleted[]>
+  getLastMissionForUser(userAddress: string): Promise<MissionCompleted | null>
   deactivateMission(missionId: string): Promise<void>
   getUserProgressInGame(
     gameId: string,
@@ -192,6 +193,19 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       )
 
       return results.rows
+    },
+    async getLastMissionForUser($userAddress: string) {
+      const results = await pg.query<MissionCompleted>(
+        SQL`
+          SELECT m.id, m.description, m.active, um.start_time, um.end_time
+          FROM missions m
+          JOIN user_missions um ON m.id = um.mission_id
+          WHERE m.active is TRUE AND um.active IS TRUE AND um.user_address = ${$userAddress.toLocaleLowerCase()}
+          ORDER BY um.start_time ASC
+          LIMIT 1`
+      )
+
+      return results.rows[0]
     },
     async getMissions() {
       const results = await pg.query<Mission>(SQL`SELECT m.id, m.description, m.active FROM missions m`)
