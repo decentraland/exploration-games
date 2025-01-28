@@ -16,7 +16,7 @@ test('POST /api/missions', ({ components }) => {
 
   afterAll(async () => {
     const { db } = components
-    await db.deleteMissions(mission.id)
+    await db.deleteMissions([mission.id])
   })
 
   it('should return 204 when updating a mission', async () => {
