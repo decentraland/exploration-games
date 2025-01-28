@@ -42,7 +42,7 @@ export async function checkCompleteMission(
         data: {
           reward: rewardResponse.data,
           mission,
-          user_mission: userMission[0].id
+          user_mission: userMission[0]
         }
       }
     }
