@@ -17,7 +17,20 @@ export type GlobalContext = {
   components: BaseComponents
 }
 
-export type IMissionChecker = IBaseComponent
+export type IMissionChecker = IBaseComponent & {
+  isMissionComplete(
+    missionId: string,
+    userAddress: string
+  ): Promise<{
+    mission: {
+      id: string
+      description: string
+      active: boolean
+    }
+    reward?: any
+    user_mission?: any
+  }>
+}
 
 // components used in every environment
 export type BaseComponents = {
@@ -125,6 +138,14 @@ export type NewProgressInGamePayload = GameMetrics & {
   data?: Record<string, any>
 }
 
+export type IScore = GameMetrics & {
+  data?: Record<string, any>
+}
+
+export type ValidCondition = '=' | '>' | '<' | '>=' | '<='
+export type ScoreKeys = keyof IScore
+export type CustomDataKeys = keyof { [key: string]: number }
+
 export type UserProgress = GameMetrics & {
   id: string
   game_id: string
@@ -140,8 +161,16 @@ export type Challenge = {
   game_id: string
   mission_id: string
   target_level: number
-  data: Record<string, any>
+  data: IChallengeData
   active: boolean
+}
+
+export type IChallengeData = {
+  [key in ScoreKeys]: {
+    customDataType?: CustomDataKeys
+    condition: ValidCondition
+    target: number
+  }
 }
 
 export type ChallengeWithCompletionTime = Challenge & {

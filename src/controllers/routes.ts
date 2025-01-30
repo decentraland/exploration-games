@@ -60,6 +60,7 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   router.post('/games/:id/progress', auth, newProgressInGameHandler)
   router.get('/games/progress', auth, getAllUserProgressInGamesHandler)
   router.get('/games/:id/challenges/completed', auth, getUserCompletedChallengesByGame)
+  //TODO: server-validations deploy step 2: disable POST /challenges/:id
   router.post('/challenges/:id', auth, userCompletedChallengeHandler)
   router.post('/missions/:id/start', auth, createUserMissionHandler)
 

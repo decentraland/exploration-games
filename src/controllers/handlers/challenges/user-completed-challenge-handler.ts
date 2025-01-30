@@ -5,12 +5,12 @@ import { validateSignedFetch } from '../../middlewares/validate-signed-fetch'
 
 export async function userCompletedChallengeHandler(
   ctx: Pick<
-    HandlerContextWithPath<'db' | 'rewardService' | 'logs', '/challenges/:id'>,
+    HandlerContextWithPath<'db' | 'rewardService' | 'logs' | 'missionChecker', '/challenges/:id'>,
     'components' | 'params' | 'verification'
   >
 ) {
   const {
-    components: { db, rewardService, logs },
+    components: { db, logs, missionChecker },
     verification,
     params
   } = ctx
@@ -35,47 +35,12 @@ export async function userCompletedChallengeHandler(
   }
 
   await db.setChallengeAsComplete(verification!.auth, id)
-
-  const challengesByMission = await db.getChallengesByMission(challenge.mission_id)
-  const completedChallenges = await db.getUserChallengeCompleted(
-    verification!.auth,
-    challengesByMission.map(({ id }) => id)
-  )
-
-  const completedChallengeIds = new Set(completedChallenges.map(({ challenge_id }) => challenge_id))
-  const allChallengesCompleted = challengesByMission.every(({ id }) => completedChallengeIds.has(id))
-  const userMission = await db.getUserMissions(verification!.auth, { missionId: challenge.mission_id, active: true })
-  const { campaign_key, ...mission } = await db.getMissionWithCampaignKeyExposure(challenge.mission_id)
-
-  if (completedChallenges.length >= challengesByMission.length && allChallengesCompleted) {
-    const ended = await db.setMissionAsEnd(userMission[0].id)
-
-    if (ended.rowCount === 0) {
-      logger.warn(`There was an error ending the user's mission: ${userMission[0].id}}`)
-      throw new InvalidRequestError(`There was an error ending the user's mission`)
-    }
-
-    const rewardResponse = await rewardService.sendReward(campaign_key, verification!.auth)
-
-    return {
-      status: 200,
-      body: {
-        data: {
-          reward: rewardResponse.data,
-          mission,
-          user_mission: userMission[0]
-        }
-      }
-    }
-  }
+  const result = await missionChecker.isMissionComplete(challenge.mission_id, verification!.auth)
 
   return {
     status: 200,
     body: {
-      data: {
-        mission,
-        user_mission: userMission[0]
-      }
+      data: result
     }
   }
 }

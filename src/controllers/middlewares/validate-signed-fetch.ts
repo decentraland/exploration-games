@@ -47,10 +47,8 @@ function sameCoords(coordsA: [number, number], coordsB: [number, number]) {
 
 export async function validateBody(ctx: SingedFetchContext, body: unknown) {
   if (
-    // TODO: once this PR reaches PROD (https://github.com/decentraland/unity-explorer/pull/2696)
-    // remove the hashPayload conditional so its always required.
-    ctx.verification?.authMetadata.hashPayload &&
-    hashSha256(JSON.stringify(body)) !== ctx.verification.authMetadata.hashPayload
+    // ctx.verification?.authMetadata.hashPayload &&
+    hashSha256(JSON.stringify(body)) !== ctx.verification?.authMetadata.hashPayload
   ) {
     throw new InvalidRequestError('Invalid body')
   }

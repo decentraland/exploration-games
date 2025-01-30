@@ -1,12 +1,16 @@
 import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
 import { HandlerContextWithPath } from '../../../types'
 import { uuidSchema } from '../../../utils'
+import { getMissionsByStatus, MissionStatus } from '../../utils/get-missions-by-status'
 
 export async function createUserMissionHandler(
-  ctx: Pick<HandlerContextWithPath<'db' | 'logs', '/missions/:id/start'>, 'components' | 'params' | 'verification'>
+  ctx: Pick<
+    HandlerContextWithPath<'db' | 'logs' | 'config', '/missions/:id/start'>,
+    'components' | 'params' | 'verification'
+  >
 ) {
   const {
-    components: { logs, db },
+    components: { logs, db, config },
     params,
     verification
   } = ctx
@@ -26,6 +30,22 @@ export async function createUserMissionHandler(
   if (!mission) {
     logger.warn(`No mission found with UUID: ${missionId}`)
     throw new InvalidRequestError('No mission found with this UUID')
+  }
+
+  const lastMission = await db.getLastMissionForUser(verification!.auth)
+
+  if (lastMission && !lastMission.end_time) {
+    logger.warn(`Can't start new mission while there is an active mission for this user.`)
+    throw new InvalidRequestError(`Can't start new mission while there is an active mission for this user.`)
+  }
+
+  const missionTimeWindow = await config.requireNumber('MISSION_TIME_WINDOW_HS')
+  const lastStartTime = lastMission?.start_time || '0'
+  const isTimeForNewMission = Date.now() - missionTimeWindow * 60 * 60 * 1000 > parseInt(lastStartTime)
+
+  if (!isTimeForNewMission) {
+    logger.warn('Need to wait more time for starting a new mission')
+    throw new InvalidRequestError('Need to wait more time for starting a new mission')
   }
 
   await db.setMissionAsStart(verification!.auth, missionId)

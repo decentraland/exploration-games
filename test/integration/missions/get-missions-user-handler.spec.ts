@@ -4,16 +4,21 @@ import { makeRequest } from '../../utils'
 
 test('GET /api/missions/available', ({ components }) => {
   let mission3
+  const missionsIds = []
+  let challenge1
+  let game
   beforeAll(async () => {
     const { db } = components
     const mission1 = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY)
-    await db.createMission('TEST Mission User 2', VALID_CAMPAIGN_KEY)
+    missionsIds.push(mission1.id)
+    missionsIds.push((await db.createMission('TEST Mission User 2', VALID_CAMPAIGN_KEY)).id)
     mission3 = await db.createMission('TEST Mission User 3', VALID_CAMPAIGN_KEY)
+    missionsIds.push(mission3.id)
     await db.deactivateMission(mission3.id)
-    const { id: gameId } = await db.createGame('TEST Mission User', '10,10')
+    game = await db.createGame('TEST Mission User', '10,10')
 
-    const challenge1 = await db.createGameChallenge({
-      gameId,
+    challenge1 = await db.createGameChallenge({
+      gameId: game.id,
       description: 'TEST Mission User 4',
       targetLevel: 4,
       missionId: mission1.id
@@ -25,6 +30,13 @@ test('GET /api/missions/available', ({ components }) => {
       active: true
     })
     await db.setMissionAsEnd(userMission[0].id)
+  })
+
+  afterAll(async () => {
+    const { db } = components
+    await db.deleteChallenges([challenge1.id])
+    await db.deleteGames([game.id])
+    await db.deleteMissions(missionsIds)
   })
 
   it('should return 200 with the missions available for the user', async () => {
