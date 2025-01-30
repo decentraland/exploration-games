@@ -2,15 +2,16 @@ import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
 import { HandlerContextWithPath } from '../../../types'
 import { uuidSchema } from '../../../utils'
 import { validateSignedFetch } from '../../middlewares/validate-signed-fetch'
+import { checkCompleteMission } from '../../utils/check-mission-complete'
 
 export async function userCompletedChallengeHandler(
   ctx: Pick<
-    HandlerContextWithPath<'db' | 'rewardService' | 'logs' | 'missionChecker', '/challenges/:id'>,
+    HandlerContextWithPath<'db' | 'rewardService' | 'logs', '/challenges/:id'>,
     'components' | 'params' | 'verification'
   >
 ) {
   const {
-    components: { db, logs, missionChecker },
+    components: { db, logs },
     verification,
     params
   } = ctx
@@ -35,12 +36,5 @@ export async function userCompletedChallengeHandler(
   }
 
   await db.setChallengeAsComplete(verification!.auth, id)
-  const result = await missionChecker.isMissionComplete(challenge.mission_id, verification!.auth)
-
-  return {
-    status: 200,
-    body: {
-      data: result
-    }
-  }
+  return await checkCompleteMission(ctx.components, challenge.mission_id, verification!.auth)
 }

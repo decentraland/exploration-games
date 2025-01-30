@@ -60,7 +60,7 @@ export async function initComponents(): Promise<AppComponents> {
 
   const db = createDBComponent({ pg })
   const rewardService = createRewardComponent({ fetcher, config })
-  const missionChecker = await createMissionChecker({ logs, db, rewardService })
+  const missionChecker = await createMissionChecker({ logs, db })
 
   return {
     config,

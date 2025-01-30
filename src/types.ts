@@ -17,20 +17,7 @@ export type GlobalContext = {
   components: BaseComponents
 }
 
-export type IMissionChecker = IBaseComponent & {
-  isMissionComplete(
-    missionId: string,
-    userAddress: string
-  ): Promise<{
-    mission: {
-      id: string
-      description: string
-      active: boolean
-    }
-    reward?: any
-    user_mission?: any
-  }>
-}
+export type IMissionChecker = IBaseComponent
 
 // components used in every environment
 export type BaseComponents = {

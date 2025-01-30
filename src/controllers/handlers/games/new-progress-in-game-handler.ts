@@ -6,6 +6,7 @@ import { uuidSchema } from '../../../utils'
 import { validateSignedFetch } from '../../middlewares/validate-signed-fetch'
 import { isScoreMetCondition } from '../../utils/challenge-condition'
 import { getMissionsByStatus, MissionStatus } from '../../utils/get-missions-by-status'
+import { checkCompleteMission } from '../../utils/check-mission-complete'
 
 const schema = Joi.object<NewProgressInGamePayload>().keys({
   user_name: Joi.string().required(),
@@ -17,10 +18,10 @@ const schema = Joi.object<NewProgressInGamePayload>().keys({
 })
 
 export async function newProgressInGameHandler(
-  ctx: HandlerContextWithPath<'db' | 'rewardService' | 'logs' | 'missionChecker', '/games/:id/progress'>
+  ctx: HandlerContextWithPath<'db' | 'rewardService' | 'logs', '/games/:id/progress'>
 ) {
   const {
-    components: { logs, db, missionChecker },
+    components: { logs, db },
     request,
     params,
     verification
@@ -67,14 +68,7 @@ export async function newProgressInGameHandler(
       console.log('marking challenge as completed: ', challenge.id)
       await db.setChallengeAsComplete(verification!.auth, challenge.id)
 
-      const result = await missionChecker.isMissionComplete(challenge.mission_id, verification!.auth)
-
-      return {
-        status: 200,
-        body: {
-          data: result
-        }
-      }
+      return await checkCompleteMission(ctx.components, challenge.mission_id, verification!.auth)
     }
   }
 
