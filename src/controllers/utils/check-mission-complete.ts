@@ -1,5 +1,5 @@
 import { InvalidRequestError } from '@dcl/platform-server-commons'
-import { BaseComponents } from '../../types'
+import { BaseComponents, RewardAttributes } from '../../types'
 
 export async function checkCompleteMission(
   components: Pick<BaseComponents, 'db' | 'rewardService' | 'logs'>,
@@ -26,6 +26,15 @@ export async function checkCompleteMission(
     throw new InvalidRequestError(`There was an error ending the user's mission, missing userMission`)
   }
 
+  let data: {
+    mission: typeof mission
+    user_mission?: typeof mission
+    reward?: RewardAttributes[]
+  } = {
+    mission,
+    user_mission: mission
+  }
+
   if (completedChallenges.length >= challengesByMission.length && allChallengesCompleted) {
     const ended = await db.setMissionAsEnd(userMission[0].id)
 
@@ -36,24 +45,16 @@ export async function checkCompleteMission(
 
     const rewardResponse = await rewardService.sendReward(campaign_key, userAddress)
 
-    return {
-      status: 200,
-      body: {
-        data: {
-          reward: rewardResponse.data,
-          mission
-        }
-      }
+    data = {
+      mission,
+      reward: rewardResponse.data
     }
   }
 
   return {
     status: 200,
     body: {
-      data: {
-        mission,
-        user_mission: mission
-      }
+      data
     }
   }
 }

@@ -47,9 +47,7 @@ test('POST /api/challenges/:id', ({ components }) => {
       method: 'POST'
     })
     
-
     const json = await response.json()
-    console.log(JSON.stringify(json))
     expect(response.status).toBe(200)
     expect(json.data.mission.id).toBe(mission.id)
   })
