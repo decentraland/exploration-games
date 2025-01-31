@@ -201,7 +201,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
           FROM missions m
           JOIN user_missions um ON m.id = um.mission_id
           WHERE m.active is TRUE AND um.active IS TRUE AND um.user_address = ${$userAddress.toLocaleLowerCase()}
-          ORDER BY um.start_time ASC
+          ORDER BY um.start_time DESC
           LIMIT 1`
       )
 
