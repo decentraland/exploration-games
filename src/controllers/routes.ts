@@ -50,11 +50,9 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   router.get('/games', getGamesHandler)
   router.get('/games/:id/challenges', getChallengesForGameHandler)
   router.get('/games/:id/leaderboard', getProgressLeaderboardInGamesHandler)
-  router.get('/missions', getMissionsHandler)
   router.get('/missions/available', auth, getMissionsAvailableHandler)
   router.get('/missions/in_progress', auth, getMissionsInProgressHandler)
   router.get('/missions/completed', auth, getMissionsCompletedHandler)
-  router.get('/missions/:id', getMissionHandler)
 
   router.get('/games/:id/progress', auth, getProgressInGameHandler)
   router.post('/games/:id/progress', auth, newProgressInGameHandler)
@@ -64,6 +62,8 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   // router.post('/challenges/:id', auth, userCompletedChallengeHandler)
   router.post('/missions/:id/start', auth, createUserMissionHandler)
 
+  router.get('/missions', auth, isAdminMiddleware, getMissionsHandler)
+  router.get('/missions/:id', auth, isAdminMiddleware, getMissionHandler)
   router.post('/games', auth, isAdminMiddleware, createGameHandler)
   router.patch('/games/:id/deactivate', auth, isAdminMiddleware, deactivateGameHandler)
   router.patch('/games/:id', auth, isAdminMiddleware, updateGameHandler)

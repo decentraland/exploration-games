@@ -28,8 +28,11 @@ export interface IDatabaseComponent {
   createMission(description: string, campaign_key: string): Promise<Mission>
   updateMission(id: string, description: string, campaign_key: string): Promise<void>
   getMission(missionId: string): Promise<Mission>
+  getMissionWithCampaignKey(missionId: string): Promise<Mission>
   getMissions(): Promise<Mission[]>
+  getMissionsWithCampaignKey(): Promise<Mission[]>
   getActiveMissions(): Promise<Mission[]>
+  getActiveMissionsWithCampaignKey(): Promise<Mission[]>
   getMissionsAvailableForUser(userAddress: string): Promise<Mission[]>
   getMissionsInProgressForUser(userAddress: string): Promise<MissionInProgress[]>
   getMissionsCompletedForUser(userAddress: string): Promise<MissionCompleted[]>
@@ -150,9 +153,28 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       return results.rows[0]
     },
+    async getMissionWithCampaignKey(missionId) {
+      const results = await pg.query<Mission>(
+        SQL`SELECT m.id, m.description, m.active, m.campaign_key FROM missions m WHERE id = ${missionId}`
+      )
+
+      return results.rows[0]
+    },
     async getActiveMissions() {
       const results = await pg.query<Mission>(
         SQL`SELECT m.id, m.description, m.active FROM missions m WHERE m.active IS TRUE`
+      )
+
+      return results.rows
+    },
+    async getMissionsWithCampaignKey() {
+      const results = await pg.query<Mission>(SQL`SELECT m.id, m.description, m.active, m.campaign_key FROM missions m`)
+
+      return results.rows
+    },
+    async getActiveMissionsWithCampaignKey() {
+      const results = await pg.query<Mission>(
+        SQL`SELECT m.id, m.description, m.active, m.campaign_key FROM missions m WHERE m.active IS TRUE`
       )
 
       return results.rows

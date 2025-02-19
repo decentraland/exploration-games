@@ -1,5 +1,6 @@
 import { test } from '../../components'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
+import { makeRequest } from '../../utils'
 
 test('GET /api/missions/:id', ({ components }) => {
   let mission
@@ -32,7 +33,7 @@ test('GET /api/missions/:id', ({ components }) => {
   it('should return 200 with a mission and the games and challenges associated', async () => {
     const { localFetch } = components
 
-    const response = await localFetch.fetch(`/api/missions/${mission.id}`)
+    const response = await makeRequest(localFetch, `/api/missions/${mission.id}`)
 
     expect(response.status).toBe(200)
 

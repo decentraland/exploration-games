@@ -12,9 +12,9 @@ export async function getMissionsHandler(
 
   let missions = []
   if (allMissions) {
-    missions = await db.getMissions()
+    missions = await db.getMissionsWithCampaignKey()
   } else {
-    missions = await db.getActiveMissions()
+    missions = await db.getActiveMissionsWithCampaignKey()
   }
 
   return {
