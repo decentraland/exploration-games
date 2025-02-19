@@ -53,7 +53,7 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   router.get('/missions/available', auth, getMissionsAvailableHandler)
   router.get('/missions/in_progress', auth, getMissionsInProgressHandler)
   router.get('/missions/completed', auth, getMissionsCompletedHandler)
-  
+
   router.get('/games/:id/progress', auth, getProgressInGameHandler)
   router.post('/games/:id/progress', auth, newProgressInGameHandler)
   router.get('/games/progress', auth, getAllUserProgressInGamesHandler)
@@ -61,7 +61,7 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   //TODO: server-validations deploy step 2: disable POST /challenges/:id
   router.post('/challenges/:id', auth, userCompletedChallengeHandler)
   router.post('/missions/:id/start', auth, createUserMissionHandler)
-  
+
   router.get('/missions', auth, isAdminMiddleware, getMissionsHandler)
   router.get('/missions/:id', auth, isAdminMiddleware, getMissionHandler)
   router.post('/games', auth, isAdminMiddleware, createGameHandler)

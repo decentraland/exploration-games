@@ -1,5 +1,6 @@
 import { test } from '../../components'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
+import { makeRequest } from '../../utils'
 
 test('GET /api/missions', ({ components }) => {
   beforeAll(async () => {
@@ -15,7 +16,7 @@ test('GET /api/missions', ({ components }) => {
   it('should return 200 with active missions', async () => {
     const { localFetch } = components
 
-    const response = await localFetch.fetch(`/api/missions`)
+    const response = await makeRequest(localFetch, `/api/missions`)
 
     expect(response.status).toBe(200)
 
@@ -32,7 +33,7 @@ test('GET /api/missions', ({ components }) => {
 
     await db.deactivateGame(missions[0].id)
 
-    const response = await localFetch.fetch(`/api/missions?all`)
+    const response = await makeRequest(localFetch, `/api/missions?all`)
 
     expect(response.status).toBe(200)
 

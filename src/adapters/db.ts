@@ -168,9 +168,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       return results.rows
     },
     async getMissionsWithCampaignKey() {
-      const results = await pg.query<Mission>(
-        SQL`SELECT m.id, m.description, m.active, m.campaign_key FROM missions m WHERE m.active IS TRUE`
-      )
+      const results = await pg.query<Mission>(SQL`SELECT m.id, m.description, m.active, m.campaign_key FROM missions m`)
 
       return results.rows
     },
