@@ -12,7 +12,7 @@ import { newProgressInGameHandler } from './handlers/games/new-progress-in-game-
 import { getChallengesForGameHandler } from './handlers/games/get-challenges-for-game-handler'
 import { getProgressInGameHandler } from './handlers/games/get-progress-in-game-handler'
 import { getAllUserProgressInGamesHandler } from './handlers/games/get-all-user-progress-in-games-handler'
-import { userCompletedChallengeHandler } from './handlers/challenges/user-completed-challenge-handler'
+// import { userCompletedChallengeHandler } from './handlers/challenges/user-completed-challenge-handler'
 import { getUserCompletedChallengesByGame } from './handlers/games/get-user-completed-challenges-by-game-handler'
 import { getProgressLeaderboardInGamesHandler } from './handlers/games/get-progress-leaderboard-in-games-handler'
 import { getMissionsHandler } from './handlers/missions/get-missions-handler'

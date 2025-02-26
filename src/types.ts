@@ -101,6 +101,7 @@ export type Mission = {
   id: string
   description: string
   campaign_key: string
+  type: string
   active: boolean
 }
 

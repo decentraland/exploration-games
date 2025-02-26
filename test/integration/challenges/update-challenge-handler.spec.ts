@@ -13,8 +13,8 @@ test('PATCH /api/challenges/:id', ({ components }) => {
     const { db } = components
     game = await db.createGame('TEST', '10,10')
     const wrongGame = await db.createGame('TEST', '10,10')
-    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY)
-    const wrongMission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY)
+    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, 'TEST')
+    const wrongMission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, 'TEST')
 
     challenge = await db.createGameChallenge({
       gameId: wrongGame.id,

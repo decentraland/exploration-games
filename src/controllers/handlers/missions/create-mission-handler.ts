@@ -5,7 +5,8 @@ import { HandlerContextWithPath, Mission } from '../../../types'
 
 const schema = Joi.object<Mission>().keys({
   description: Joi.string().required(),
-  campaign_key: Joi.string().required()
+  campaign_key: Joi.string().required(),
+  type: Joi.string().required()
 })
 
 export async function createMissionHandler(
@@ -28,7 +29,7 @@ export async function createMissionHandler(
 
   const validatedBody = body as Mission
 
-  const mission = await db.createMission(validatedBody.description, validatedBody.campaign_key)
+  const mission = await db.createMission(validatedBody.description, validatedBody.campaign_key, validatedBody.type)
 
   return {
     status: 201,

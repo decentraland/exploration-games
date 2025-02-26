@@ -5,7 +5,8 @@ import { HandlerContextWithPath, Mission } from '../../../types'
 
 const schema = Joi.object<Mission>().keys({
   description: Joi.string().required(),
-  campaign_key: Joi.string().required()
+  campaign_key: Joi.string().required(),
+  type: Joi.string().required()
 })
 
 export async function updateMissionHandler(
@@ -38,7 +39,7 @@ export async function updateMissionHandler(
   }
 
   try {
-    await db.updateMission(mission.id, validatedBody.description, validatedBody.campaign_key)
+    await db.updateMission(mission.id, validatedBody.description, validatedBody.campaign_key, validatedBody.type)
   } catch (error) {
     logger.error(`Error updating mission: ${error}`)
     throw new InvalidRequestError('Error updating mission')

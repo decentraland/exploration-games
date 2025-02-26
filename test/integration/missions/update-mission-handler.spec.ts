@@ -6,12 +6,13 @@ test('POST /api/missions', ({ components }) => {
   let mission
   const payload = {
     description: 'Mission Updated',
-    campaign_key: NON_EXISTING_CAMPAIGN_KEY
+    campaign_key: NON_EXISTING_CAMPAIGN_KEY,
+    type: 'TEST'
   }
 
   beforeAll(async () => {
     const { db } = components
-    mission = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY)
+    mission = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY, 'TEST')
   })
 
   afterAll(async () => {
@@ -33,6 +34,7 @@ test('POST /api/missions', ({ components }) => {
 
     expect(await missionUpdated.description).toBe(payload.description)
     expect(await missionUpdated.campaign_key).toBe(payload.campaign_key)
+    expect(await missionUpdated.type).toBe(payload.type)
   })
 
   it('should return 400 when no auth', async () => {

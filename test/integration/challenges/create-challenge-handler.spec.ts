@@ -10,7 +10,7 @@ test('POST /api/challenges', ({ components }) => {
   beforeAll(async () => {
     const { db } = components
     game = await db.createGame('TEST', '10,10')
-    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY)
+    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, 'TEST')
   })
 
   beforeEach(() => {

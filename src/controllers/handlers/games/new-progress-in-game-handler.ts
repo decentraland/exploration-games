@@ -57,7 +57,7 @@ export async function newProgressInGameHandler(
     body.data
   )
 
-  const { challenges } = await getMissionsByStatus(MissionStatus.IN_PROGRESS, verification!.auth, db)
+  const { challenges } = await getMissionsByStatus(MissionStatus.IN_PROGRESS, '', verification!.auth, db)
 
   const gameChallenges = challenges.filter((challenge) => challenge.game_id === id && !challenge.completed)
 

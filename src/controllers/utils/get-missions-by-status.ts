@@ -8,18 +8,23 @@ export enum MissionStatus {
 
 type MissionsGetterByStatus = Record<
   MissionStatus,
-  (db: IDatabaseComponent, userAddress: string) => Promise<MissionInProgress[] | MissionCompleted[]>
+  (db: IDatabaseComponent, userAddress: string, type: string) => Promise<MissionInProgress[] | MissionCompleted[]>
 >
 
 const missionsGetterByStatus: MissionsGetterByStatus = {
-  [MissionStatus.IN_PROGRESS]: async (db: IDatabaseComponent, userAddress: string) =>
-    db.getMissionsInProgressForUser(userAddress),
-  [MissionStatus.COMPLETED]: async (db: IDatabaseComponent, userAddress: string) =>
-    db.getMissionsCompletedForUser(userAddress)
+  [MissionStatus.IN_PROGRESS]: async (db: IDatabaseComponent, userAddress: string, type: string) =>
+    db.getMissionsInProgressForUser(userAddress, type),
+  [MissionStatus.COMPLETED]: async (db: IDatabaseComponent, userAddress: string, type: string) =>
+    db.getMissionsCompletedForUser(userAddress, type)
 }
 
-export const getMissionsByStatus = async (status: MissionStatus, userAddress: string, db: IDatabaseComponent) => {
-  const missions = await missionsGetterByStatus[status](db, userAddress)
+export const getMissionsByStatus = async (
+  status: MissionStatus,
+  type: string,
+  userAddress: string,
+  db: IDatabaseComponent
+) => {
+  const missions = await missionsGetterByStatus[status](db, userAddress, type)
   const missionsIds = missions.map(({ id }) => id)
   const challenges = await db.getUserChallengesByMissions(missionsIds, userAddress)
   const challengesIds = challenges.map(({ game_id }) => game_id)

@@ -1,7 +1,6 @@
 import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
 import { HandlerContextWithPath } from '../../../types'
 import { uuidSchema } from '../../../utils'
-import { getMissionsByStatus, MissionStatus } from '../../utils/get-missions-by-status'
 
 export async function createUserMissionHandler(
   ctx: Pick<
@@ -32,7 +31,12 @@ export async function createUserMissionHandler(
     throw new InvalidRequestError('No mission found with this UUID')
   }
 
-  const lastMission = await db.getLastMissionForUser(verification!.auth)
+  if (!mission.type) {
+    logger.warn(`Mission ${missionId} has no type`)
+    throw new InvalidRequestError('Mission has no type')
+  }
+
+  const lastMission = await db.getLastMissionForUser(verification!.auth, mission.type)
 
   if (lastMission && !lastMission.end_time) {
     logger.warn(`Can't start new mission while there is an active mission for this user.`)
