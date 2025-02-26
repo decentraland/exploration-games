@@ -1,5 +1,5 @@
-import { HandlerContextWithPath } from '../../../types'
-import { getMissionsByStatus, MissionStatus } from '../../utils/get-missions-by-status'
+import { HandlerContextWithPath, MissionType } from '../../../types'
+import { getMissionsByStatusAndType, MissionStatus } from '../../utils/get-missions-by-status'
 
 export async function getMissionsInProgressHandler(
   ctx: Pick<HandlerContextWithPath<'db', '/missions/in_progress'>, 'components' | 'verification' | 'url'>
@@ -10,11 +10,16 @@ export async function getMissionsInProgressHandler(
     url
   } = ctx
 
-  const type = url.searchParams.get('type') || 'mini-games'
+  const type = (url.searchParams.get('type') as MissionType) || MissionType.MINI_GAMES
 
   const userAddress = verification!.auth
 
-  const { missions, challenges, games } = await getMissionsByStatus(MissionStatus.IN_PROGRESS, type, userAddress, db)
+  const { missions, challenges, games } = await getMissionsByStatusAndType(
+    MissionStatus.IN_PROGRESS,
+    type,
+    userAddress,
+    db
+  )
 
   return {
     status: 200,

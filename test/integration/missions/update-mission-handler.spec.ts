@@ -1,18 +1,19 @@
 import { test } from '../../components'
 import { VALID_CAMPAIGN_KEY, NON_EXISTING_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
 import { getIdentity, makeRequest } from '../../utils'
+import { MissionType } from '../../../src/types'
 
 test('POST /api/missions', ({ components }) => {
   let mission
   const payload = {
     description: 'Mission Updated',
     campaign_key: NON_EXISTING_CAMPAIGN_KEY,
-    type: 'TEST'
+    type: MissionType.MINI_GAMES
   }
 
   beforeAll(async () => {
     const { db } = components
-    mission = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY, 'TEST')
+    mission = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
   })
 
   afterAll(async () => {

@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { test } from '../../components'
 import { getIdentity, makeRequest } from '../../utils'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
-
+import { MissionType } from '../../../src/types'
 test('POST /api/challenges', ({ components }) => {
   let game
   let mission
@@ -10,7 +10,7 @@ test('POST /api/challenges', ({ components }) => {
   beforeAll(async () => {
     const { db } = components
     game = await db.createGame('TEST', '10,10')
-    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, 'TEST')
+    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
   })
 
   beforeEach(() => {

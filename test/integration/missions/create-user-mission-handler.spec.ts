@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import { test } from '../../components'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
 import { admin, getIdentity, makeRequest } from '../../utils'
+import { MissionType } from '../../../src/types'
 
 test('POST /api/missions/:id/start', ({ components }) => {
   let mission
@@ -12,8 +13,8 @@ test('POST /api/missions/:id/start', ({ components }) => {
   beforeAll(async () => {
     const { db } = components
     const { id: gameId } = await db.createGame('TEST', '10,10')
-    mission = await db.createMission('Mission Test nueva', VALID_CAMPAIGN_KEY, 'TEST')
-    mission2 = await db.createMission('Mission Test 2 nueva', VALID_CAMPAIGN_KEY, 'TEST')
+    mission = await db.createMission('Mission Test nueva', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    mission2 = await db.createMission('Mission Test 2 nueva', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
 
   })
 
@@ -51,7 +52,7 @@ test('POST /api/missions/:id/start', ({ components }) => {
     const { localFetch } = components
 
     const userId = admin.authChain[0].payload
-    const lastMissionTest2 = await db.getLastMissionForUser(userId, 'TEST')
+    const lastMissionTest2 = await db.getLastMissionForUser(userId, MissionType.MINI_GAMES)
 
     const userMission = await db.getUserMissions(userId, { missionId: lastMissionTest2.id, active: true })
 

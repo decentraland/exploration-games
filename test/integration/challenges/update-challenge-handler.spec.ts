@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { test } from '../../components'
 import { getIdentity, makeRequest } from '../../utils'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
-import { uuidSchema } from '../../../src/utils'
+import { MissionType } from '../../../src/types'
 
 test('PATCH /api/challenges/:id', ({ components }) => {
   let game
@@ -13,8 +13,8 @@ test('PATCH /api/challenges/:id', ({ components }) => {
     const { db } = components
     game = await db.createGame('TEST', '10,10')
     const wrongGame = await db.createGame('TEST', '10,10')
-    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, 'TEST')
-    const wrongMission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, 'TEST')
+    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    const wrongMission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
 
     challenge = await db.createGameChallenge({
       gameId: wrongGame.id,

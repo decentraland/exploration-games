@@ -14,7 +14,8 @@ import {
   UserChallenge,
   MissionInProgress,
   ChallengeWithCompletionTime,
-  MissionCompleted
+  MissionCompleted,
+  MissionType
 } from '../types'
 
 export interface IDatabaseComponent {
@@ -33,10 +34,11 @@ export interface IDatabaseComponent {
   getMissionsWithCampaignKey(): Promise<Mission[]>
   getActiveMissions(): Promise<Mission[]>
   getActiveMissionsWithCampaignKey(): Promise<Mission[]>
-  getMissionsAvailableForUser(userAddress: string, type: string): Promise<Mission[]>
-  getMissionsInProgressForUser(userAddress: string, type: string): Promise<MissionInProgress[]>
-  getMissionsCompletedForUser(userAddress: string, type: string): Promise<MissionCompleted[]>
-  getLastMissionForUser(userAddress: string, type: string): Promise<MissionCompleted | null>
+  getMissionsAvailableByTypeForUser(userAddress: string, type: MissionType): Promise<Mission[]>
+  getMissionsInProgressForUser(userAddress: string): Promise<MissionInProgress[]>
+  getMissionsInProgressByTypeForUser(userAddress: string, type: MissionType): Promise<MissionInProgress[]>
+  getMissionsCompletedForUser(userAddress: string, type: MissionType): Promise<MissionCompleted[]>
+  getLastMissionForUser(userAddress: string, type: MissionType): Promise<MissionCompleted | null>
   deactivateMission(missionId: string): Promise<void>
   getUserProgressInGame(
     gameId: string,
@@ -181,7 +183,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       return results.rows
     },
-    async getMissionsAvailableForUser($userAddress: string, $type: string) {
+    async getMissionsAvailableByTypeForUser($userAddress: string, $type: MissionType) {
       const results = await pg.query<Mission>(SQL`
         SELECT m.id, m.description, m.active FROM missions m 
         WHERE m.active is true 
@@ -194,24 +196,32 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       `)
       return results.rows
     },
-    async getMissionsInProgressForUser($userAddress: string, $type: string) {
-      const query = SQL`
-      SELECT m.id, m.description, m.active, m.type, um.start_time
-      FROM missions m
-      JOIN user_missions um ON m.id = um.mission_id
-      WHERE m.active is TRUE
-      AND um.active IS TRUE
-      AND um.end_time IS NULL
-      AND um.user_address = ${$userAddress.toLocaleLowerCase()}
-    `
-      if ($type) {
-        query.append(SQL`AND m.type = ${$type}`)
-      }
-
-      const results = await pg.query<MissionInProgress>(query)
+    async getMissionsInProgressForUser($userAddress: string) {
+      const results = await pg.query<MissionInProgress>(SQL`
+        SELECT m.id, m.description, m.active, m.type, um.start_time
+        FROM missions m
+        JOIN user_missions um ON m.id = um.mission_id
+        WHERE m.active is TRUE
+        AND um.active IS TRUE
+        AND um.end_time IS NULL
+        AND um.user_address = ${$userAddress.toLocaleLowerCase()}
+      `)
       return results.rows
     },
-    async getMissionsCompletedForUser($userAddress: string, $type: string) {
+    async getMissionsInProgressByTypeForUser($userAddress: string, $type: MissionType) {
+      const results = await pg.query<MissionInProgress>(SQL`
+        SELECT m.id, m.description, m.active, m.type, um.start_time
+        FROM missions m
+        JOIN user_missions um ON m.id = um.mission_id
+        WHERE m.active is TRUE
+        AND um.active IS TRUE
+        AND um.end_time IS NULL
+        AND um.user_address = ${$userAddress.toLocaleLowerCase()}
+        AND m.type = ${$type}
+      `)
+      return results.rows
+    },
+    async getMissionsCompletedForUser($userAddress: string, $type: MissionType) {
       const results = await pg.query<MissionCompleted>(SQL`
           SELECT m.id, m.description, m.active, m.type, um.start_time, um.end_time
           FROM missions m
@@ -221,7 +231,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         `)
       return results.rows
     },
-    async getLastMissionForUser($userAddress: string, $type: string) {
+    async getLastMissionForUser($userAddress: string, $type: MissionType) {
       const results = await pg.query<MissionCompleted>(SQL`
         SELECT m.id, m.description, m.active, um.start_time, um.end_time
           FROM missions m

@@ -101,8 +101,13 @@ export type Mission = {
   id: string
   description: string
   campaign_key: string
-  type: string
+  type: MissionType
   active: boolean
+}
+
+export enum MissionType {
+  MINI_GAMES = 'mini-games',
+  FASHION_WEEK = 'fw-2025'
 }
 
 export type MissionInProgress = Mission & {

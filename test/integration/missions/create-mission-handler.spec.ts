@@ -1,3 +1,4 @@
+import { MissionType } from '../../../src/types'
 import { test } from '../../components'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
 import { getIdentity, makeRequest } from '../../utils'
@@ -8,7 +9,7 @@ test('POST /api/missions', ({ components }) => {
     payload = {
       description: 'Mission Test',
       campaign_key: VALID_CAMPAIGN_KEY,
-      type: 'TEST'
+      type: MissionType.MINI_GAMES
     }
   })
 

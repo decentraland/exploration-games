@@ -12,7 +12,6 @@ import { newProgressInGameHandler } from './handlers/games/new-progress-in-game-
 import { getChallengesForGameHandler } from './handlers/games/get-challenges-for-game-handler'
 import { getProgressInGameHandler } from './handlers/games/get-progress-in-game-handler'
 import { getAllUserProgressInGamesHandler } from './handlers/games/get-all-user-progress-in-games-handler'
-// import { userCompletedChallengeHandler } from './handlers/challenges/user-completed-challenge-handler'
 import { getUserCompletedChallengesByGame } from './handlers/games/get-user-completed-challenges-by-game-handler'
 import { getProgressLeaderboardInGamesHandler } from './handlers/games/get-progress-leaderboard-in-games-handler'
 import { getMissionsHandler } from './handlers/missions/get-missions-handler'
@@ -58,8 +57,6 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   router.post('/games/:id/progress', auth, newProgressInGameHandler)
   router.get('/games/progress', auth, getAllUserProgressInGamesHandler)
   router.get('/games/:id/challenges/completed', auth, getUserCompletedChallengesByGame)
-  //POST /challenges/:id replaced by upsert progres
-  // router.post('/challenges/:id', auth, userCompletedChallengeHandler)
   router.post('/missions/:id/start', auth, createUserMissionHandler)
 
   router.get('/missions', auth, isAdminMiddleware, getMissionsHandler)

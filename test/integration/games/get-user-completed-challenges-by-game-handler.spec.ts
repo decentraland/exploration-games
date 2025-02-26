@@ -1,3 +1,4 @@
+import { MissionType } from '../../../src/types'
 import { test } from '../../components'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
 import { makeRequest } from '../../utils'
@@ -7,7 +8,7 @@ test('GET /api/games/:id/challenges/completed', ({ components }) => {
     const { localFetch, db } = components
 
     const game = await db.createGame('TEST', '10,10')
-    const mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, 'TEST')
+    const mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
     const { id: challengeId } = await db.createGameChallenge({
       gameId: game.id,
       description: 'Reach Level 4',

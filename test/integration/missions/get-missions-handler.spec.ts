@@ -1,14 +1,15 @@
 import { test } from '../../components'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
 import { makeRequest } from '../../utils'
+import { MissionType } from '../../../src/types'
 
 test('GET /api/missions', ({ components }) => {
   beforeAll(async () => {
     const { db } = components
-    await db.createMission('Mission Test1', VALID_CAMPAIGN_KEY, 'TEST')
-    await db.createMission('Mission Test2', VALID_CAMPAIGN_KEY, 'TEST')
-    const mission3 = await db.createMission('Mission Test3', VALID_CAMPAIGN_KEY, 'TEST')
-    const mission4 = await db.createMission('Mission Test4', VALID_CAMPAIGN_KEY, 'TEST')
+    await db.createMission('Mission Test1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    await db.createMission('Mission Test2', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    const mission3 = await db.createMission('Mission Test3', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    const mission4 = await db.createMission('Mission Test4', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
     await db.deactivateMission(mission3.id)
     await db.deactivateMission(mission4.id)
   })
@@ -16,7 +17,7 @@ test('GET /api/missions', ({ components }) => {
   it('should return 200 with active missions', async () => {
     const { localFetch } = components
 
-    const response = await makeRequest(localFetch, `/api/missions?type=TEST`)
+    const response = await makeRequest(localFetch, `/api/missions?type=${MissionType.MINI_GAMES}`)
 
     expect(response.status).toBe(200)
 
