@@ -5,30 +5,45 @@ import { MissionType } from '../../../src/types'
 
 test('GET /api/missions/:id', ({ components }) => {
   let mission
+  let game
+  let game1
+  let game2
+
+  let challenge
+  let challenge1
+  let challenge2
+
   beforeAll(async () => {
     const { db } = components
-    const game = await db.createGame('TEST', '10,10')
-    const game1 = await db.createGame('TEST 1', '10,10')
-    const game2 = await db.createGame('TEST 2', '10,10')
+    game = await db.createGame('TEST', '10,10')
+    game1 = await db.createGame('TEST 1', '10,10')
+    game2 = await db.createGame('TEST 2', '10,10')
     mission = await db.createMission('Mission Test1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
-    await db.createGameChallenge({
+    challenge = await db.createGameChallenge({
       gameId: game.id,
       description: 'Reach level 6',
       targetLevel: 6,
       missionId: mission.id
     })
-    await db.createGameChallenge({
+    challenge1 = await db.createGameChallenge({
       gameId: game1.id,
       description: 'Reach level 6',
       targetLevel: 6,
       missionId: mission.id
     })
-    await db.createGameChallenge({
+    challenge2 = await db.createGameChallenge({
       gameId: game2.id,
       description: 'Reach level 6',
       targetLevel: 6,
       missionId: mission.id
     })
+  })
+
+  afterAll(async () => {
+    const { db } = components
+    await db.deleteChallenges([challenge.id, challenge1.id, challenge2.id])
+    await db.deleteMissions([mission.id])
+    await db.deleteGames([game.id, game1.id, game2.id])
   })
 
   it('should return 200 with a mission, games and challenges associated', async () => {

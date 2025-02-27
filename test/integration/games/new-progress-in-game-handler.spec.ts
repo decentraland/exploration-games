@@ -2,10 +2,22 @@ import { test } from '../../components'
 import { makeRequest, makeRequestWithBodyModified } from '../../utils'
 
 test('POST /api/games/:id/progress', ({ components }) => {
+  let game
+  let game2
+  let game3
+  let game4
+  let game5
+  let game6
+  let game7
+  afterAll(async () => {
+    const { db } = components
+    await db.deleteGames([game, game2, game3, game4, game5, game6, game7].map((game) => game.id))
+  })
+
   it('should return 201 created without data', async () => {
     const { localFetch, db } = components
 
-    const game = await db.createGame('TEST', '10,10')
+    game = await db.createGame('TEST', '10,10')
 
     const payload = {
       score: 10,
@@ -36,7 +48,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
   it('should return 201 created with data', async () => {
     const { localFetch, db } = components
 
-    const game = await db.createGame('TEST', '10,10')
+    game2 = await db.createGame('TEST', '10,10')
 
     const payload = {
       score: 10,
@@ -69,7 +81,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
   it('should return 201 created only with data and level', async () => {
     const { localFetch, db } = components
 
-    const game = await db.createGame('TEST', '10,10')
+    game3 = await db.createGame('TEST', '10,10')
 
     const payload = {
       level: 1,
@@ -100,7 +112,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
   it('should return 400 when no auth', async () => {
     const { localFetch, db } = components
 
-    const game = await db.createGame('TEST', '10,10')
+    game4 = await db.createGame('TEST', '10,10')
 
     const payload = {
       score: 10,
@@ -121,7 +133,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
   it('should return 400 when bad payload', async () => {
     const { localFetch, db } = components
 
-    const game = await db.createGame('TEST', '10,10')
+    game5 = await db.createGame('TEST', '10,10')
 
     const payload = {
       score: 'abc',
@@ -140,7 +152,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
   it('should return 400 when payload was modified', async () => {
     const { localFetch, db } = components
 
-    const game = await db.createGame('TEST', '10,10')
+    game6 = await db.createGame('TEST', '10,10')
     const payload = {
       score: 10,
       level: 1,
@@ -160,7 +172,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
   it('should return 400 when the user is in another scene', async () => {
     const { localFetch, db } = components
 
-    const game = await db.createGame('TEST', '11,10')
+    game7 = await db.createGame('TEST', '11,10')
     const payload = {
       score: 10,
       level: 1,

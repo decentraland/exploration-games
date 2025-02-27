@@ -3,15 +3,25 @@ import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
 import { makeRequest } from '../../utils'
 import { MissionType } from '../../../src/types'
 
+let mission1
+let mission2
+let mission3
+let mission4
+
 test('GET /api/missions', ({ components }) => {
   beforeAll(async () => {
     const { db } = components
-    await db.createMission('Mission Test1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
-    await db.createMission('Mission Test2', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
-    const mission3 = await db.createMission('Mission Test3', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
-    const mission4 = await db.createMission('Mission Test4', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    mission1 = await db.createMission('Mission Test1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    mission2 = await db.createMission('Mission Test2', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    mission3 = await db.createMission('Mission Test3', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    mission4 = await db.createMission('Mission Test4', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
     await db.deactivateMission(mission3.id)
     await db.deactivateMission(mission4.id)
+  })
+
+  afterAll(async () => {
+    const { db } = components
+    await db.deleteMissions([mission1.id, mission2.id, mission3.id, mission4.id])
   })
 
   it('should return 200 with active missions', async () => {

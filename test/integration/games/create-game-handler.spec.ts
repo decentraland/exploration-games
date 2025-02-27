@@ -1,7 +1,14 @@
 import { test } from '../../components'
 import { getIdentity, makeRequest } from '../../utils'
 
+
 test('POST /api/games', ({ components }) => {
+  let game
+  afterAll(async () => {
+    const { db } = components
+    await db.deleteGames([game.id])
+  })
+
   it('should return 201 created', async () => {
     const { localFetch } = components
 
@@ -18,7 +25,7 @@ test('POST /api/games', ({ components }) => {
     expect(response.status).toBe(201)
 
     const body = await response.json()
-
+    game = body.data
     expect(body.data).not.toBe(undefined)
     expect(body.data.name).toBe('Test Game')
     expect(body.data.parcel).toBe('10,10')
