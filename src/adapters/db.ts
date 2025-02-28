@@ -185,7 +185,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getMissionsAvailableByTypeForUser($userAddress: string, $type: MissionType) {
       const results = await pg.query<Mission>(SQL`
-        SELECT m.id, m.description, m.active FROM missions m 
+        SELECT m.id, m.description, m.active, m.type FROM missions m 
         WHERE m.active is true 
         AND m.type = ${$type}
         AND m.id not in 
