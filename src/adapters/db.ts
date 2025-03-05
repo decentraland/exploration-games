@@ -26,8 +26,8 @@ export interface IDatabaseComponent {
   getAllGames(): Promise<Game[]>
   getActiveGames(): Promise<Game[]>
   deactivateGame(gameId: string): Promise<void>
-  createMission(description: string, campaign_key: string, type: string): Promise<Mission>
-  updateMission(id: string, description: string, campaign_key: string, type: string): Promise<void>
+  createMission(description: string, campaign_key: string, type: MissionType): Promise<Mission>
+  updateMission(id: string, description: string, campaign_key: string, type: MissionType): Promise<void>
   getMission(missionId: string): Promise<Mission>
   getMissionWithCampaignKey(missionId: string): Promise<Mission>
   getMissions(): Promise<Mission[]>
@@ -351,7 +351,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         `
       )
     },
-    async createMission(description: string, campaign_key: string, type: string) {
+    async createMission(description: string, campaign_key: string, type: MissionType) {
       const uuid = randomUUID()
 
       const results = await pg.query<Mission>(
@@ -362,7 +362,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       return results.rows[0]
     },
-    async updateMission(id: string, description: string, campaign_key: string, type: string) {
+    async updateMission(id: string, description: string, campaign_key: string, type: MissionType) {
       await pg.query<Mission>(
         SQL`
           UPDATE missions SET description = ${description}, campaign_key = ${campaign_key}, type = ${type}   

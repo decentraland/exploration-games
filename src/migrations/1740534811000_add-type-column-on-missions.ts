@@ -14,8 +14,11 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       default: 'mini-games'
     }
   })
+
+  pgm.createIndex(tableName, [columnName])
 }
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropColumn(tableName, columnName)
+  pgm.dropIndex(tableName, [columnName])
 }
