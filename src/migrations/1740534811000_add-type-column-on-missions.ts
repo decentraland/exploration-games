@@ -19,6 +19,6 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
 }
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
-  pgm.dropColumn(tableName, columnName)
   pgm.dropIndex(tableName, [columnName])
+  pgm.dropColumn(tableName, columnName)
 }
