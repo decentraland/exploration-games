@@ -1,6 +1,7 @@
 import { test } from '../../components'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
 import { makeRequest } from '../../utils'
+import { MissionType } from '../../../src/types'
 
 test('GET /api/missions/available', ({ components }) => {
   let mission3
@@ -9,10 +10,10 @@ test('GET /api/missions/available', ({ components }) => {
   let game
   beforeAll(async () => {
     const { db } = components
-    const mission1 = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY)
+    const mission1 = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
     missionsIds.push(mission1.id)
-    missionsIds.push((await db.createMission('TEST Mission User 2', VALID_CAMPAIGN_KEY)).id)
-    mission3 = await db.createMission('TEST Mission User 3', VALID_CAMPAIGN_KEY)
+    missionsIds.push((await db.createMission('TEST Mission User 2', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)).id)
+    mission3 = await db.createMission('TEST Mission User 3', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
     missionsIds.push(mission3.id)
     await db.deactivateMission(mission3.id)
     game = await db.createGame('TEST Mission User', '10,10')
@@ -42,7 +43,7 @@ test('GET /api/missions/available', ({ components }) => {
   it('should return 200 with the missions available for the user', async () => {
     const { localFetch } = components
 
-    const response = await makeRequest(localFetch, `/api/missions/available`)
+    const response = await makeRequest(localFetch, `/api/missions/available?type=${MissionType.MINI_GAMES}`)
 
     expect(response.status).toBe(200)
 
@@ -55,7 +56,7 @@ test('GET /api/missions/available', ({ components }) => {
   it('should return 400 when no auth', async () => {
     const { localFetch } = components
 
-    const response = await localFetch.fetch(`/api/missions/available`)
+    const response = await localFetch.fetch(`/api/missions/available?type=${MissionType.MINI_GAMES}`)
 
     expect(response.status).toBe(400)
   })

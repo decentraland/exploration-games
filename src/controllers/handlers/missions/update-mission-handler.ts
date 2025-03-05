@@ -1,11 +1,14 @@
 import Joi from 'joi'
 import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
 import { parseJson } from '@dcl/platform-server-commons/dist/utils'
-import { HandlerContextWithPath, Mission } from '../../../types'
+import { HandlerContextWithPath, Mission, MissionType } from '../../../types'
 
 const schema = Joi.object<Mission>().keys({
   description: Joi.string().required(),
-  campaign_key: Joi.string().required()
+  campaign_key: Joi.string().required(),
+  type: Joi.string()
+    .valid(...Object.values(MissionType))
+    .required()
 })
 
 export async function updateMissionHandler(
@@ -38,7 +41,7 @@ export async function updateMissionHandler(
   }
 
   try {
-    await db.updateMission(mission.id, validatedBody.description, validatedBody.campaign_key)
+    await db.updateMission(mission.id, validatedBody.description, validatedBody.campaign_key, validatedBody.type)
   } catch (error) {
     logger.error(`Error updating mission: ${error}`)
     throw new InvalidRequestError('Error updating mission')

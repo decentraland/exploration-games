@@ -1,17 +1,19 @@
 import { test } from '../../components'
 import { VALID_CAMPAIGN_KEY, NON_EXISTING_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
 import { getIdentity, makeRequest } from '../../utils'
+import { MissionType } from '../../../src/types'
 
 test('POST /api/missions', ({ components }) => {
   let mission
   const payload = {
     description: 'Mission Updated',
-    campaign_key: NON_EXISTING_CAMPAIGN_KEY
+    campaign_key: NON_EXISTING_CAMPAIGN_KEY,
+    type: MissionType.MINI_GAMES
   }
 
   beforeAll(async () => {
     const { db } = components
-    mission = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY)
+    mission = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
   })
 
   afterAll(async () => {
@@ -33,6 +35,7 @@ test('POST /api/missions', ({ components }) => {
 
     expect(await missionUpdated.description).toBe(payload.description)
     expect(await missionUpdated.campaign_key).toBe(payload.campaign_key)
+    expect(await missionUpdated.type).toBe(payload.type)
   })
 
   it('should return 400 when no auth', async () => {

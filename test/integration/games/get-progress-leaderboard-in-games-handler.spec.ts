@@ -128,6 +128,10 @@ test('GET /api/games/:id/leaderboard', ({ components }) => {
       }
     )
   })
+  afterAll(async () => {
+    const { db } = components
+    await db.deleteGames([game.id])
+  })
 
   it('should return 200 with all the progress for a game with order by time', async () => {
     const { localFetch } = components

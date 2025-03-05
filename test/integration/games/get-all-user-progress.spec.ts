@@ -2,10 +2,17 @@ import { test } from '../../components'
 import { getIdentity, makeRequest } from '../../utils'
 
 test('GET /api/games/progress', ({ components }) => {
+  let game1
+  let game2
+  afterAll(async () => {
+    const { db } = components
+    await db.deleteGames([game1.id, game2.id])
+  })
+
   it('should return 200 with all progress for played games', async () => {
     const { localFetch, db } = components
-    const game1 = await db.createGame('TEST', '10,10')
-    const game2 = await db.createGame('TEST 2', '15,10')
+    game1 = await db.createGame('TEST', '10,10')
+    game2 = await db.createGame('TEST 2', '15,10')
 
     const identity = await getIdentity()
 

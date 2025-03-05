@@ -3,19 +3,26 @@ import { test } from '../../components'
 import { getIdentity, makeRequest } from '../../utils'
 import { randomUUID } from 'crypto'
 
+
 test('PUT /api/games/:id/deactivate', ({ components }) => {
+  let game
+  afterAll(async () => {
+    const { db } = components
+    await db.deleteGames([game.id])
+  })
+
   it('should return 204 updated', async () => {
     const { localFetch, db, pg } = components
 
-    const { id } = await db.createGame('test', '10,10')
+    game = await db.createGame('test', '10,10')
 
-    const response = await makeRequest(localFetch, `/api/games/${id}/deactivate`, {
+    const response = await makeRequest(localFetch, `/api/games/${game.id}/deactivate`, {
       method: 'PATCH'
     })
 
     expect(response.status).toBe(204)
 
-    const { rows } = await pg.query(SQL`SELECT active FROM games where id = ${id}`)
+    const { rows } = await pg.query(SQL`SELECT active FROM games where id = ${game.id}`)
     expect(rows[0].active).toBe(false)
   })
 

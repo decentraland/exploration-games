@@ -1,11 +1,14 @@
 import Joi from 'joi'
 import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
 import { parseJson } from '@dcl/platform-server-commons/dist/utils'
-import { HandlerContextWithPath, Mission } from '../../../types'
+import { HandlerContextWithPath, Mission, MissionType } from '../../../types'
 
 const schema = Joi.object<Mission>().keys({
   description: Joi.string().required(),
-  campaign_key: Joi.string().required()
+  campaign_key: Joi.string().required(),
+  type: Joi.string()
+    .valid(...Object.values(MissionType))
+    .required()
 })
 
 export async function createMissionHandler(
@@ -28,7 +31,7 @@ export async function createMissionHandler(
 
   const validatedBody = body as Mission
 
-  const mission = await db.createMission(validatedBody.description, validatedBody.campaign_key)
+  const mission = await db.createMission(validatedBody.description, validatedBody.campaign_key, validatedBody.type)
 
   return {
     status: 201,

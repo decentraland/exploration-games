@@ -1,14 +1,17 @@
-import { HandlerContextWithPath } from '../../../types'
+import { HandlerContextWithPath, MissionType } from '../../../types'
 
 export async function getMissionsAvailableHandler(
-  ctx: Pick<HandlerContextWithPath<'db', '/missions/available'>, 'components' | 'verification'>
+  ctx: Pick<HandlerContextWithPath<'db', '/missions/available'>, 'components' | 'verification' | 'url'>
 ) {
   const {
     components: { db },
-    verification
+    verification,
+    url
   } = ctx
 
-  const missions = await db.getMissionsAvailableForUser(verification!.auth)
+  const type = (url.searchParams.get('type') as MissionType) || MissionType.MINI_GAMES
+
+  const missions = await db.getMissionsAvailableByTypeForUser(verification!.auth, type)
 
   return {
     status: 200,

@@ -1,19 +1,31 @@
 import { test } from '../../components'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
+import { MissionType } from '../../../src/types'  
+
 
 test('GET /api/games/:id/challenges', ({ components }) => {
+  let game
+  let challenge
+  let mission
+  afterAll(async () => {
+    const { db } = components
+    await db.deleteChallenges([challenge.id])
+    await db.deleteGames([game.id])
+    await db.deleteMissions([mission.id])
+  })
+
   it('should return 200 with challenges for game', async () => {
     const { localFetch, db } = components
-    const { id } = await db.createGame('TEST', '10,10')
-    const mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY)
-    const challenge = await db.createGameChallenge({
-      gameId: id,
+    game = await db.createGame('TEST', '10,10')
+    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    challenge = await db.createGameChallenge({
+      gameId: game.id,
       description: 'Reach level 6',
       targetLevel: 6,
       missionId: mission.id
     })
 
-    const response = await localFetch.fetch(`/api/games/${id}/challenges`)
+    const response = await localFetch.fetch(`/api/games/${game.id}/challenges`)
 
     expect(response.status).toBe(200)
 

@@ -1,5 +1,5 @@
 import { after } from 'node:test'
-import { Mission, Game, Challenge } from '../../../src/types'
+import { Mission, Game, Challenge, MissionType } from '../../../src/types'
 import { test } from '../../components'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
 import { makeRequest } from '../../utils'
@@ -11,9 +11,9 @@ test('GET /api/missions/in_progress', ({ components }) => {
 
   beforeAll(async () => {
     const { db } = components
-    mission1 = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY)
-    mission2 = await db.createMission('TEST Mission User 2', VALID_CAMPAIGN_KEY)
-    mission3 = await db.createMission('TEST Mission User 3', VALID_CAMPAIGN_KEY)
+    mission1 = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    mission2 = await db.createMission('TEST Mission User 2', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    mission3 = await db.createMission('TEST Mission User 3', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
 
     await db.deactivateMission(mission3.id)
 
@@ -58,7 +58,7 @@ test('GET /api/missions/in_progress', ({ components }) => {
   it('should return 200 with missions in progress for the user', async () => {
     const { localFetch } = components
 
-    const response = await makeRequest(localFetch, `/api/missions/in_progress`)
+    const response = await makeRequest(localFetch, `/api/missions/in_progress?type=${MissionType.MINI_GAMES}`)
 
     expect(response.status).toBe(200)
 
@@ -71,7 +71,7 @@ test('GET /api/missions/in_progress', ({ components }) => {
   it('should return 400 when no auth', async () => {
     const { localFetch } = components
 
-    const response = await localFetch.fetch(`/api/missions/in_progress`)
+    const response = await localFetch.fetch(`/api/missions/in_progress?type=${MissionType.MINI_GAMES}`)
 
     expect(response.status).toBe(400)
   })

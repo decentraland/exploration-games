@@ -2,19 +2,21 @@ import { randomUUID } from 'crypto'
 import { test } from '../../components'
 import { getIdentity, makeRequest } from '../../utils'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
-import { uuidSchema } from '../../../src/utils'
+import { MissionType } from '../../../src/types'
 
 test('PATCH /api/challenges/:id', ({ components }) => {
   let game
+  let wrongGame
   let mission
+  let wrongMission
   let challenge
   let payload
   beforeAll(async () => {
     const { db } = components
     game = await db.createGame('TEST', '10,10')
-    const wrongGame = await db.createGame('TEST', '10,10')
-    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY)
-    const wrongMission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY)
+    wrongGame = await db.createGame('TEST', '10,10')
+    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    wrongMission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
 
     challenge = await db.createGameChallenge({
       gameId: wrongGame.id,
@@ -29,6 +31,13 @@ test('PATCH /api/challenges/:id', ({ components }) => {
       gameId: game.id,
       missionId: mission.id
     }
+  })
+
+  afterAll(async () => {
+    const { db } = components
+    await db.deleteChallenges([challenge.id])
+    await db.deleteMissions([mission.id, wrongMission.id])
+    await db.deleteGames([game.id, wrongGame.id])
   })
 
   it('should return 204 created', async () => {

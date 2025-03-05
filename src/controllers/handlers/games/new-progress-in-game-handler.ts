@@ -5,7 +5,6 @@ import { HandlerContextWithPath, NewProgressInGamePayload } from '../../../types
 import { uuidSchema } from '../../../utils'
 import { validateSignedFetch } from '../../middlewares/validate-signed-fetch'
 import { isScoreMetCondition } from '../../utils/challenge-condition'
-import { getMissionsByStatus, MissionStatus } from '../../utils/get-missions-by-status'
 import { checkCompleteMission } from '../../utils/check-mission-complete'
 
 const schema = Joi.object<NewProgressInGamePayload>().keys({
@@ -57,7 +56,9 @@ export async function newProgressInGameHandler(
     body.data
   )
 
-  const { challenges } = await getMissionsByStatus(MissionStatus.IN_PROGRESS, verification!.auth, db)
+  const missions = await db.getMissionsInProgressForUser(verification!.auth)
+  const missionsIds = missions.map(({ id }) => id)
+  const challenges = await db.getUserChallengesByMissions(missionsIds, verification!.auth)
 
   const gameChallenges = challenges.filter((challenge) => challenge.game_id === id && !challenge.completed)
 

@@ -1,14 +1,21 @@
+import { MissionType } from '../../../src/types'
 import { test } from '../../components'
 import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
 import { getIdentity, makeRequest } from '../../utils'
+let missionId = ''
 
 test('POST /api/missions', ({ components }) => {
   let payload
   beforeAll(async () => {
     payload = {
       description: 'Mission Test',
-      campaign_key: VALID_CAMPAIGN_KEY
+      campaign_key: VALID_CAMPAIGN_KEY,
+      type: MissionType.MINI_GAMES
     }
+  })
+  afterAll(async () => {
+    const { db } = components
+    await db.deleteMissions([missionId])
   })
 
   it('should return 201 created', async () => {
@@ -22,10 +29,12 @@ test('POST /api/missions', ({ components }) => {
     expect(response.status).toBe(201)
 
     const body = await response.json()
-
+    
+    missionId = body.data.id
     expect(body.data).not.toBe(undefined)
     expect(body.data.description).toBe(payload.description)
     expect(body.data.campaign_key).toBe(VALID_CAMPAIGN_KEY)
+    expect(body.data.type).toBe(payload.type)
   })
 
   it('should return 400 when no auth', async () => {
