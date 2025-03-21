@@ -11,7 +11,7 @@ export async function validateSignedFetch(
   ctx: SingedFetchContext,
   opts?: { gameId?: string; body?: unknown; validateParcel?: boolean }
 ) {
-  if (opts?.gameId) {
+  if (opts?.validateParcel && opts?.gameId) {
     await validateGameParcel(ctx, opts.gameId)
   }
   if (opts?.body) {
