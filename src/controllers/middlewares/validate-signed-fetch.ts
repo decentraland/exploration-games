@@ -9,16 +9,16 @@ type SingedFetchContext = DecentralandSignatureContext<DecentralandSignatureMeta
 
 export async function validateSignedFetch(
   ctx: SingedFetchContext,
-  opts?: { gameId?: string; body?: unknown; validateParcel?: boolean }
+  opts?: { gameId?: string; body?: unknown; skipParcelValidation?: boolean }
 ) {
-  if (opts?.validateParcel && opts?.gameId) {
+  if (!opts?.skipParcelValidation && opts?.gameId) {
     await validateGameParcel(ctx, opts.gameId)
   }
   if (opts?.body) {
     await validateBody(ctx, opts.body)
   }
 
-  // await validateUserInDCL(ctx, !!opts?.validateParcel)
+  // await validateUserInDCL(ctx, !opts?.skipParcelValidation)
 }
 
 export async function validateGameParcel(ctx: SingedFetchContext, gameId: string) {
