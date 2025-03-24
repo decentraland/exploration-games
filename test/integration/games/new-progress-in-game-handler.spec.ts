@@ -1,4 +1,6 @@
+import { MissionType } from '../../../src/types'
 import { test } from '../../components'
+import { VALID_CAMPAIGN_KEY } from '../../mocks/send-reward-mock'
 import { makeRequest, makeRequestWithBodyModified } from '../../utils'
 
 test('POST /api/games/:id/progress', ({ components }) => {
@@ -9,9 +11,15 @@ test('POST /api/games/:id/progress', ({ components }) => {
   let game5
   let game6
   let game7
+  let game8
+  let mission
+  let challenge
+
   afterAll(async () => {
     const { db } = components
-    await db.deleteGames([game, game2, game3, game4, game5, game6, game7].map((game) => game.id))
+    await db.deleteChallenges([challenge.id])
+    await db.deleteMissions([mission.id])
+    await db.deleteGames([game, game2, game3, game4, game5, game6, game7, game8].map((game) => game.id))
   })
 
   it('should return 201 created without data', async () => {
@@ -109,6 +117,46 @@ test('POST /api/games/:id/progress', ({ components }) => {
     expect(body.data.data).toEqual({ metadata: true })
   })
 
+  it('should return 201 when the user is in another scene but data includes visit', async () => {
+    const { localFetch, db } = components
+
+    game8 = await db.createGame('TEST', '11,10')
+    
+    //todo add mission type check fw-2025
+    
+    mission = await db.createMission("TEST", VALID_CAMPAIGN_KEY, MissionType.FASHION_WEEK)
+    challenge = await db.createGameChallenge({
+      gameId: game8.id,
+      description: "test",
+      targetLevel: 1,
+      missionId: mission.id
+    })
+
+    await db.setMissionAsStart('0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', mission.id)
+    const payload = {
+      user_name: 'user_name',
+      level: 1,
+      data: {
+        visit: 2000
+      }
+    }
+
+    const response = await makeRequest(localFetch, `/api/games/${game8.id}/progress`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+
+    const body = await response.json()
+
+    expect(body.data).not.toBe(undefined)
+    expect(body.data.score).toBeNull()
+    expect(body.data.level).toBe(1)
+    expect(body.data.time).toBeNull()
+    expect(body.data.moves).toBeNull()
+    expect(body.data.user_name).toBe('user_name')
+    expect(body.data.data).toEqual({ visit: 2000 })
+  })
+
   it('should return 400 when no auth', async () => {
     const { localFetch, db } = components
 
@@ -178,7 +226,10 @@ test('POST /api/games/:id/progress', ({ components }) => {
       level: 1,
       time: 150,
       moves: 10,
-      user_name: 'user_name'
+      user_name: 'user_name',
+      data: {
+        metadata: true
+      }
     }
 
     const response = await makeRequestWithBodyModified(localFetch, `/api/games/${game.id}/progress`, {
@@ -187,4 +238,5 @@ test('POST /api/games/:id/progress', ({ components }) => {
     })
     expect(response.status).toBe(400)
   })
+
 })

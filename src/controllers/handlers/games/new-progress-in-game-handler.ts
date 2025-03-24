@@ -43,8 +43,13 @@ export async function newProgressInGameHandler(
     throw new InvalidRequestError(validatePayload.error.message)
   }
 
+  const missions = await db.getMissionsInProgressForUser(verification!.auth)
+  const missionsIds = missions.map(({ id }) => id)
+
+  const skipParcelValidation = body.data?.visit && missions.some((mission) => mission.type === 'fw-2025')
+  // console.log('skipParcelValidation', skipParcelValidation)
   // Validate signed fetch
-  await validateSignedFetch(ctx, { body, gameId: validateGameId.value, validateParcel: true })
+  await validateSignedFetch(ctx, { body, gameId: validateGameId.value, skipParcelValidation: skipParcelValidation })
 
   const progress = await db.createProgressInGame(
     id,
@@ -56,8 +61,6 @@ export async function newProgressInGameHandler(
     body.data
   )
 
-  const missions = await db.getMissionsInProgressForUser(verification!.auth)
-  const missionsIds = missions.map(({ id }) => id)
   const challenges = await db.getUserChallengesByMissions(missionsIds, verification!.auth)
 
   const gameChallenges = challenges.filter((challenge) => challenge.game_id === id && !challenge.completed)
