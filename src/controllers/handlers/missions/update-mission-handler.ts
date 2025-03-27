@@ -8,7 +8,8 @@ const schema = Joi.object<Mission>().keys({
   campaign_key: Joi.string().required(),
   type: Joi.string()
     .valid(...Object.values(MissionType))
-    .required()
+    .required(),
+  thumb_url: Joi.string().required()
 })
 
 export async function updateMissionHandler(
@@ -41,7 +42,13 @@ export async function updateMissionHandler(
   }
 
   try {
-    await db.updateMission(mission.id, validatedBody.description, validatedBody.campaign_key, validatedBody.type)
+    await db.updateMission(
+      mission.id,
+      validatedBody.description,
+      validatedBody.campaign_key,
+      validatedBody.type,
+      validatedBody.thumb_url
+    )
   } catch (error) {
     logger.error(`Error updating mission: ${error}`)
     throw new InvalidRequestError('Error updating mission')

@@ -26,8 +26,14 @@ export interface IDatabaseComponent {
   getAllGames(): Promise<Game[]>
   getActiveGames(): Promise<Game[]>
   deactivateGame(gameId: string): Promise<void>
-  createMission(description: string, campaign_key: string, type: MissionType): Promise<Mission>
-  updateMission(id: string, description: string, campaign_key: string, type: MissionType): Promise<void>
+  createMission(description: string, campaign_key: string, type: MissionType, thumb_url: string): Promise<Mission>
+  updateMission(
+    id: string,
+    description: string,
+    campaign_key: string,
+    type: MissionType,
+    thumb_url: string
+  ): Promise<void>
   getMission(missionId: string): Promise<Mission>
   getMissionWithCampaignKey(missionId: string): Promise<Mission>
   getMissions(): Promise<Mission[]>
@@ -150,42 +156,42 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getMission(missionId) {
       const results = await pg.query<Mission>(
-        SQL`SELECT m.id, m.description, m.active, m.type FROM missions m WHERE id = ${missionId}`
+        SQL`SELECT m.id, m.description, m.active, m.type, m.thumb_url FROM missions m WHERE id = ${missionId}`
       )
 
       return results.rows[0]
     },
     async getMissionWithCampaignKey(missionId) {
       const results = await pg.query<Mission>(
-        SQL`SELECT m.id, m.description, m.active, m.campaign_key, m.type FROM missions m WHERE id = ${missionId}`
+        SQL`SELECT m.id, m.description, m.active, m.campaign_key, m.type, m.thumb_url FROM missions m WHERE id = ${missionId}`
       )
 
       return results.rows[0]
     },
     async getActiveMissions() {
       const results = await pg.query<Mission>(
-        SQL`SELECT m.id, m.description, m.active, m.type FROM missions m WHERE m.active IS TRUE`
+        SQL`SELECT m.id, m.description, m.active, m.type, m.thumb_url FROM missions m WHERE m.active IS TRUE`
       )
 
       return results.rows
     },
     async getMissionsWithCampaignKey() {
       const results = await pg.query<Mission>(
-        SQL`SELECT m.id, m.description, m.active, m.campaign_key, m.type FROM missions m`
+        SQL`SELECT m.id, m.description, m.active, m.campaign_key, m.type, m.thumb_url FROM missions m`
       )
 
       return results.rows
     },
     async getActiveMissionsWithCampaignKey() {
       const results = await pg.query<Mission>(
-        SQL`SELECT m.id, m.description, m.active, m.campaign_key, m.type FROM missions m WHERE m.active IS TRUE`
+        SQL`SELECT m.id, m.description, m.active, m.campaign_key, m.type, m.thumb_url FROM missions m WHERE m.active IS TRUE`
       )
 
       return results.rows
     },
     async getMissionsAvailableByTypeForUser($userAddress: string, $type: MissionType) {
       const results = await pg.query<Mission>(SQL`
-        SELECT m.id, m.description, m.active, m.type FROM missions m 
+        SELECT m.id, m.description, m.active, m.type, m.thumb_url FROM missions m 
         WHERE m.active is true 
         AND m.type = ${$type}
         AND m.id not in 
@@ -198,7 +204,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getMissionsInProgressForUser($userAddress: string) {
       const results = await pg.query<MissionInProgress>(SQL`
-        SELECT m.id, m.description, m.active, m.type, um.start_time
+        SELECT m.id, m.description, m.active, m.type, m.thumb_url, um.start_time
         FROM missions m
         JOIN user_missions um ON m.id = um.mission_id
         WHERE m.active is TRUE
@@ -210,7 +216,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getMissionsInProgressByTypeForUser($userAddress: string, $type: MissionType) {
       const results = await pg.query<MissionInProgress>(SQL`
-        SELECT m.id, m.description, m.active, m.type, um.start_time
+        SELECT m.id, m.description, m.active, m.type, m.thumb_url, um.start_time
         FROM missions m
         JOIN user_missions um ON m.id = um.mission_id
         WHERE m.active is TRUE
@@ -223,7 +229,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getMissionsCompletedForUser($userAddress: string, $type: MissionType) {
       const results = await pg.query<MissionCompleted>(SQL`
-          SELECT m.id, m.description, m.active, m.type, um.start_time, um.end_time
+          SELECT m.id, m.description, m.active, m.type, m.thumb_url, um.start_time, um.end_time
           FROM missions m
           JOIN user_missions um ON m.id = um.mission_id
           WHERE m.active is TRUE AND um.active IS TRUE AND um.end_time IS NOT NULL AND um.user_address = ${$userAddress.toLocaleLowerCase()}
@@ -233,7 +239,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getLastMissionForUser($userAddress: string, $type: MissionType) {
       const results = await pg.query<MissionCompleted>(SQL`
-        SELECT m.id, m.description, m.active, um.start_time, um.end_time
+        SELECT m.id, m.description, m.active, m.type, m.thumb_url, um.start_time, um.end_time
           FROM missions m
           JOIN user_missions um ON m.id = um.mission_id
           WHERE m.active is TRUE AND um.active IS TRUE AND um.user_address = ${$userAddress.toLocaleLowerCase()}
@@ -244,7 +250,9 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       return results.rows[0]
     },
     async getMissions() {
-      const results = await pg.query<Mission>(SQL`SELECT m.id, m.description, m.active, m.type FROM missions m`)
+      const results = await pg.query<Mission>(
+        SQL`SELECT m.id, m.description, m.active, m.type, m.thumb_url FROM missions m`
+      )
 
       return results.rows
     },
@@ -351,21 +359,21 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         `
       )
     },
-    async createMission(description: string, campaign_key: string, type: MissionType) {
+    async createMission(description: string, campaign_key: string, type: MissionType, thumb_url: string) {
       const uuid = randomUUID()
 
       const results = await pg.query<Mission>(
-        SQL`INSERT INTO missions (id, description, campaign_key, type) 
-          VALUES (${uuid}, ${description}, ${campaign_key}, ${type}) 
+        SQL`INSERT INTO missions (id, description, campaign_key, type, thumb_url) 
+          VALUES (${uuid}, ${description}, ${campaign_key}, ${type}, ${thumb_url}) 
          RETURNING *`
       )
 
       return results.rows[0]
     },
-    async updateMission(id: string, description: string, campaign_key: string, type: MissionType) {
+    async updateMission(id: string, description: string, campaign_key: string, type: MissionType, thumb_url: string) {
       await pg.query<Mission>(
         SQL`
-          UPDATE missions SET description = ${description}, campaign_key = ${campaign_key}, type = ${type}   
+          UPDATE missions SET description = ${description}, campaign_key = ${campaign_key}, type = ${type}, thumb_url = ${thumb_url}
           WHERE id = ${id}
         `
       )
