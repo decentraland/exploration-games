@@ -18,7 +18,7 @@ test('GET /api/games/:id/challenges/completed', ({ components }) => {
     const { localFetch, db } = components
 
     game = await db.createGame('TEST', '10,10')
-    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    mission = await db.createMission('Mission Test', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')
     challenge = await db.createGameChallenge({
       gameId: game.id,
       description: 'Reach Level 4',

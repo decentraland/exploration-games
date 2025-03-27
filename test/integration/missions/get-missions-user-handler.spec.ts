@@ -10,10 +10,10 @@ test('GET /api/missions/available', ({ components }) => {
   let game
   beforeAll(async () => {
     const { db } = components
-    const mission1 = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    const mission1 = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')
     missionsIds.push(mission1.id)
-    missionsIds.push((await db.createMission('TEST Mission User 2', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)).id)
-    mission3 = await db.createMission('TEST Mission User 3', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    missionsIds.push((await db.createMission('TEST Mission User 2', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')).id)
+    mission3 = await db.createMission('TEST Mission User 3', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')
     missionsIds.push(mission3.id)
     await db.deactivateMission(mission3.id)
     game = await db.createGame('TEST Mission User', '10,10')

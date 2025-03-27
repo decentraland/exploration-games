@@ -8,7 +8,8 @@ const schema = Joi.object<Mission>().keys({
   campaign_key: Joi.string().required(),
   type: Joi.string()
     .valid(...Object.values(MissionType))
-    .required()
+    .required(),
+  thumb_url: Joi.string().required()
 })
 
 export async function createMissionHandler(
@@ -31,7 +32,12 @@ export async function createMissionHandler(
 
   const validatedBody = body as Mission
 
-  const mission = await db.createMission(validatedBody.description, validatedBody.campaign_key, validatedBody.type)
+  const mission = await db.createMission(
+    validatedBody.description,
+    validatedBody.campaign_key,
+    validatedBody.type,
+    validatedBody.thumb_url
+  )
 
   return {
     status: 201,

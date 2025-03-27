@@ -103,6 +103,7 @@ export type Mission = {
   campaign_key: string
   type: MissionType
   active: boolean
+  thumb_url: string
 }
 
 export enum MissionType {

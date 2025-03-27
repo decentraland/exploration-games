@@ -8,12 +8,13 @@ test('POST /api/missions', ({ components }) => {
   const payload = {
     description: 'Mission Updated',
     campaign_key: NON_EXISTING_CAMPAIGN_KEY,
-    type: MissionType.MINI_GAMES
+    type: MissionType.MINI_GAMES,
+    thumb_url: 'thumb_url'
   }
 
   beforeAll(async () => {
     const { db } = components
-    mission = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    mission = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')
   })
 
   afterAll(async () => {
@@ -36,6 +37,7 @@ test('POST /api/missions', ({ components }) => {
     expect(await missionUpdated.description).toBe(payload.description)
     expect(await missionUpdated.campaign_key).toBe(payload.campaign_key)
     expect(await missionUpdated.type).toBe(payload.type)
+    expect(await missionUpdated.thumb_url).toBe(payload.thumb_url)
   })
 
   it('should return 400 when no auth', async () => {
