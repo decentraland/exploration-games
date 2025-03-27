@@ -18,7 +18,7 @@ test('GET /api/missions/:id', ({ components }) => {
     game = await db.createGame('TEST', '10,10')
     game1 = await db.createGame('TEST 1', '10,10')
     game2 = await db.createGame('TEST 2', '10,10')
-    mission = await db.createMission('Mission Test1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    mission = await db.createMission('Mission Test1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')
     challenge = await db.createGameChallenge({
       gameId: game.id,
       description: 'Reach level 6',
@@ -57,6 +57,8 @@ test('GET /api/missions/:id', ({ components }) => {
 
     expect(json.data.mission.id).toBe(mission.id)
     expect(json.data.mission.description).toBe(mission.description)
+    expect(json.data.mission.type).toBe(mission.type)
+    expect(json.data.mission.thumb_url).toBe(mission.thumb_url)
     expect(json.data.challenges.length).toBe(3)
     expect(json.data.games.length).toBe(3)
   })

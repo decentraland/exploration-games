@@ -14,9 +14,9 @@ test('POST /api/missions/:id/start', ({ components }) => {
   beforeAll(async () => {
     const { db } = components
     const { id: gameId } = await db.createGame('TEST', '10,10')
-    mission = await db.createMission('Mission Test mini-games', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
-    mission2 = await db.createMission('Mission Test 2 mini-games', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
-    mission3 = await db.createMission('Mission Test 3 fashion week', VALID_CAMPAIGN_KEY, MissionType.FASHION_WEEK)
+    mission = await db.createMission('Mission Test mini-games', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')
+    mission2 = await db.createMission('Mission Test 2 mini-games', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')
+    mission3 = await db.createMission('Mission Test 3 fashion week', VALID_CAMPAIGN_KEY, MissionType.FASHION_WEEK, 'thumb_url')
 
   })
 

@@ -124,7 +124,7 @@ test('POST /api/games/:id/progress', ({ components }) => {
     
     //todo add mission type check fw-2025
     
-    mission = await db.createMission("TEST", VALID_CAMPAIGN_KEY, MissionType.FASHION_WEEK)
+    mission = await db.createMission("TEST", VALID_CAMPAIGN_KEY, MissionType.FASHION_WEEK, 'thumb_url')
     challenge = await db.createGameChallenge({
       gameId: game8.id,
       description: "test",

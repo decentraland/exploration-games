@@ -10,7 +10,8 @@ test('POST /api/missions', ({ components }) => {
     payload = {
       description: 'Mission Test',
       campaign_key: VALID_CAMPAIGN_KEY,
-      type: MissionType.MINI_GAMES
+      type: MissionType.MINI_GAMES, 
+      thumb_url: 'thumb_url'
     }
   })
   afterAll(async () => {
@@ -35,6 +36,7 @@ test('POST /api/missions', ({ components }) => {
     expect(body.data.description).toBe(payload.description)
     expect(body.data.campaign_key).toBe(VALID_CAMPAIGN_KEY)
     expect(body.data.type).toBe(payload.type)
+    expect(body.data.thumb_url).toBe(payload.thumb_url)
   })
 
   it('should return 400 when no auth', async () => {

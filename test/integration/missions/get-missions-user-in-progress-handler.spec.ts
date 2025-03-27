@@ -11,9 +11,9 @@ test('GET /api/missions/in_progress', ({ components }) => {
 
   beforeAll(async () => {
     const { db } = components
-    mission1 = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
-    mission2 = await db.createMission('TEST Mission User 2', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
-    mission3 = await db.createMission('TEST Mission User 3', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES)
+    mission1 = await db.createMission('TEST Mission User 1', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')
+    mission2 = await db.createMission('TEST Mission User 2', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')
+    mission3 = await db.createMission('TEST Mission User 3', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')
 
     await db.deactivateMission(mission3.id)
 
