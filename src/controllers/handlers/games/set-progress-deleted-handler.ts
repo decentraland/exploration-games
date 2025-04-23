@@ -4,7 +4,7 @@ import { parseJson } from '@dcl/platform-server-commons/dist/utils'
 import { DeleteProgressBody, HandlerContextWithPath } from '../../../types'
 
 const schema = Joi.object<DeleteProgressBody>().keys({
-  ids: Joi.array().items(Joi.string()).required(),
+  ids: Joi.array().items(Joi.string().uuid()).required(),
   isNull: Joi.bool()
 })
 

@@ -497,28 +497,29 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const sortDirection = options.direction === SortDirection.ASC ? 'ASC' : 'DESC'
 
       const query = SQL`
-        SELECT DISTINCT ON (p.user_address)
-          p.game_id,
-          p.user_address,
-          p.user_name,
-          p.level,
-          p.score,
-          p.time,
-          p.moves,
-          p.data,
-          p.updated_at,
-          p.deleted_at
-        FROM progress p
-        WHERE p.game_id = ${gameId}
-        AND p.deleted_at IS NULL
+      SELECT game_id,
+          user_address,
+          user_name,
+          level,
+          score,
+          time,
+          moves,
+          data,
+          updated_at 
+          FROM ( SELECT DISTINCT ON (user_address) *
+            FROM progress
+            WHERE game_id = ${gameId} AND deleted_at IS NULL
       `
 
       if (options.level !== null) {
-        query.append(SQL` AND p.level = ${options.level} `)
+        query.append(SQL` AND level = ${options.level}`)
       }
 
-      query.append(` ORDER BY p.user_address, p.level DESC, p.${orderOption} ${sortDirection} LIMIT ${options.limit}`)
+      query.append(` ORDER BY user_address, ${!options.level ? 'level DESC,' : ''} ${orderOption} ${sortDirection}`)
 
+      query.append(
+        `) AS per_user ORDER BY ${!options.level ? 'per_user.level DESC,' : ''} per_user.${orderOption} ${sortDirection} LIMIT ${options.limit}`
+      )
       const results = await pg.query<GamePlayedByUser>(query)
       return results.rows
     },

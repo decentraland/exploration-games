@@ -133,15 +133,14 @@ test('GET /api/games/:id/leaderboard', ({ components }) => {
     await db.deleteGames([game.id])
   })
 
-  it('should return 200 with all the progress for a game with order by time', async () => {
+  it('should return 200 with 2 progress (one for each user) for a game with order by score', async () => {
     const { localFetch } = components
 
     const response = await makeRequest(localFetch, `/api/games/${game.id}/leaderboard`)
 
     expect(response.status).toBe(200)
-
     const body = await response.json()
-
+    
     expect(body.data).not.toBe(undefined)
     expect(body.data.length).toBe(2)
     expect(body.data[0].level).toBe(35)
@@ -154,7 +153,7 @@ test('GET /api/games/:id/leaderboard', ({ components }) => {
     expect(body.data[1].moves).toBe(11)
   })
 
-  it('should return 200 with all the progress for a game with order by score', async () => {
+  it('should return 200 with all the progress for a game with order by time', async () => {
     const { localFetch } = components
 
     const response = await makeRequest(localFetch, `/api/games/${game.id}/leaderboard?sort=time`)
@@ -162,7 +161,6 @@ test('GET /api/games/:id/leaderboard', ({ components }) => {
     expect(response.status).toBe(200)
 
     const body = await response.json()
-
     expect(body.data).not.toBe(undefined)
     expect(body.data.length).toBe(2)
     expect(body.data[0].level).toBe(35)
@@ -213,18 +211,6 @@ test('GET /api/games/:id/leaderboard', ({ components }) => {
     expect(body.data[1].score).toBe(33)
     expect(body.data[1].time).toBe(100)
     expect(body.data[1].moves).toBe(22)
-  })
-
-  it('should return 200 with all the progress for a game with limit 1', async () => {
-    const { localFetch } = components
-
-    const response = await makeRequest(localFetch, `/api/games/${game.id}/leaderboard?limit=1`)
-
-    expect(response.status).toBe(200)
-
-    const body = await response.json()
-    expect(body.data).not.toBe(undefined)
-    expect(body.data.length).toBe(1)
   })
 
   it('should return 200 with all the progress for a game with limit 1', async () => {
