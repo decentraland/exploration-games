@@ -201,6 +201,11 @@ export type UserMission = {
   active: boolean
 }
 
+export type DeleteProgressBody = {
+  ids: string[]
+  isNull?: boolean
+}
+
 export enum ProgressSort {
   SCORE = 'score',
   LATEST = 'updated_at',
