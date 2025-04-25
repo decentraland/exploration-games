@@ -24,7 +24,8 @@ import { getMissionsCompletedHandler } from './handlers/missions/get-missions-us
 import { updateMissionHandler } from './handlers/missions/update-mission-handler'
 import { updateGameHandler } from './handlers/games/update-game-handler'
 import { updateChallengeHandler } from './handlers/challenges/update-challenge-handler'
-import { setProgressDeletedHandler } from './handlers/games/set-progress-deleted-handler'
+import { setProgressDisabledHandler } from './handlers/games/set-progress-disabled-handler'
+import { setProgressEnableddHandler } from './handlers/games/set-progress-enabled-handler'
 import { getAllProgressInGameHandler } from './handlers/games/get-all-progress-in-game-handler'
 
 // We return the entire router because it will be easier to test than a whole server
@@ -70,7 +71,8 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   router.patch('/challenges/:id', auth, isAdminMiddleware, updateChallengeHandler)
   router.post('/missions', auth, isAdminMiddleware, createMissionHandler)
   router.patch('/missions/:id', auth, isAdminMiddleware, updateMissionHandler)
-  router.post('/games/progress/delete', auth, isAdminMiddleware, setProgressDeletedHandler)
+  router.post('/games/progress/disable', auth, isAdminMiddleware, setProgressDisabledHandler)
+  router.post('/games/progress/enable', auth, isAdminMiddleware, setProgressEnableddHandler)
   router.get('/games/:id/progress/all', auth, isAdminMiddleware, getAllProgressInGameHandler)
   return router
 }

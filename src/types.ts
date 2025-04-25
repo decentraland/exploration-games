@@ -201,9 +201,8 @@ export type UserMission = {
   active: boolean
 }
 
-export type DeleteProgressBody = {
+export type DisableProgressBody = {
   ids: string[]
-  isNull?: boolean
 }
 
 export enum ProgressSort {

@@ -53,7 +53,7 @@ export interface IDatabaseComponent {
   ): Promise<UserProgress[]>
   getAllProgressInGame(
     gameId: string,
-    option: { sort: ProgressSort; direction: SortDirection; limit: number }
+    option: { sort?: ProgressSort; direction?: SortDirection; limit?: number }
   ): Promise<UserProgress[]>
   createProgressInGame(
     gameId: string,
@@ -64,7 +64,8 @@ export interface IDatabaseComponent {
     gameMetrics: GameMetrics,
     data?: Record<string, any> | null
   ): Promise<UserProgress>
-  setProgressDeleted(progressIds: string[], isNull?: boolean): Promise<Record<'rows' | 'rowCount', any>>
+  setProgressDisabled(progressIds: string[]): Promise<Record<'rows' | 'rowCount', any>>
+  setProgressEnabled(progressIds: string[]): Promise<Record<'rows' | 'rowCount', any>>
   getAllGamesBeingPlayedByUser(userAddress: string): Promise<GamePlayedByUser[]>
   getGameLeaderboard(
     gameId: string,
@@ -270,7 +271,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         FROM progress 
         WHERE game_id = ${gameId} 
           AND user_address = ${userAddress.toLocaleLowerCase()} 
-          AND deleted_at IS NULL
+          AND disabled IS FALSE
       `
 
       const orderOption: ProgressSort =
@@ -285,11 +286,15 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const results = await pg.query<UserProgress>(query)
       return results.rows
     },
-    async setProgressDeleted(progressIds: string[], isNull?: boolean) {
-      console.log('setting progress deleted to ', isNull ? null : Date.now())
+    async setProgressDisabled(progressIds: string[]) {
+      console.log('setting progress disabled to ', progressIds)
       return await pg.query(
-        SQL`UPDATE progress SET deleted_at = ${isNull ? null : Date.now()} WHERE id = ANY(${progressIds}::uuid[])`
+        SQL`UPDATE progress SET disabled_at = ${Date.now()}, disabled = true WHERE id = ANY(${progressIds}::uuid[])`
       )
+    },
+    async setProgressEnabled(progressIds: string[]) {
+      console.log('setting progress enabled to ', progressIds)
+      return await pg.query(SQL`UPDATE progress SET disabled = false WHERE id = ANY(${progressIds}::uuid[])`)
     },
     async getAllProgressInGame(gameId, option) {
       const query = SQL`
@@ -305,7 +310,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       query.append(`ORDER BY ${orderOption} ${direction} `)
 
-      query.append(SQL`LIMIT ${option.limit}`)
+      query.append(SQL`LIMIT ${option.limit ?? 10}`)
 
       const results = await pg.query<UserProgress>(query)
       return results.rows
@@ -477,7 +482,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async getAllGamesBeingPlayedByUser(userAddress: string) {
       const results = await pg.query<GamePlayedByUser>(
         SQL`SELECT g.id, g.name, g.parcel, p.level, p.score, p.time, p.moves, p.data 
-          FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE p.user_address = ${userAddress.toLocaleLowerCase()} AND p.deleted_at IS NULL`
+          FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE p.user_address = ${userAddress.toLocaleLowerCase()} AND p.disabled IS FALSE`
       )
 
       return results.rows
@@ -508,7 +513,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
           updated_at 
           FROM ( SELECT DISTINCT ON (user_address) *
             FROM progress
-            WHERE game_id = ${gameId} AND deleted_at IS NULL
+            WHERE game_id = ${gameId} AND disabled IS FALSE
       `
 
       if (options.level !== null) {

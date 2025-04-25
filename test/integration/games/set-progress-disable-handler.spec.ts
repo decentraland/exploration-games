@@ -2,7 +2,7 @@ import { test } from '../../components'
 import { getIdentity, makeRequest } from '../../utils'
 import { randomUUID } from 'crypto'
 
-test('POST /games/progress/delete', ({ components }) => {
+test('POST /games/progress/disable', ({ components }) => {
     let game
     let progress1
 
@@ -33,7 +33,7 @@ test('POST /games/progress/delete', ({ components }) => {
             ids: [progress1.id]
         }
 
-        const response = await makeRequest(localFetch, '/api/games/progress/delete', {
+        const response = await makeRequest(localFetch, '/api/games/progress/disable', {
             method: 'POST',
             body: JSON.stringify(payload)
         })
@@ -41,22 +41,6 @@ test('POST /games/progress/delete', ({ components }) => {
         expect(response.status).toBe(200)
     })
 
-    it('should return 200 when setting isNull', async () => {
-        const { localFetch, pg } = components
-
-        const payload = {
-            ids: [progress1.id],
-            isNull: true
-        }
-
-        const response = await makeRequest(localFetch, '/api/games/progress/delete', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        })
-
-        expect(response.status).toBe(200)
-    })
-    
     it('should return 400 when not uuid', async () => {
         const { localFetch } = components
 
@@ -64,7 +48,7 @@ test('POST /games/progress/delete', ({ components }) => {
             ids: ["aaaaa"]
         }
 
-        const response = await makeRequest(localFetch, '/api/games/progress/delete', {
+        const response = await makeRequest(localFetch, '/api/games/progress/disable', {
             method: 'POST',
             body: JSON.stringify(payload)
         })
@@ -78,7 +62,7 @@ test('POST /games/progress/delete', ({ components }) => {
             ids: [progress1.id]
         }
 
-        const response = await localFetch.fetch('/api/games/progress/delete', {
+        const response = await localFetch.fetch('/api/games/progress/disable', {
             method: 'POST',
             body: JSON.stringify(payload)
         })
@@ -97,7 +81,7 @@ test('POST /games/progress/delete', ({ components }) => {
 
         const response = await makeRequest(
             localFetch,
-            '/api/games/progress/delete',
+            '/api/games/progress/disable',
             {
                 method: 'POST',
                 body: JSON.stringify(payload)
