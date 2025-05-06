@@ -27,7 +27,7 @@ export async function getProgressInGameHandler(
   const optionSortDirection = url.searchParams.get('direction')?.toLocaleUpperCase() as SortDirection | null
   let limitOption = Number(url.searchParams.get('limit') || 10)
 
-  if (limitOption && (limitOption < 1 || limitOption > 10)) {
+  if (limitOption && (limitOption < 1 || limitOption > 500)) {
     limitOption = 10
   }
 

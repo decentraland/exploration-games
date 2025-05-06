@@ -7,70 +7,49 @@ test('GET /games/:id/progress/all', ({ components }) => {
     beforeAll(async () => {
         const { db } = components
         game = await db.createGame('TEST', '10,10')
-        await db.createProgressInGame(
-            game.id,
-            { userAddress: '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', userName: 'UserName1' },
+
+        const fstUserProgress = [
             { level: 10, score: 2, time: 3500, moves: 150 },
-            {
-                metadata: true
-            }
-        )
-        await db.createProgressInGame(
-            game.id,
-            { userAddress: '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', userName: 'UserName1' },
             { level: 3, score: 10, time: 1200, moves: 350 },
-            {
-                metadata: true
-            }
-        )
-        await db.createProgressInGame(
-            game.id,
-            { userAddress: '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', userName: 'UserName1' },
             { level: 15, score: 3, time: 200, moves: 65 },
-            {
-                metadata: true
-            }
-        )
-        await db.createProgressInGame(
-            game.id,
-            { userAddress: '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', userName: 'UserName1' },
             { level: 8, score: 4, time: 1500, moves: 400 },
-            {
-                metadata: true
-            }
-        )
-        await db.createProgressInGame(
-            game.id,
-            { userAddress: '0xd9b96b5dc720fc52bede1ec3b40a930e15f70ddd', userName: 'UserName2' },
+        ]
+
+        const sndUserProgress = [
             { level: 35, score: 3, time: 1550, moves: 425 },
-            {
-                metadata: true
-            }
-        )
-        await db.createProgressInGame(
-            game.id,
-            { userAddress: '0xd9b96b5dc720fc52bede1ec3b40a930e15f70ddd', userName: 'UserName2' },
             { level: 4, score: 39, time: 2550, moves: 525 },
-            {
-                metadata: true
-            }
-        )
-        await db.createProgressInGame(
-            game.id,
-            { userAddress: '0xd9b96b5dc720fc52bede1ec3b40a930e15f70ddd', userName: 'UserName2' },
             { level: 12, score: 16, time: 25550, moves: 825 },
-            {
-                metadata: true
-            }
-        )
-        await db.createProgressInGame(
-            game.id,
-            { userAddress: '0xd9b96b5dc720fc52bede1ec3b40a930e15f70ddd', userName: 'UserName2' },
             { level: 1, score: 8, time: 3550, moves: 1325 },
-            {
-                metadata: true
-            }
-        )
+        ]
+
+        for (const progress of fstUserProgress) {
+            await db.createProgressInGame(
+                game.id,
+                { userAddress: '0x7949f9f239d1a0816ce5eb364a1f588ae9cc1bf5', userName: 'UserName1' },
+                progress,
+                {
+                    metadata: true
+                }
+            )
+            await new Promise((r) => setTimeout(r, 1))
+        }
+        
+        for (const progress of sndUserProgress) {
+            await db.createProgressInGame(
+                game.id,
+                { userAddress: '0xd9b96b5dc720fc52bede1ec3b40a930e15f70ddd', userName: 'UserName2' },
+                progress,
+                {
+                    metadata: true
+                }
+            )
+            await new Promise((r) => setTimeout(r, 1))
+        }
+    })
+
+    afterAll(async () => {
+        const { db } = components
+        await db.deleteGames([game.id])
     })
 
     it('should return 200 sort by level progress for game', async () => {
@@ -83,11 +62,15 @@ test('GET /games/:id/progress/all', ({ components }) => {
         const body = await response.json()
 
         expect(body.data).not.toBe(undefined)
-        expect(body.data[0].level).toBe(35)
-        expect(body.data[0].score).toBe(3)
-        expect(body.data[0].time).toBe(1550)
-        expect(body.data[0].moves).toBe(425)
-        expect(body.data[0].data).toEqual({ metadata: true })
+        expect({
+            data: [{
+                level: 35,
+                score: 3,
+                time: 1550,
+                moves: 425,
+                data: { metadata: true }
+            }]
+        })
     })
 
     it('should return 200 sort by score progress for game and limit by 2', async () => {
@@ -101,11 +84,15 @@ test('GET /games/:id/progress/all', ({ components }) => {
 
         expect(body.data).not.toBe(undefined)
         expect(body.data.length).toBe(2)
-        expect(body.data[0].level).toBe(4)
-        expect(body.data[0].score).toBe(39)
-        expect(body.data[0].time).toBe(2550)
-        expect(body.data[0].moves).toBe(525)
-        expect(body.data[0].data).toEqual({ metadata: true })
+        expect({
+            data: [{
+                level: 4,
+                score: 39,
+                time: 2550,
+                moves: 525,
+                data: { metadata: true }
+            }]
+        })
     })
 
     it('should return 200 sort by time progress for game', async () => {
@@ -119,11 +106,15 @@ test('GET /games/:id/progress/all', ({ components }) => {
 
         expect(body.data).not.toBe(undefined)
         expect(body.data.length).toBeGreaterThanOrEqual(4)
-        expect(body.data[0].level).toBe(12)
-        expect(body.data[0].score).toBe(16)
-        expect(body.data[0].time).toBe(25550)
-        expect(body.data[0].moves).toBe(825)
-        expect(body.data[0].data).toEqual({ metadata: true })
+        expect({
+            data: [{
+                level: 12,
+                score: 16,
+                time: 25550,
+                moves: 825,
+                data: { metadata: true }
+            }]
+        })
     })
 
     it('should return 200 sort by moves progress for game', async () => {
@@ -136,11 +127,15 @@ test('GET /games/:id/progress/all', ({ components }) => {
         const body = await response.json()
 
         expect(body.data).not.toBe(undefined)
-        expect(body.data[0].level).toBe(1)
-        expect(body.data[0].score).toBe(8)
-        expect(body.data[0].time).toBe(3550)
-        expect(body.data[0].moves).toBe(1325)
-        expect(body.data[0].data).toEqual({ metadata: true })
+        expect({
+            data: [{
+                level: 1,
+                score: 8,
+                time: 3550,
+                moves: 1325,
+                data: { metadata: true }
+            }]
+        })
     })
 
     it('should return 200 sort by moves progress but limit just to the one with less movements for game', async () => {
@@ -157,11 +152,15 @@ test('GET /games/:id/progress/all', ({ components }) => {
 
         expect(body.data).not.toBe(undefined)
         expect(body.data.length).toBe(1)
-        expect(body.data[0].level).toBe(15)
-        expect(body.data[0].score).toBe(3)
-        expect(body.data[0].time).toBe(200)
-        expect(body.data[0].moves).toBe(65)
-        expect(body.data[0].data).toEqual({ metadata: true })
+        expect({
+            data: [{
+                level: 15,
+                score: 3,
+                time: 200,
+                moves: 65,
+                data: { metadata: true }
+            }]
+        })
     })
 
     it('should return 400 when not an uuid', async () => {

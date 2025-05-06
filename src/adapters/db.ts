@@ -64,8 +64,7 @@ export interface IDatabaseComponent {
     gameMetrics: GameMetrics,
     data?: Record<string, any> | null
   ): Promise<UserProgress>
-  setProgressDisabled(progressIds: string[]): Promise<Record<'rows' | 'rowCount', any>>
-  setProgressEnabled(progressIds: string[]): Promise<Record<'rows' | 'rowCount', any>>
+  setProgressStatus(progressIds: string[], disabled: boolean): Promise<Record<'rows' | 'rowCount', any>>
   getAllGamesBeingPlayedByUser(userAddress: string): Promise<GamePlayedByUser[]>
   getGameLeaderboard(
     gameId: string,
@@ -286,15 +285,9 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const results = await pg.query<UserProgress>(query)
       return results.rows
     },
-    async setProgressDisabled(progressIds: string[]) {
-      console.log('setting progress disabled to ', progressIds)
-      return await pg.query(
-        SQL`UPDATE progress SET disabled_at = ${Date.now()}, disabled = true WHERE id = ANY(${progressIds}::uuid[])`
-      )
-    },
-    async setProgressEnabled(progressIds: string[]) {
-      console.log('setting progress enabled to ', progressIds)
-      return await pg.query(SQL`UPDATE progress SET disabled = false WHERE id = ANY(${progressIds}::uuid[])`)
+    async setProgressStatus(progressIds: string[], disabled: boolean) {
+      console.log(`setting progress ${disabled} to `, progressIds)
+      return await pg.query(SQL`UPDATE progress SET disabled = ${disabled} WHERE id = ANY(${progressIds}::uuid[])`)
     },
     async getAllProgressInGame(gameId, option) {
       const query = SQL`

@@ -2,8 +2,7 @@
 import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate'
 
 export const shorthands: ColumnDefinitions = {
-  disabled: { type: 'boolean', notNull: true, default: false },
-  disabled_at: { type: 'bigint', notNull: false }
+  disabled: { type: 'boolean', notNull: true, default: false }
 }
 
 const tableName = 'progress'
