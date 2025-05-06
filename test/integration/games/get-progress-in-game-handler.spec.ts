@@ -33,7 +33,7 @@ test('GET /api/games/:id/progress', ({ components }) => {
         }
       )
       console.log("done creating game progress: ", progress)
-      setTimeout(() => { }, 2)
+      await new Promise((r) => setTimeout(r, 1))
     }
 
     for (const progress of scndUserProgress) {
@@ -47,7 +47,7 @@ test('GET /api/games/:id/progress', ({ components }) => {
         }
       )
       console.log("done creating game progress: ", progress)
-      setTimeout(() => { }, 2)
+      await new Promise((r) => setTimeout(r, 1))
     }
   })
 
