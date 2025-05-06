@@ -2,16 +2,15 @@ import { InvalidRequestError } from '@dcl/platform-server-commons'
 import { HandlerContextWithPath, ProgressSort, SortDirection } from '../../../types'
 import { uuidSchema } from '../../../utils'
 
-export async function getProgressInGameHandler(
+export async function getAllProgressInGameHandler(
   ctx: Pick<
-    HandlerContextWithPath<'db' | 'logs', '/games/:id/progress'>,
+    HandlerContextWithPath<'db' | 'logs', '/games/:id/progress/all'>,
     'components' | 'params' | 'verification' | 'url'
   >
 ) {
   const {
     components: { db },
     params,
-    verification,
     url
   } = ctx
 
@@ -27,11 +26,11 @@ export async function getProgressInGameHandler(
   const optionSortDirection = url.searchParams.get('direction')?.toLocaleUpperCase() as SortDirection | null
   let limitOption = Number(url.searchParams.get('limit') || 10)
 
-  if (limitOption && (limitOption < 1 || limitOption > 500)) {
+  if (limitOption && (limitOption < 1 || limitOption > 1000)) {
     limitOption = 10
   }
 
-  const progress = await db.getUserProgressInGame(id, verification!.auth, {
+  const progress = await db.getAllProgressInGame(id, {
     sort: optionSort as ProgressSort,
     direction: optionSortDirection || SortDirection.DESC,
     limit: limitOption

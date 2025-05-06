@@ -201,6 +201,11 @@ export type UserMission = {
   active: boolean
 }
 
+export type ProgressStatusBody = {
+  ids: string[]
+  disabled: boolean
+}
+
 export enum ProgressSort {
   SCORE = 'score',
   LATEST = 'updated_at',

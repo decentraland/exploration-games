@@ -51,6 +51,10 @@ export interface IDatabaseComponent {
     userAddress: string,
     option: { sort: ProgressSort; direction: SortDirection; limit: number }
   ): Promise<UserProgress[]>
+  getAllProgressInGame(
+    gameId: string,
+    option: { sort?: ProgressSort; direction?: SortDirection; limit?: number }
+  ): Promise<UserProgress[]>
   createProgressInGame(
     gameId: string,
     userData: {
@@ -60,6 +64,7 @@ export interface IDatabaseComponent {
     gameMetrics: GameMetrics,
     data?: Record<string, any> | null
   ): Promise<UserProgress>
+  setProgressStatus(progressIds: string[], disabled: boolean): Promise<Record<'rows' | 'rowCount', any>>
   getAllGamesBeingPlayedByUser(userAddress: string): Promise<GamePlayedByUser[]>
   getGameLeaderboard(
     gameId: string,
@@ -265,6 +270,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         FROM progress 
         WHERE game_id = ${gameId} 
           AND user_address = ${userAddress.toLocaleLowerCase()} 
+          AND disabled IS FALSE
       `
 
       const orderOption: ProgressSort =
@@ -275,6 +281,29 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       query.append(`ORDER BY ${orderOption} ${direction} `)
 
       query.append(SQL`LIMIT ${option.limit}`)
+
+      const results = await pg.query<UserProgress>(query)
+      return results.rows
+    },
+    async setProgressStatus(progressIds: string[], disabled: boolean) {
+      console.log(`setting progress ${disabled} to `, progressIds)
+      return await pg.query(SQL`UPDATE progress SET disabled = ${disabled} WHERE id = ANY(${progressIds}::uuid[])`)
+    },
+    async getAllProgressInGame(gameId, option) {
+      const query = SQL`
+        SELECT * 
+        FROM progress 
+        WHERE game_id = ${gameId} 
+      `
+
+      const orderOption: ProgressSort =
+        Object.values(ProgressSort).find((sort) => sort === option.sort) || ProgressSort.LATEST
+
+      const direction = option.direction === SortDirection.ASC ? SortDirection.ASC : SortDirection.DESC
+
+      query.append(`ORDER BY ${orderOption} ${direction} `)
+
+      query.append(SQL`LIMIT ${option.limit ?? 10}`)
 
       const results = await pg.query<UserProgress>(query)
       return results.rows
@@ -446,7 +475,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     async getAllGamesBeingPlayedByUser(userAddress: string) {
       const results = await pg.query<GamePlayedByUser>(
         SQL`SELECT g.id, g.name, g.parcel, p.level, p.score, p.time, p.moves, p.data 
-          FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE p.user_address = ${userAddress.toLocaleLowerCase()}`
+          FROM progress p INNER JOIN games g ON g.id = p.game_id WHERE p.user_address = ${userAddress.toLocaleLowerCase()} AND p.disabled IS FALSE`
       )
 
       return results.rows
@@ -463,80 +492,33 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       const orderOption: Omit<ProgressSort, 'LATEST'> =
         Object.values(ProgressSort).find((sort) => sort === options.sort) || ProgressSort.SCORE
 
-      const sortField = options.direction === SortDirection.ASC ? `min_${orderOption}` : `max_${orderOption}`
-      const sortAlias =
-        options.direction === SortDirection.ASC
-          ? `MIN(${orderOption}) AS ${sortField}`
-          : `MAX(${orderOption}) AS ${sortField}`
+      const sortDirection = options.direction === SortDirection.ASC ? 'ASC' : 'DESC'
 
       const query = SQL`
-        SELECT 
-          p.game_id,
-          p.user_address,
-          p.user_name,
-          p.level,
-          p.score,
-          p.time,
-          p.moves,
-          p.data,
-          p.updated_at
-        FROM 
-          progress p
-          `
-      if (!options.level) {
-        query.append(SQL`INNER JOIN (
-            SELECT 
-              user_address,
-              MAX(level) AS max_level
-            FROM 
-              progress
-            WHERE 
-              game_id = ${gameId}
-            GROUP BY 
-              user_address
-          ) max_levels 
-          ON p.user_address = max_levels.user_address 
-          AND p.level = max_levels.max_level
-        `)
-      }
-
-      query.append(`INNER JOIN (
-          SELECT 
-            user_address,
-            level,
-            ${sortAlias}
-          FROM 
-            progress`)
-
-      query.append(
-        SQL`
-          WHERE 
-            game_id = ${gameId}
-          `
-      )
-      query.append(`GROUP BY 
-            user_address,
-            level
-        ) sort_${orderOption}
-        ON p.user_address = sort_${orderOption}.user_address
-        AND p.level = sort_${orderOption}.level
-        AND p.${orderOption} = sort_${orderOption}.${sortField}
-        `)
-
-      query.append(
-        SQL`
-        WHERE 
-          p.game_id = ${gameId}
+      SELECT game_id,
+          user_address,
+          user_name,
+          level,
+          score,
+          time,
+          moves,
+          data,
+          updated_at 
+          FROM ( SELECT DISTINCT ON (user_address) *
+            FROM progress
+            WHERE game_id = ${gameId} AND disabled IS FALSE
       `
-      )
 
-      if (options.level) {
-        query.append(SQL`AND p.level = ${options.level} `)
+      if (options.level !== null) {
+        query.append(SQL` AND level = ${options.level}`)
       }
 
-      query.append(`ORDER BY p.level DESC, ${orderOption} ${options.direction} LIMIT ${options.limit}`)
-      const results = await pg.query<GamePlayedByUser>(query)
+      query.append(` ORDER BY user_address, ${!options.level ? 'level DESC,' : ''} ${orderOption} ${sortDirection}`)
 
+      query.append(
+        `) AS per_user ORDER BY ${!options.level ? 'per_user.level DESC,' : ''} per_user.${orderOption} ${sortDirection} LIMIT ${options.limit}`
+      )
+      const results = await pg.query<GamePlayedByUser>(query)
       return results.rows
     },
     async getChallenge(challengeId: string) {
