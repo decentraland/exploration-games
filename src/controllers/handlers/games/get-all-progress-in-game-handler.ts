@@ -22,6 +22,7 @@ export async function getAllProgressInGameHandler(
     throw new InvalidRequestError('Invalid UUID')
   }
 
+  const level = url.searchParams.get('level') as string | null
   const optionSort = url.searchParams.get('sort') as ProgressSort | null
   const optionSortDirection = url.searchParams.get('direction')?.toLocaleUpperCase() as SortDirection | null
   let limitOption = Number(url.searchParams.get('limit') || 10)
@@ -30,10 +31,18 @@ export async function getAllProgressInGameHandler(
     limitOption = 10
   }
 
+  let pageOption = Number(url.searchParams.get('page') || 1)
+
+  if (pageOption < 1 || pageOption > 1000) {
+    pageOption = 1
+  }
+
   const progress = await db.getAllProgressInGame(id, {
     sort: optionSort as ProgressSort,
     direction: optionSortDirection || SortDirection.DESC,
-    limit: limitOption
+    limit: limitOption,
+    level: level ? Number(level) : null,
+    page: pageOption
   })
 
   return {

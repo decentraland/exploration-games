@@ -53,7 +53,7 @@ export interface IDatabaseComponent {
   ): Promise<UserProgress[]>
   getAllProgressInGame(
     gameId: string,
-    option: { sort?: ProgressSort; direction?: SortDirection; limit?: number }
+    option: { sort?: ProgressSort; direction?: SortDirection; limit?: number; level?: number | null; page?: number }
   ): Promise<UserProgress[]>
   createProgressInGame(
     gameId: string,
@@ -296,6 +296,11 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
         WHERE game_id = ${gameId} 
       `
 
+      if (option.level)
+        query.append(SQL`
+        AND level = ${Number(option.level)}
+      `)
+
       const orderOption: ProgressSort =
         Object.values(ProgressSort).find((sort) => sort === option.sort) || ProgressSort.LATEST
 
@@ -303,7 +308,11 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
 
       query.append(`ORDER BY ${orderOption} ${direction} `)
 
-      query.append(SQL`LIMIT ${option.limit ?? 10}`)
+      const limit = option.limit ?? 10
+      const page = option.page ?? 1
+      const offset = (page - 1) * limit
+
+      query.append(SQL`LIMIT ${limit} OFFSET ${offset}`)
 
       const results = await pg.query<UserProgress>(query)
       return results.rows
