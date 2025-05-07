@@ -33,7 +33,7 @@ test('GET /games/:id/progress/all', ({ components }) => {
             )
             await new Promise((r) => setTimeout(r, 1))
         }
-        
+
         for (const progress of sndUserProgress) {
             await db.createProgressInGame(
                 game.id,
@@ -158,6 +158,62 @@ test('GET /games/:id/progress/all', ({ components }) => {
                 score: 3,
                 time: 200,
                 moves: 65,
+                data: { metadata: true }
+            }]
+        })
+    })
+
+    it('should return 200 filter by level', async () => {
+        const { localFetch } = components
+
+        const response = await makeRequest(
+            localFetch,
+            `/api/games/${game.id}/progress/all?level=15`
+        )
+
+        expect(response.status).toBe(200)
+
+        const body = await response.json()
+
+        expect(body.data).not.toBe(undefined)
+        expect(body.data.length).toBe(1)
+        expect({
+            data: [{
+                level: 15,
+                score: 3,
+                time: 200,
+                moves: 65,
+                data: { metadata: true }
+            }]
+        })
+    })
+
+    it('should return 200 with fourth page of 2 results', async () => {
+        const { localFetch } = components
+
+        const response = await makeRequest(
+            localFetch,
+            `/api/games/${game.id}/progress/all?sort=time&limit=2&page=4`
+        )
+
+        expect(response.status).toBe(200)
+
+        const body = await response.json()
+        expect(body.data).not.toBe(undefined)
+        expect(body.data.length).toBe(2)
+        expect({
+            data: [{
+                level: 3,
+                time: 1200,
+                moves: 350,
+                score: 10,
+                data: { metadata: true }
+            },
+            {
+                level: 15,
+                time: 200,
+                moves: 65,
+                score: 3,
                 data: { metadata: true }
             }]
         })
