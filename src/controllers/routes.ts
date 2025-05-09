@@ -3,6 +3,7 @@ import { errorHandler } from '@dcl/platform-server-commons/dist/controllers/hand
 import { wellKnownComponents as authVerificationMiddleware } from '@dcl/platform-crypto-middleware'
 import { GlobalContext } from '../types'
 import isAdminMiddleware from './middlewares/is-admin-middleware'
+import isValidKeyMiddleware from './middlewares/is-valid-key-middleware'
 import { statusHandler } from './handlers/status-handler'
 import { createGameHandler } from './handlers/games/create-game-handler'
 import { getGamesHandler } from './handlers/games/get-games-handler'
@@ -26,6 +27,7 @@ import { updateGameHandler } from './handlers/games/update-game-handler'
 import { updateChallengeHandler } from './handlers/challenges/update-challenge-handler'
 import { setProgressStatusHandler } from './handlers/games/set-progress-status-handler'
 import { getAllProgressInGameHandler } from './handlers/games/get-all-progress-in-game-handler'
+import { newMultiplayerProgressHandler } from './handlers/games/new-multiplayer-progress-handler'
 
 // We return the entire router because it will be easier to test than a whole server
 export async function setupRouter(globalContext: GlobalContext): Promise<Router<GlobalContext>> {
@@ -60,6 +62,8 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   router.get('/games/progress', auth, getAllUserProgressInGamesHandler)
   router.get('/games/:id/challenges/completed', auth, getUserCompletedChallengesByGame)
   router.post('/missions/:id/start', auth, createUserMissionHandler)
+
+  router.post('/multiplayer/progress', isValidKeyMiddleware, newMultiplayerProgressHandler)
 
   router.get('/missions', auth, isAdminMiddleware, getMissionsHandler)
   router.get('/missions/:id', auth, isAdminMiddleware, getMissionHandler)

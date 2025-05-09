@@ -132,6 +132,15 @@ export type NewProgressInGamePayload = GameMetrics & {
   data?: Record<string, any>
 }
 
+export type MultiplayerPlayerScore = NewProgressInGamePayload & {
+  user_address: string
+}
+
+export type NewMultiplayerProgressPayload = {
+  game_id: string
+  scores: MultiplayerPlayerScore[]
+}
+
 export type IScore = GameMetrics & {
   data?: Record<string, any>
 }
