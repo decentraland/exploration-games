@@ -15,7 +15,8 @@ import {
   MissionInProgress,
   ChallengeWithCompletionTime,
   MissionCompleted,
-  MissionType
+  MissionType,
+  NewMultiplayerProgressPayload
 } from '../types'
 
 export interface IDatabaseComponent {
@@ -64,6 +65,7 @@ export interface IDatabaseComponent {
     gameMetrics: GameMetrics,
     data?: Record<string, any> | null
   ): Promise<UserProgress>
+  createMultiplayerProgressInGame(multiplayerProgress: NewMultiplayerProgressPayload): Promise<UserProgress[]>
   setProgressStatus(progressIds: string[], disabled: boolean): Promise<Record<'rows' | 'rowCount', any>>
   getAllGamesBeingPlayedByUser(userAddress: string): Promise<GamePlayedByUser[]>
   getGameLeaderboard(
@@ -337,6 +339,27 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       )
 
       return results.rows[0]
+    },
+    async createMultiplayerProgressInGame(multiplayerProgress: NewMultiplayerProgressPayload) {
+      const now = Date.now()
+      const query = SQL`
+        INSERT INTO progress 
+          (id, game_id, user_address, user_name, level, score, time, moves, data, updated_at) 
+        VALUES
+      `
+
+      multiplayerProgress.scores.forEach(({ user_address, user_name, level, score, time, moves, data }, index) => {
+        const uuid = randomUUID()
+        if (index > 0) query.append(`,`)
+        query.append(
+          SQL`(${uuid}, ${multiplayerProgress.game_id}, ${user_address.toLowerCase()}, ${user_name}, ${level}, ${score}, ${time}, ${moves}, ${data}, ${now})`
+        )
+      })
+
+      query.append(SQL` RETURNING *`)
+
+      const results = await pg.query<UserProgress>(query)
+      return results.rows
     },
     async createGameChallenge(gameValues: {
       gameId: string

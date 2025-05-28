@@ -28,7 +28,7 @@ async function initComponents(): Promise<TestComponents> {
     { path: ['.env.default', '.env'] },
     {
       PG_COMPONENT_PSQL_CONNECTION_STRING: 'postgresql://usr:pwd@localhost:5432/exploration_games',
-      ALLOWED_KEYS: 'testKey198fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,testKey426b927411fc9231b56382173b5e6a8e6c2c7e1b8b8e6b8e6b8e6b8e6'
+      MULTIPLAYER_KEY: 'testKey198fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
     }
   )
 

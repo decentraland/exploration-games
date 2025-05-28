@@ -1,9 +1,9 @@
 import { Router } from '@well-known-components/http-server'
 import { errorHandler } from '@dcl/platform-server-commons/dist/controllers/handlers/error-handler'
 import { wellKnownComponents as authVerificationMiddleware } from '@dcl/platform-crypto-middleware'
+import { bearerTokenMiddleware } from '@dcl/platform-server-commons'
 import { GlobalContext } from '../types'
 import isAdminMiddleware from './middlewares/is-admin-middleware'
-import isValidKeyMiddleware from './middlewares/is-valid-key-middleware'
 import { statusHandler } from './handlers/status-handler'
 import { createGameHandler } from './handlers/games/create-game-handler'
 import { getGamesHandler } from './handlers/games/get-games-handler'
@@ -63,8 +63,6 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   router.get('/games/:id/challenges/completed', auth, getUserCompletedChallengesByGame)
   router.post('/missions/:id/start', auth, createUserMissionHandler)
 
-  router.post('/multiplayer/progress', isValidKeyMiddleware, newMultiplayerProgressHandler)
-
   router.get('/missions', auth, isAdminMiddleware, getMissionsHandler)
   router.get('/missions/:id', auth, isAdminMiddleware, getMissionHandler)
   router.post('/games', auth, isAdminMiddleware, createGameHandler)
@@ -76,5 +74,11 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   router.patch('/missions/:id', auth, isAdminMiddleware, updateMissionHandler)
   router.patch('/games/progress/status', auth, isAdminMiddleware, setProgressStatusHandler)
   router.get('/games/:id/progress/all', auth, isAdminMiddleware, getAllProgressInGameHandler)
+
+  const multiplayerToken = await globalContext.components.config.getString('MULTIPLAYER_KEY')
+  if (!!multiplayerToken) {
+    router.post('/multiplayer/progress', bearerTokenMiddleware(multiplayerToken), newMultiplayerProgressHandler)
+  }
+
   return router
 }

@@ -21,7 +21,7 @@ const scoreSchema = Joi.object<MultiplayerPlayerScore>().keys({
 
 const schema = Joi.object<NewMultiplayerProgressPayload>().keys({
   game_id: Joi.string().required().uuid(),
-  scores: Joi.array().items(scoreSchema).required()
+  scores: Joi.array().min(1).items(scoreSchema).required()
 })
 
 export async function newMultiplayerProgressHandler(
@@ -39,7 +39,7 @@ export async function newMultiplayerProgressHandler(
   const validatePayload = schema.validate(body)
   if (validatePayload.error) {
     logger.warn(
-      `Invalid multuplayer progress object received: ${validatePayload.error.message} (${JSON.stringify(body)}`
+      `Invalid multiplayer progress object received: ${validatePayload.error.message} (${JSON.stringify(body)}`
     )
     throw new InvalidRequestError(validatePayload.error.message)
   }
@@ -50,28 +50,13 @@ export async function newMultiplayerProgressHandler(
   if (validateGameId.error) {
     throw new InvalidRequestError('Invalid UUID')
   }
-  // Validate signed fetch
-  //   await validateSignedFetch(ctx, { body, gameId: validateGameId.value, skipParcelValidation: skipParcelValidation })
 
-  const newProgress: UserProgress[] = []
-
-  for (const score of body.scores) {
-    const progress = await db.createProgressInGame(
-      game_id,
-      {
-        userAddress: score.user_address,
-        userName: score.user_name
-      },
-      { level: score.level, score: score.score, time: score.time, moves: score.moves },
-      score.data
-    )
-    newProgress.push(progress)
-  }
+  const upserted: UserProgress[] = await db.createMultiplayerProgressInGame(body)
 
   return {
     status: 201,
     body: {
-      data: newProgress
+      data: upserted
     }
   }
 }
