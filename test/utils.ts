@@ -29,6 +29,8 @@ export const admin: AuthIdentity = {
   ]
 }
 
+export const allowedKeys = ['test-key-1', 'test-key-2']
+
 export function getAuthHeaders(
   method: string,
   path: string,

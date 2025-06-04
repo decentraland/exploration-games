@@ -1,6 +1,7 @@
 import { Router } from '@well-known-components/http-server'
 import { errorHandler } from '@dcl/platform-server-commons/dist/controllers/handlers/error-handler'
 import { wellKnownComponents as authVerificationMiddleware } from '@dcl/platform-crypto-middleware'
+import { bearerTokenMiddleware } from '@dcl/platform-server-commons'
 import { GlobalContext } from '../types'
 import isAdminMiddleware from './middlewares/is-admin-middleware'
 import { statusHandler } from './handlers/status-handler'
@@ -26,6 +27,7 @@ import { updateGameHandler } from './handlers/games/update-game-handler'
 import { updateChallengeHandler } from './handlers/challenges/update-challenge-handler'
 import { setProgressStatusHandler } from './handlers/games/set-progress-status-handler'
 import { getAllProgressInGameHandler } from './handlers/games/get-all-progress-in-game-handler'
+import { newMultiplayerProgressHandler } from './handlers/games/new-multiplayer-progress-handler'
 
 // We return the entire router because it will be easier to test than a whole server
 export async function setupRouter(globalContext: GlobalContext): Promise<Router<GlobalContext>> {
@@ -72,5 +74,11 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   router.patch('/missions/:id', auth, isAdminMiddleware, updateMissionHandler)
   router.patch('/games/progress/status', auth, isAdminMiddleware, setProgressStatusHandler)
   router.get('/games/:id/progress/all', auth, isAdminMiddleware, getAllProgressInGameHandler)
+
+  const multiplayerToken = await globalContext.components.config.getString('MULTIPLAYER_KEY')
+  if (!!multiplayerToken) {
+    router.post('/multiplayer/progress', bearerTokenMiddleware(multiplayerToken), newMultiplayerProgressHandler)
+  }
+
   return router
 }
