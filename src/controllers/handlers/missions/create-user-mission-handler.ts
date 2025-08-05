@@ -43,7 +43,7 @@ export async function createUserMissionHandler(
     throw new InvalidRequestError(`Can't start new mission while there is an active mission for this user.`)
   }
 
-  const missionTimeWindow = await config.requireNumber('MISSION_TIME_WINDOW_HS')
+  const missionTimeWindow = mission?.type === 'mini-games' ? await config.requireNumber('MISSION_TIME_WINDOW_HS') : 0
   const lastStartTime = lastMission?.start_time || '0'
   const isTimeForNewMission = Date.now() - missionTimeWindow * 60 * 60 * 1000 > parseInt(lastStartTime)
 
