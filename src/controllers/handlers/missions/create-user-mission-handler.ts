@@ -36,20 +36,33 @@ export async function createUserMissionHandler(
     throw new InvalidRequestError('Mission has no type')
   }
 
+  const isMinigame = mission?.type === 'mini-games'
+
   const lastMission = await db.getLastMissionForUser(verification!.auth, mission.type)
 
-  if (lastMission && !lastMission.end_time) {
-    logger.warn(`Can't start new mission while there is an active mission for this user.`)
-    throw new InvalidRequestError(`Can't start new mission while there is an active mission for this user.`)
-  }
+  if (isMinigame) {
+    if (lastMission && !lastMission.end_time) {
+      logger.warn(`Can't start new mission while there is an active mission for this user.`)
+      throw new InvalidRequestError(`Can't start new mission while there is an active mission for this user.`)
+    }
 
-  const missionTimeWindow = mission?.type === 'mini-games' ? await config.requireNumber('MISSION_TIME_WINDOW_HS') : 0
-  const lastStartTime = lastMission?.start_time || '0'
-  const isTimeForNewMission = Date.now() - missionTimeWindow * 60 * 60 * 1000 > parseInt(lastStartTime)
+    const missionTimeWindow = await config.requireNumber('MISSION_TIME_WINDOW_HS')
+    const lastStartTime = lastMission?.start_time || '0'
+    const isTimeForNewMission = Date.now() - missionTimeWindow * 60 * 60 * 1000 > parseInt(lastStartTime)
 
-  if (!isTimeForNewMission) {
-    logger.warn('Need to wait more time for starting a new mission')
-    throw new InvalidRequestError('Need to wait more time for starting a new mission')
+    if (!isTimeForNewMission) {
+      logger.warn('Need to wait more time for starting a new mission')
+      throw new InvalidRequestError('Need to wait more time for starting a new mission')
+    }
+  } else {
+    if (lastMission && !lastMission.end_time) {
+      if (lastMission.id === missionId) {
+        logger.warn(`This mission is already active for this user.`)
+        throw new InvalidRequestError(`This mission is already active for this user.`)
+      } else {
+        await db.setIncompleteMission(lastMission.user_mission_id)
+      }
+    }
   }
 
   await db.setMissionAsStart(verification!.auth, missionId)

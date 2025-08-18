@@ -118,6 +118,7 @@ export type MissionInProgress = Mission & {
 export type MissionCompleted = Mission & {
   start_time: string
   end_time: string
+  user_mission_id: string
 }
 
 export type GameMetrics = {

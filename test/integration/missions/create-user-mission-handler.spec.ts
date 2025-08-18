@@ -8,6 +8,7 @@ test('POST /api/missions/:id/start', ({ components }) => {
   let mission
   let mission2
   let mission3
+  let mission4
 
   const oldDateNow = Date.now
 
@@ -17,6 +18,7 @@ test('POST /api/missions/:id/start', ({ components }) => {
     mission = await db.createMission('Mission Test mini-games', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')
     mission2 = await db.createMission('Mission Test 2 mini-games', VALID_CAMPAIGN_KEY, MissionType.MINI_GAMES, 'thumb_url')
     mission3 = await db.createMission('Mission Test 3 fashion week', VALID_CAMPAIGN_KEY, MissionType.FASHION_WEEK, 'thumb_url')
+    mission4 = await db.createMission('Mission Test 4 fashion week', VALID_CAMPAIGN_KEY, MissionType.FASHION_WEEK, 'thumb_url')
 
   })
 
@@ -24,7 +26,7 @@ test('POST /api/missions/:id/start', ({ components }) => {
     const { db } = components
 
     Date.now = oldDateNow
-    await db.deleteMissions([mission.id, mission2.id, mission3.id])
+    await db.deleteMissions([mission.id, mission2.id, mission3.id, mission4.id])
 
   })
 
@@ -75,6 +77,16 @@ test('POST /api/missions/:id/start', ({ components }) => {
     })
 
     expect(response.status).toBe(400)
+  })
+  
+  it('should return 204 when the date is less than one day since last fw-2025 mission start starting a fw-2025 mission', async () => {
+    const { localFetch } = components
+
+    const response = await makeRequest(localFetch, `/api/missions/${mission4.id}/start`, {
+      method: 'POST'
+    })
+
+    expect(response.status).toBe(204)
   })
   
 
