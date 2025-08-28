@@ -79,7 +79,8 @@ test('POST /api/missions/:id/start', ({ components }) => {
     expect(response.status).toBe(400)
   })
   
-  it('should return 204 when the date is less than one day since last fw-2025 mission start starting a fw-2025 mission', async () => {
+  describe('when the date is less than one day since last fw-2025 mission start, starting a fw-2025 mission', () => { 
+    it('should return 204', async () => {
     const { localFetch } = components
 
     const response = await makeRequest(localFetch, `/api/missions/${mission4.id}/start`, {
@@ -88,7 +89,7 @@ test('POST /api/missions/:id/start', ({ components }) => {
 
     expect(response.status).toBe(204)
   })
-  
+})
 
   it('should return 204 when the date is more than than one day since last completed mission start', async () => {
     const { db } = components
