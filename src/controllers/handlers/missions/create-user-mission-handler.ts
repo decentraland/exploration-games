@@ -36,20 +36,29 @@ export async function createUserMissionHandler(
     throw new InvalidRequestError('Mission has no type')
   }
 
+  const isMinigame = mission?.type === 'mini-games'
+
   const lastMission = await db.getLastMissionForUser(verification!.auth, mission.type)
 
-  if (lastMission && !lastMission.end_time) {
+  if (lastMission && !lastMission.end_time && isMinigame) {
     logger.warn(`Can't start new mission while there is an active mission for this user.`)
     throw new InvalidRequestError(`Can't start new mission while there is an active mission for this user.`)
+  } else if (lastMission && !lastMission.end_time && !isMinigame && lastMission.id === missionId) {
+    logger.warn(`This mission is already active for this user.`)
+    throw new InvalidRequestError(`This mission is already active for this user.`)
+  } else if (lastMission && !lastMission.end_time && !isMinigame && lastMission.id !== missionId) {
+    await db.setIncompleteMission(lastMission.user_mission_id)
   }
 
-  const missionTimeWindow = mission?.type === 'mini-games' ? await config.requireNumber('MISSION_TIME_WINDOW_HS') : 0
-  const lastStartTime = lastMission?.start_time || '0'
-  const isTimeForNewMission = Date.now() - missionTimeWindow * 60 * 60 * 1000 > parseInt(lastStartTime)
+  if (isMinigame && lastMission) {
+    const missionTimeWindow = await config.requireNumber('MISSION_TIME_WINDOW_HS')
+    const lastStartTime = parseInt(lastMission.start_time || '0')
+    const isTimeForNewMission = Date.now() - missionTimeWindow * 60 * 60 * 1000 > lastStartTime
 
-  if (!isTimeForNewMission) {
-    logger.warn('Need to wait more time for starting a new mission')
-    throw new InvalidRequestError('Need to wait more time for starting a new mission')
+    if (!isTimeForNewMission) {
+      logger.warn('Need to wait more time for starting a new mission')
+      throw new InvalidRequestError('Need to wait more time for starting a new mission')
+    }
   }
 
   await db.setMissionAsStart(verification!.auth, missionId)

@@ -246,7 +246,7 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
     },
     async getLastMissionForUser($userAddress: string, $type: MissionType) {
       const results = await pg.query<MissionCompleted>(SQL`
-        SELECT m.id, m.description, m.active, m.type, m.thumb_url, um.start_time, um.end_time
+        SELECT m.id, m.description, m.active, m.type, m.thumb_url, um.id AS user_mission_id, um.start_time, um.end_time
           FROM missions m
           JOIN user_missions um ON m.id = um.mission_id
           WHERE m.active is TRUE AND um.active IS TRUE AND um.user_address = ${$userAddress.toLocaleLowerCase()}
