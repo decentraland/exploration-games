@@ -40,18 +40,14 @@ export async function createUserMissionHandler(
 
   const lastMission = await db.getLastMissionForUser(verification!.auth, mission.type)
 
-  if (lastMission && !lastMission.end_time) {
-    if (isMinigame) {
-      logger.warn(`Can't start new mission while there is an active mission for this user.`)
-      throw new InvalidRequestError(`Can't start new mission while there is an active mission for this user.`)
-    } else {
-      if (lastMission.id === missionId) {
-        logger.warn(`This mission is already active for this user.`)
-        throw new InvalidRequestError(`This mission is already active for this user.`)
-      } else {
-        await db.setIncompleteMission(lastMission.user_mission_id)
-      }
-    }
+  if (lastMission && !lastMission.end_time && isMinigame) {
+    logger.warn(`Can't start new mission while there is an active mission for this user.`)
+    throw new InvalidRequestError(`Can't start new mission while there is an active mission for this user.`)
+  } else if (lastMission && !lastMission.end_time && !isMinigame && lastMission.id === missionId) {
+    logger.warn(`This mission is already active for this user.`)
+    throw new InvalidRequestError(`This mission is already active for this user.`)
+  } else if (lastMission && !lastMission.end_time && !isMinigame && lastMission.id !== missionId) {
+    await db.setIncompleteMission(lastMission.user_mission_id)
   }
 
   if (isMinigame && lastMission) {
