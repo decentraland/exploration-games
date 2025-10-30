@@ -3,7 +3,7 @@ info:
   title: Exploration Games API
   description: |
     ## Overview
-    The Exploration Games API is a service for managing mini-games, missions, challenges, and player progress in Decentraland.    
+    The Exploration Games API is a service for managing mini-games, missions, challenges, and player progress in Decentraland    
     
     This service provides a comprehensive system for:
     - **Games**: Create and manage mini-games within Decentraland parcels
