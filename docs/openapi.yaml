@@ -1,0 +1,1375 @@
+openapi: 3.0.3
+info:
+  title: Exploration Games API
+  description: |
+    ## Overview
+    The Exploration Games API is a service for managing mini-games, missions, challenges, and player progress in Decentraland.    
+    
+    This service provides a comprehensive system for:
+    - **Games**: Create and manage mini-games within Decentraland parcels
+    - **Missions**: Campaign-based mission system with time-gated progression
+    - **Challenges**: Level and metric-based objectives within games
+    - **Progress Tracking**: Track player scores, levels, times, and custom game metrics
+    - **Leaderboards**: View competitive rankings across games
+    - **Rewards**: Integration with reward system upon mission completion
+    
+    ### Authentication
+    Most endpoints require authentication via Decentraland's signature verification middleware.
+    Admin endpoints require additional admin privileges verification.
+    
+    ### Mission System
+    The mission system supports two types:
+    - **mini-games**: Traditional time-gated missions with one active at a time
+    - **fw-2025**: Fashion Week 2025 missions with special visit tracking
+    
+    ### Progress Tracking
+    Player progress includes:
+    - **score**: Game score metric
+    - **level**: Current level achieved
+    - **time**: Time taken (in seconds/milliseconds)
+    - **moves**: Number of moves made
+    - **data**: Custom JSON data for game-specific metrics
+    
+  version: 1.0.0
+  contact:
+    name: Decentraland Foundation
+servers:
+  - url: https://exploration-games.decentraland.org
+    description: Production server
+  - url: https://exploration-games.decentraland.zone
+    description: Development server
+
+tags:
+  - name: Status
+    description: Service health and version information
+  - name: Games
+    description: Game management and retrieval operations
+  - name: Challenges
+    description: Challenge creation and management for missions
+  - name: Missions
+    description: Mission management and user mission tracking
+  - name: Progress
+    description: Player progress tracking and leaderboards
+  - name: Multiplayer
+    description: Multiplayer game progress submission
+
+paths:
+  /status:
+    get:
+      tags:
+        - Status
+      summary: Get service status
+      description: Returns the current version, commit hash, and server time
+      operationId: getStatus
+      security: []
+      responses:
+        '200':
+          description: Service status information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                    description: Service version
+                    example: "1.0.0"
+                  currentTime:
+                    type: number
+                    description: Current server time in milliseconds
+                    example: 1698765432000
+                  commitHash:
+                    type: string
+                    description: Git commit hash
+                    example: "abc123def456"
+
+  /api/games:
+    get:
+      tags:
+        - Games
+      summary: Get games
+      description: Retrieve all active games or all games (including inactive) with the 'all' query parameter
+      operationId: getGames
+      security: []
+      parameters:
+        - name: all
+          in: query
+          description: Include inactive games
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of games
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Game'
+    post:
+      tags:
+        - Games
+      summary: Create a new game
+      description: Create a new game at a specific parcel location (Admin only)
+      operationId: createGame
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGamePayload'
+      responses:
+        '201':
+          description: Game created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Game'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/games/{id}:
+    patch:
+      tags:
+        - Games
+      summary: Update a game
+      description: Update game name and parcel location (Admin only)
+      operationId: updateGame
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Game ID (UUID)
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGamePayload'
+      responses:
+        '204':
+          description: Game updated successfully
+        '400':
+          description: Invalid request or game not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/games/{id}/deactivate:
+    patch:
+      tags:
+        - Games
+      summary: Deactivate a game
+      description: Deactivate a game by ID (Admin only)
+      operationId: deactivateGame
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Game ID (UUID)
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Game deactivated successfully
+        '400':
+          description: Invalid UUID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/games/{id}/challenges:
+    get:
+      tags:
+        - Challenges
+      summary: Get challenges for a game
+      description: Retrieve all active challenges for a specific game
+      operationId: getChallengesForGame
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Game ID (UUID)
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of challenges
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Challenge'
+        '400':
+          description: Invalid UUID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/games/{id}/challenges/completed:
+    get:
+      tags:
+        - Challenges
+      summary: Get user completed challenges by game
+      description: Retrieve all challenges completed by the authenticated user for a specific game
+      operationId: getUserCompletedChallengesByGame
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Game ID (UUID)
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of completed challenges
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChallengeWithCompletionTime'
+        '400':
+          description: Invalid UUID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/games/{id}/leaderboard:
+    get:
+      tags:
+        - Progress
+      summary: Get game leaderboard
+      description: Retrieve leaderboard rankings for a specific game with optional filtering and sorting
+      operationId: getProgressLeaderboard
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Game ID (UUID)
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: level
+          in: query
+          description: Filter by specific level
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: sort
+          in: query
+          description: Sort field (cannot be 'level')
+          required: false
+          schema:
+            type: string
+            enum: [score, updated_at, time, moves]
+            default: score
+        - name: direction
+          in: query
+          description: Sort direction
+          required: false
+          schema:
+            type: string
+            enum: [ASC, DESC]
+            default: DESC
+        - name: limit
+          in: query
+          description: Number of results to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 10
+      responses:
+        '200':
+          description: Leaderboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LeaderboardEntry'
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/games/{id}/progress:
+    get:
+      tags:
+        - Progress
+      summary: Get user progress in game
+      description: Retrieve the authenticated user's progress history in a specific game
+      operationId: getProgressInGame
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Game ID (UUID)
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: sort
+          in: query
+          description: Sort field
+          required: false
+          schema:
+            type: string
+            enum: [score, updated_at, level, time, moves]
+            default: updated_at
+        - name: direction
+          in: query
+          description: Sort direction
+          required: false
+          schema:
+            type: string
+            enum: [ASC, DESC]
+            default: DESC
+        - name: limit
+          in: query
+          description: Number of results to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 10
+      responses:
+        '200':
+          description: User progress data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserProgress'
+        '400':
+          description: Invalid UUID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Progress
+      summary: Submit new progress in game
+      description: Submit new game progress for the authenticated user. Automatically checks for challenge completion and mission completion.
+      operationId: newProgressInGame
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Game ID (UUID)
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewProgressInGamePayload'
+      responses:
+        '201':
+          description: Progress submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserProgress'
+        '400':
+          description: Invalid request payload or UUID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/games/{id}/progress/all:
+    get:
+      tags:
+        - Progress
+      summary: Get all progress in game
+      description: Retrieve all user progress entries for a specific game with pagination (Admin only)
+      operationId: getAllProgressInGame
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Game ID (UUID)
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: level
+          in: query
+          description: Filter by specific level
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: sort
+          in: query
+          description: Sort field
+          required: false
+          schema:
+            type: string
+            enum: [score, updated_at, level, time, moves]
+            default: updated_at
+        - name: direction
+          in: query
+          description: Sort direction
+          required: false
+          schema:
+            type: string
+            enum: [ASC, DESC]
+            default: DESC
+        - name: limit
+          in: query
+          description: Number of results per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 10
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 1
+      responses:
+        '200':
+          description: All progress data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserProgress'
+        '400':
+          description: Invalid UUID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/games/progress:
+    get:
+      tags:
+        - Progress
+      summary: Get all user progress
+      description: Retrieve all games being played by the authenticated user with their latest progress
+      operationId: getAllUserProgressInGames
+      security: []
+      responses:
+        '200':
+          description: List of games played by user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GamePlayedByUser'
+
+  /api/games/progress/status:
+    patch:
+      tags:
+        - Progress
+      summary: Set progress status
+      description: Enable or disable specific progress entries (Admin only)
+      operationId: setProgressStatus
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProgressStatusBody'
+      responses:
+        '200':
+          description: Progress status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      description: Updated progress entries
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/challenges:
+    post:
+      tags:
+        - Challenges
+      summary: Create a new challenge
+      description: Create a new challenge for a game and mission (Admin only)
+      operationId: createChallenge
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChallengePayload'
+      responses:
+        '201':
+          description: Challenge created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Challenge'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/challenges/{id}:
+    patch:
+      tags:
+        - Challenges
+      summary: Update a challenge
+      description: Update an existing challenge (Admin only)
+      operationId: updateChallenge
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Challenge ID (UUID)
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChallengePayload'
+      responses:
+        '204':
+          description: Challenge updated successfully
+        '400':
+          description: Invalid request or challenge not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/missions:
+    get:
+      tags:
+        - Missions
+      summary: Get all missions
+      description: Retrieve all missions or only active missions (Admin only)
+      operationId: getMissions
+      security: []
+      parameters:
+        - name: all
+          in: query
+          description: Include inactive missions
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of missions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Mission'
+    post:
+      tags:
+        - Missions
+      summary: Create a new mission
+      description: Create a new mission campaign (Admin only)
+      operationId: createMission
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMissionPayload'
+      responses:
+        '201':
+          description: Mission created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Mission'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/missions/{id}:
+    get:
+      tags:
+        - Missions
+      summary: Get mission details
+      description: Retrieve mission details including associated challenges and games (Admin only)
+      operationId: getMission
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Mission ID (UUID)
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Mission details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      mission:
+                        $ref: '#/components/schemas/Mission'
+                      challenges:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Challenge'
+                      games:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Game'
+    patch:
+      tags:
+        - Missions
+      summary: Update a mission
+      description: Update an existing mission (Admin only)
+      operationId: updateMission
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Mission ID (UUID)
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMissionPayload'
+      responses:
+        '204':
+          description: Mission updated successfully
+        '400':
+          description: Invalid request or mission not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/missions/available:
+    get:
+      tags:
+        - Missions
+      summary: Get available missions for user
+      description: Retrieve missions available to start for the authenticated user
+      operationId: getMissionsAvailable
+      security: []
+      parameters:
+        - name: type
+          in: query
+          description: Mission type filter
+          required: false
+          schema:
+            type: string
+            enum: [mini-games, fw-2025]
+            default: mini-games
+      responses:
+        '200':
+          description: List of available missions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Mission'
+
+  /api/missions/in_progress:
+    get:
+      tags:
+        - Missions
+      summary: Get missions in progress
+      description: Retrieve missions currently in progress for the authenticated user with challenges and games
+      operationId: getMissionsInProgress
+      security: []
+      parameters:
+        - name: type
+          in: query
+          description: Mission type filter
+          required: false
+          schema:
+            type: string
+            enum: [mini-games, fw-2025]
+            default: mini-games
+      responses:
+        '200':
+          description: Missions in progress with challenges and games
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      missions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MissionInProgress'
+                      challenges:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ChallengeWithCompletionTime'
+                      games:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Game'
+
+  /api/missions/completed:
+    get:
+      tags:
+        - Missions
+      summary: Get completed missions
+      description: Retrieve missions completed by the authenticated user with challenges and games
+      operationId: getMissionsCompleted
+      security: []
+      parameters:
+        - name: type
+          in: query
+          description: Mission type filter
+          required: false
+          schema:
+            type: string
+            enum: [mini-games, fw-2025]
+            default: mini-games
+      responses:
+        '200':
+          description: Completed missions with challenges and games
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      missions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MissionCompleted'
+                      challenges:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ChallengeWithCompletionTime'
+                      games:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Game'
+
+  /api/missions/{id}/start:
+    post:
+      tags:
+        - Missions
+      summary: Start a mission
+      description: |
+        Start a mission for the authenticated user. 
+        
+        **Rules:**
+        - Mini-games missions: Only one active mission at a time, with time window restrictions between missions
+        - Fashion Week missions: Can have multiple active, switching between them marks previous as incomplete
+        - Mission must exist and have a valid type
+      operationId: startMission
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Mission ID (UUID)
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Mission started successfully
+        '400':
+          description: Invalid UUID, mission not found, or cannot start mission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/multiplayer/progress:
+    post:
+      tags:
+        - Multiplayer
+      summary: Submit multiplayer game progress
+      description: Submit progress for multiple players in a multiplayer game session (Requires bearer token authentication)
+      operationId: newMultiplayerProgress
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewMultiplayerProgressPayload'
+      responses:
+        '201':
+          description: Multiplayer progress submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserProgress'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Game:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique game identifier
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          description: Game name
+          example: "Puzzle Master"
+        parcel:
+          type: string
+          description: Decentraland parcel coordinates
+          example: "10,20"
+        active:
+          type: boolean
+          description: Whether the game is active
+          example: true
+      required:
+        - id
+        - name
+        - parcel
+        - active
+
+    CreateGamePayload:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Game name
+          example: "Puzzle Master"
+        x:
+          type: integer
+          description: X coordinate of the parcel
+          minimum: -150
+          maximum: 150
+          example: 10
+        y:
+          type: integer
+          description: Y coordinate of the parcel
+          minimum: -150
+          maximum: 150
+          example: 20
+      required:
+        - name
+        - x
+        - y
+
+    Mission:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique mission identifier
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        description:
+          type: string
+          description: Mission description
+          example: "Complete 3 mini-games to earn rewards"
+        campaign_key:
+          type: string
+          description: Campaign identifier for reward system
+          example: "minigames-season-1"
+        type:
+          type: string
+          enum: [mini-games, fw-2025]
+          description: Mission type
+          example: "mini-games"
+        active:
+          type: boolean
+          description: Whether the mission is active
+          example: true
+        thumb_url:
+          type: string
+          description: Thumbnail image URL
+          example: "https://example.com/mission-thumb.png"
+      required:
+        - id
+        - description
+        - campaign_key
+        - type
+        - active
+        - thumb_url
+
+    CreateMissionPayload:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Mission description
+          example: "Complete 3 mini-games to earn rewards"
+        campaign_key:
+          type: string
+          description: Campaign identifier for reward system
+          example: "minigames-season-1"
+        type:
+          type: string
+          enum: [mini-games, fw-2025]
+          description: Mission type
+          example: "mini-games"
+        thumb_url:
+          type: string
+          description: Thumbnail image URL
+          example: "https://example.com/mission-thumb.png"
+      required:
+        - description
+        - campaign_key
+        - type
+        - thumb_url
+
+    MissionInProgress:
+      allOf:
+        - $ref: '#/components/schemas/Mission'
+        - type: object
+          properties:
+            start_time:
+              type: string
+              description: Mission start timestamp (milliseconds)
+              example: "1698765432000"
+          required:
+            - start_time
+
+    MissionCompleted:
+      allOf:
+        - $ref: '#/components/schemas/MissionInProgress'
+        - type: object
+          properties:
+            end_time:
+              type: string
+              description: Mission completion timestamp (milliseconds)
+              example: "1698865432000"
+            user_mission_id:
+              type: string
+              format: uuid
+              description: User mission instance ID
+              example: "550e8400-e29b-41d4-a716-446655440002"
+          required:
+            - end_time
+            - user_mission_id
+
+    Challenge:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique challenge identifier
+          example: "550e8400-e29b-41d4-a716-446655440003"
+        description:
+          type: string
+          description: Challenge description
+          example: "Reach level 5 with a score over 1000"
+        game_id:
+          type: string
+          format: uuid
+          description: Associated game ID
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        mission_id:
+          type: string
+          format: uuid
+          description: Associated mission ID
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        target_level:
+          type: integer
+          minimum: 1
+          description: Required level to complete challenge
+          example: 5
+        data:
+          type: object
+          description: Challenge conditions (e.g., score >= 1000)
+          additionalProperties: true
+          example:
+            score:
+              condition: ">="
+              target: 1000
+        active:
+          type: boolean
+          description: Whether the challenge is active
+          example: true
+      required:
+        - id
+        - description
+        - game_id
+        - mission_id
+        - target_level
+        - active
+
+    CreateChallengePayload:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Challenge description
+          example: "Reach level 5 with a score over 1000"
+        gameId:
+          type: string
+          format: uuid
+          description: Associated game ID
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        missionId:
+          type: string
+          format: uuid
+          description: Associated mission ID
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        targetLevel:
+          type: integer
+          minimum: 1
+          description: Required level to complete challenge
+          example: 5
+        data:
+          type: object
+          description: Challenge conditions
+          additionalProperties: true
+          example:
+            score:
+              condition: ">="
+              target: 1000
+      required:
+        - description
+        - gameId
+        - missionId
+        - targetLevel
+
+    ChallengeWithCompletionTime:
+      allOf:
+        - $ref: '#/components/schemas/Challenge'
+        - type: object
+          properties:
+            completed:
+              type: boolean
+              description: Whether the user completed this challenge
+              example: true
+            completed_at:
+              type: string
+              description: Completion timestamp (ISO 8601)
+              example: "2024-10-30T12:34:56.789Z"
+          required:
+            - completed
+            - completed_at
+
+    GameMetrics:
+      type: object
+      properties:
+        score:
+          type: number
+          description: Game score
+          example: 1500
+        level:
+          type: integer
+          minimum: 1
+          description: Current level achieved
+          example: 5
+        time:
+          type: number
+          description: Time taken (seconds/milliseconds)
+          example: 120.5
+        moves:
+          type: number
+          description: Number of moves made
+          example: 45
+
+    UserProgress:
+      allOf:
+        - $ref: '#/components/schemas/GameMetrics'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Progress entry ID
+              example: "550e8400-e29b-41d4-a716-446655440004"
+            game_id:
+              type: string
+              format: uuid
+              description: Game ID
+              example: "550e8400-e29b-41d4-a716-446655440000"
+            user_address:
+              type: string
+              description: User's wallet address
+              example: "0x1234567890123456789012345678901234567890"
+            user_name:
+              type: string
+              description: User's display name
+              example: "Player123"
+            data:
+              type: object
+              description: Custom game-specific data
+              additionalProperties: true
+              example:
+                powerUpsUsed: 3
+                enemiesDefeated: 10
+            updated_at:
+              type: string
+              description: Last update timestamp (ISO 8601)
+              example: "2024-10-30T12:34:56.789Z"
+          required:
+            - id
+            - game_id
+            - user_address
+            - user_name
+            - updated_at
+
+    NewProgressInGamePayload:
+      allOf:
+        - $ref: '#/components/schemas/GameMetrics'
+        - type: object
+          properties:
+            user_name:
+              type: string
+              description: User's display name
+              example: "Player123"
+            data:
+              type: object
+              description: Custom game-specific data
+              additionalProperties: true
+              example:
+                powerUpsUsed: 3
+          required:
+            - user_name
+            - level
+
+    MultiplayerPlayerScore:
+      allOf:
+        - $ref: '#/components/schemas/NewProgressInGamePayload'
+        - type: object
+          properties:
+            user_address:
+              type: string
+              pattern: '^0x[a-fA-F0-9]{40}$'
+              description: User's wallet address
+              example: "0x1234567890123456789012345678901234567890"
+          required:
+            - user_address
+
+    NewMultiplayerProgressPayload:
+      type: object
+      properties:
+        game_id:
+          type: string
+          format: uuid
+          description: Game ID
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        scores:
+          type: array
+          description: Array of player scores
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/MultiplayerPlayerScore'
+      required:
+        - game_id
+        - scores
+
+    GamePlayedByUser:
+      allOf:
+        - $ref: '#/components/schemas/GameMetrics'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: Game name
+              example: "Puzzle Master"
+            parcel:
+              type: string
+              description: Decentraland parcel coordinates
+              example: "10,20"
+            data:
+              type: object
+              description: Custom game-specific data
+              additionalProperties: true
+          required:
+            - name
+            - parcel
+
+    LeaderboardEntry:
+      allOf:
+        - $ref: '#/components/schemas/GameMetrics'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: Game name
+              example: "Puzzle Master"
+            parcel:
+              type: string
+              description: Decentraland parcel coordinates
+              example: "10,20"
+            user_address:
+              type: string
+              description: User's wallet address
+              example: "0x1234567890123456789012345678901234567890"
+            data:
+              type: object
+              description: Custom game-specific data
+              additionalProperties: true
+          required:
+            - name
+            - parcel
+            - user_address
+
+    ProgressStatusBody:
+      type: object
+      properties:
+        ids:
+          type: array
+          description: Array of progress entry IDs
+          items:
+            type: string
+            format: uuid
+          example: ["550e8400-e29b-41d4-a716-446655440004"]
+        disabled:
+          type: boolean
+          description: Whether to disable (true) or enable (false) the progress entries
+          example: false
+      required:
+        - ids
+        - disabled
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Invalid UUID"
+        message:
+          type: string
+          description: Detailed error description
+          example: "The provided ID is not a valid UUID format"
+
+  securitySchemes:
+    DecentralandSignature:
+      type: apiKey
+      in: header
+      name: X-Identity-Auth-Chain-0
+      description: Decentraland signature authentication chain
+    BearerToken:
+      type: http
+      scheme: bearer
+      description: Bearer token for multiplayer endpoints
+
