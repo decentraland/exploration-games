@@ -1,6 +1,6 @@
 # Exploration Games
 
-## 🤖 AI Agent Context
+## AI Agent Context
 
 **Service Purpose:** Manages exploration games and related functionality within Decentraland. Provides services for game discovery, participation tracking, and reward distribution for exploration-based gameplay experiences.
 
