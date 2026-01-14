@@ -11,7 +11,7 @@ jobs:
       - name: Use Node.js 20.x
         uses: actions/setup-node@v3
         with:
-          node-version: 20.x
+          node-version: '24.13'
           cache: yarn
       - name: install
         run: yarn install --frozen-lockfile
@@ -39,7 +39,7 @@ jobs:
       - name: Use Node.js 20.x
         uses: actions/setup-node@v3
         with:
-          node-version: 20.x
+          node-version: '24.13'
           cache: yarn
       - name: install
         run: yarn install --frozen-lockfile
