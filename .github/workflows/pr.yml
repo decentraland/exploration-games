@@ -8,4 +8,5 @@ jobs:
     uses: decentraland/platform-actions/.github/workflows/apps-pr.yml@main
     with:
       service-name: exploration-games
+      node-version: '24.x'
     secrets: inherit
