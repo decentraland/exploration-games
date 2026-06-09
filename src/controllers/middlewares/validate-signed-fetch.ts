@@ -18,7 +18,10 @@ export async function validateSignedFetch(
     await validateBody(ctx, opts.body)
   }
 
-  // await validateUserInDCL(ctx, !opts?.skipParcelValidation)
+  // Always verify the signer is actually connected in DCL (presence). The parcel
+  // match is only enforced when this is not a "visit" (skipParcelValidation),
+  // so visits still work while progress can no longer be claimed from outside.
+  await validateUserInDCL(ctx, !opts?.skipParcelValidation)
 }
 
 export async function validateGameParcel(ctx: SingedFetchContext, gameId: string) {
@@ -75,6 +78,20 @@ export async function validateUserInDCL(ctx: SingedFetchContext, validateParcel:
 
   if (ctx.verification?.authMetadata.realm.serverName === 'main') {
     hostname = 'https://archipelago-ea-stats.decentraland.org'
+  }
+
+  // The hostname comes from the client-signed realm metadata, so restrict it to
+  // trusted Decentraland realms before fetching. Without this the peers lookup
+  // is an SSRF (e.g. http://169.254.169.254/...) and is bypassable by pointing
+  // at an attacker-controlled /comms/peers that returns a forged peer list.
+  let realmUrl: URL
+  try {
+    realmUrl = new URL(hostname)
+  } catch {
+    throw new InvalidRequestError('Invalid realm hostname')
+  }
+  if (realmUrl.protocol !== 'https:' || !realmUrl.hostname.endsWith('.decentraland.org')) {
+    throw new InvalidRequestError('Realm hostname not allowed')
   }
 
   let data: PeerResponse
