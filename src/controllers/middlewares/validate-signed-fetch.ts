@@ -99,7 +99,10 @@ export async function validateUserInDCL(ctx: SingedFetchContext, validateParcel:
   // Restrict the peers lookup to trusted Decentraland realms. Without this the
   // lookup is an SSRF (e.g. http://169.254.169.254/...) and is bypassable by
   // pointing at an attacker-controlled /comms/peers returning a forged peer list.
-  if (realmUrl.protocol !== 'https:' || !(realmHost === 'decentraland.org' || realmHost.endsWith('.decentraland.org'))) {
+  if (
+    realmUrl.protocol !== 'https:' ||
+    !(realmHost === 'decentraland.org' || realmHost.endsWith('.decentraland.org'))
+  ) {
     throw new InvalidRequestError('Realm hostname not allowed')
   }
 
