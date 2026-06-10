@@ -449,7 +449,12 @@ export function createDBComponent(components: Pick<AppComponents, 'pg'>): IDatab
       )
     },
     async setMissionAsEnd(userMissionId: string) {
-      return await pg.query(SQL`UPDATE user_missions SET end_time = ${Date.now()} WHERE id = ${userMissionId}`)
+      // Guard with `end_time IS NULL` so the mission can only be ended once.
+      // The caller gates the reward on rowCount, so concurrent "complete last
+      // challenge" requests can no longer each end the mission and send a reward.
+      return await pg.query(
+        SQL`UPDATE user_missions SET end_time = ${Date.now()} WHERE id = ${userMissionId} AND end_time IS NULL`
+      )
     },
     async setIncompleteMission(userMissionId: string) {
       await pg.query(SQL`UPDATE user_missions SET active = false WHERE id = ${userMissionId}`)
