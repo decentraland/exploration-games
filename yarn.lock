@@ -319,7 +319,15 @@
     "@dcl/core-commons" "^0.10.0"
     "@dcl/crypto" "3.7.0"
 
-"@dcl/crypto@3.7.0":
+"@dcl/crypto-middleware@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@dcl/crypto-middleware/-/crypto-middleware-4.1.1.tgz#a46861caa68bf38f0355ce72d77a8232200d54ed"
+  integrity sha512-wNo3D00SyZKoxy3THQj+EMWWatU9F2VTPwqTIVWZj3JlnaKRScNpLOsrHVPETN9FYtTIlJqqhjlUWsjoUGVisw==
+  dependencies:
+    "@dcl/core-commons" "^0.10.0"
+    "@dcl/crypto" "3.7.0"
+
+"@dcl/crypto@3.7.0", "@dcl/crypto@^3.7.0":
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/@dcl/crypto/-/crypto-3.7.0.tgz#2436370e591ea269da4806ee800e8eec21ff2168"
   integrity sha512-8HSFLxnIHDeA8I/6yGAUwbCin2TX2oPn2uBLj5UmR0NFAyN5wYJCqbeolaJaIdmqN9RFjdb9ixKOY4uKF5Q2XA==
@@ -354,10 +362,10 @@
     eslint-plugin-prettier "^5.1.3"
     prettier "^3.3.2"
 
-"@dcl/fetch-component@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@dcl/fetch-component/-/fetch-component-1.1.0.tgz#cc16300374e789fb920b8d7d11e6445fe4f20ee0"
-  integrity sha512-WDri8jx8EN90P+0EE9NII/oMV5GDcpMMIrUGFq9OT3EW9xeRkyiUyRYwSqI9rjjG+2wNJcpDnkCVlMq+kva6fg==
+"@dcl/fetch-component@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@dcl/fetch-component/-/fetch-component-1.1.1.tgz#8f089f216150bab23d4cb798311796943243bc0b"
+  integrity sha512-Q1d/By58NRFIF7h5oMSSFNFGtcJmoKKY6V3kOo314soCgSH0IETydwaD8Hu2zPWK9TZQVx+eDJppViyKVpt91Q==
   dependencies:
     "@dcl/core-commons" "0.10.1"
 
@@ -370,10 +378,10 @@
     "@dcl/schemas" "^18.0.0"
     "@well-known-components/interfaces" "^1.4.3"
 
-"@dcl/http-server@^2.0.2":
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/@dcl/http-server/-/http-server-2.0.3.tgz#0897b14327ef1d5ffcc2c77d3f012c4113650f4d"
-  integrity sha512-viIRBUk0Gnh39CgpOUXHjXfK85PYejvkScTlHAwAyUFHir01Qh3FMztZUOcO9uEEdbMXdJf7HuJfSDbXJv1gNw==
+"@dcl/http-server@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@dcl/http-server/-/http-server-2.1.0.tgz#5385ba3319356d32d468365a84530f24e245fa65"
+  integrity sha512-UqIFIo18JeKklM/RM0wEJ0u/DCGjikBHtQ1LzuQKjDK6SP9XgeVhukgCg5BmdW0D3Qzlql2i5CGpW4EdyfUiWQ==
   dependencies:
     "@dcl/core-commons" "0.10.1"
     "@well-known-components/interfaces" "^1.5.1"
