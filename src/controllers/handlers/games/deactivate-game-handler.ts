@@ -1,5 +1,5 @@
 import { HandlerContextWithPath } from '../../../types'
-import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
+import { InvalidRequestError } from '@dcl/http-commons'
 import { uuidSchema } from '../../../utils'
 
 export async function deactivateGameHandler(

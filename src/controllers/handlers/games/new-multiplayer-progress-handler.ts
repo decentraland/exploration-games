@@ -1,6 +1,5 @@
 import Joi from 'joi'
-import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
-import { parseJson } from '@dcl/platform-server-commons/dist/utils'
+import { InvalidRequestError, parseJson } from '@dcl/http-commons'
 import {
   HandlerContextWithPath,
   MultiplayerPlayerScore,

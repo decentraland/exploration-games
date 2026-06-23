@@ -1,7 +1,7 @@
-import { InvalidRequestError } from '@dcl/platform-server-commons'
+import { InvalidRequestError } from '@dcl/http-commons'
 import { AppComponents, DecentralandSignatureMetadata } from '../../types'
 import { createHash } from 'crypto'
-import { DecentralandSignatureContext } from '@dcl/platform-crypto-middleware'
+import { DecentralandSignatureContext } from '@dcl/crypto-middleware'
 
 type SingedFetchContext = DecentralandSignatureContext<DecentralandSignatureMetadata> & {
   components: Pick<AppComponents, 'db'>

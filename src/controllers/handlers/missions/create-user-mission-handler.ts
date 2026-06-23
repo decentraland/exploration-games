@@ -1,4 +1,4 @@
-import { InvalidRequestError } from '@dcl/platform-server-commons/dist/errors'
+import { InvalidRequestError } from '@dcl/http-commons'
 import { HandlerContextWithPath } from '../../../types'
 import { uuidSchema } from '../../../utils'
 

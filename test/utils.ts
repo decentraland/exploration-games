@@ -1,7 +1,7 @@
 import { AuthChain, AuthIdentity, AuthLinkType, Authenticator, IdentityType } from '@dcl/crypto'
 import { computeAddress, createUnsafeIdentity } from '@dcl/crypto/dist/crypto'
-import { AUTH_CHAIN_HEADER_PREFIX, AUTH_METADATA_HEADER, AUTH_TIMESTAMP_HEADER } from '@dcl/platform-crypto-middleware'
-import { IFetchComponent } from '@well-known-components/interfaces'
+import { AUTH_CHAIN_HEADER_PREFIX, AUTH_METADATA_HEADER, AUTH_TIMESTAMP_HEADER } from '@dcl/crypto-middleware'
+import { IFetchComponent } from '@dcl/core-commons'
 import { hashSha256 } from '../src/controllers/middlewares/validate-signed-fetch'
 
 export type Identity = { authChain: AuthIdentity; realAccount: IdentityType; ephemeralIdentity: IdentityType }

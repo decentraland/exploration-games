@@ -1,15 +1,14 @@
 import type {
   IConfigComponent,
   ILoggerComponent,
-  IHttpServerComponent,
   IBaseComponent,
-  IMetricsComponent,
-  IFetchComponent
+  IMetricsComponent
 } from '@well-known-components/interfaces'
-import { IPgComponent } from '@well-known-components/pg-component'
+import type { IHttpServerComponent, IFetchComponent } from '@dcl/core-commons'
+import { IPgComponent } from '@dcl/pg-component'
 import { metricDeclarations } from './metrics'
 import { IDatabaseComponent } from './adapters/db'
-import { DecentralandSignatureContext } from '@dcl/platform-crypto-middleware/dist/types'
+import { DecentralandSignatureContext } from '@dcl/crypto-middleware'
 import { ChainId } from '@dcl/schemas/dist/dapps/chain-id'
 import { Rarity, EmoteCategory, WearableCategory } from '@dcl/schemas'
 
