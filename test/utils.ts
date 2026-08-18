@@ -41,7 +41,7 @@ export function getAuthHeaders(
   const timestamp = Date.now()
   const metadataJSON = JSON.stringify(metadata)
   const payloadParts = [method.toLowerCase(), path.toLowerCase(), timestamp.toString(), metadataJSON]
-  const payloadToSign = payloadParts.join(':').toLowerCase()
+  const payloadToSign = payloadParts.join(':')
 
   const chain = chainProvider(payloadToSign)
 

@@ -1,6 +1,6 @@
 import { Router } from '@dcl/http-server'
 import { errorHandler, bearerTokenMiddleware } from '@dcl/http-commons'
-import { wellKnownComponents as authVerificationMiddleware } from '@dcl/crypto-middleware'
+import { wellKnownComponents as authVerificationMiddleware, requireSigner } from '@dcl/crypto-middleware'
 import { GlobalContext } from '../types'
 import isAdminMiddleware from './middlewares/is-admin-middleware'
 import { statusHandler } from './handlers/status-handler'
@@ -37,7 +37,7 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   const auth = authVerificationMiddleware({
     fetcher: components.fetcher,
     optional: false,
-    metadataValidator: (metadata) => metadata.signer === 'decentraland-kernel-scene'
+    metadataValidator: requireSigner('decentraland-kernel-scene')
   })
 
   components.server.use(router.middleware())
