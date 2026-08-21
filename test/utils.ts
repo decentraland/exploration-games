@@ -55,6 +55,36 @@ export function getAuthHeaders(
   return headers
 }
 
+/**
+ * Builds ADR-44 headers signing the **pre-6.0.0** payload: the joined string is folded as a whole,
+ * metadata included. That fold is what left the metadata's casing outside the signature, and it is
+ * still what the explorer runtime emits, so this is the shape real scene traffic arrives in.
+ *
+ * Only routes that opt in via `canonicalMetadataKeys` verify it; anywhere else it is a 401.
+ */
+export function getLegacyAuthHeaders(
+  method: string,
+  path: string,
+  metadata: Record<string, any>,
+  chainProvider: (payload: string) => AuthChain
+) {
+  const headers: Record<string, string> = {}
+  const timestamp = Date.now()
+  const metadataJSON = JSON.stringify(metadata)
+  const payloadToSign = [method, path, timestamp.toString(), metadataJSON].join(':').toLowerCase()
+
+  const chain = chainProvider(payloadToSign)
+
+  chain.forEach((link, index) => {
+    headers[`${AUTH_CHAIN_HEADER_PREFIX}${index}`] = JSON.stringify(link)
+  })
+
+  headers[AUTH_TIMESTAMP_HEADER] = timestamp.toString()
+  headers[AUTH_METADATA_HEADER] = metadataJSON
+
+  return headers
+}
+
 export function makeRequest(localFetch: IFetchComponent, path: string, options: any = {}, identity = admin) {
   const url = new URL(path, 'http://localhost:3000')
 
