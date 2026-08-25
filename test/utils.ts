@@ -2,6 +2,7 @@ import { AuthChain, AuthIdentity, AuthLinkType, Authenticator, IdentityType } fr
 import { computeAddress, createUnsafeIdentity } from '@dcl/crypto/dist/crypto'
 import { AUTH_CHAIN_HEADER_PREFIX, AUTH_METADATA_HEADER, AUTH_TIMESTAMP_HEADER } from '@dcl/crypto-middleware'
 import { IFetchComponent } from '@dcl/core-commons'
+import { getAuthHeaders } from '@dcl/test-helpers'
 import { hashSha256 } from '../src/controllers/middlewares/validate-signed-fetch'
 
 export type Identity = { authChain: AuthIdentity; realAccount: IdentityType; ephemeralIdentity: IdentityType }
@@ -31,29 +32,12 @@ export const admin: AuthIdentity = {
 
 export const allowedKeys = ['test-key-1', 'test-key-2']
 
-export function getAuthHeaders(
-  method: string,
-  path: string,
-  metadata: Record<string, any>,
-  chainProvider: (payload: string) => AuthChain
-) {
-  const headers: Record<string, string> = {}
-  const timestamp = Date.now()
-  const metadataJSON = JSON.stringify(metadata)
-  const payloadParts = [method.toLowerCase(), path.toLowerCase(), timestamp.toString(), metadataJSON]
-  const payloadToSign = payloadParts.join(':')
-
-  const chain = chainProvider(payloadToSign)
-
-  chain.forEach((link, index) => {
-    headers[`${AUTH_CHAIN_HEADER_PREFIX}${index}`] = JSON.stringify(link)
-  })
-
-  headers[AUTH_TIMESTAMP_HEADER] = timestamp.toString()
-  headers[AUTH_METADATA_HEADER] = metadataJSON
-
-  return headers
-}
+/**
+ * The current (6.x) ADR-44 payload is signed by `@dcl/test-helpers`, so the one definition of it
+ * stays in step with the `@dcl/crypto-middleware` that verifies it. Re-exported here so call sites
+ * keep importing it from `test/utils`.
+ */
+export { getAuthHeaders }
 
 /**
  * Builds ADR-44 headers signing the **pre-6.0.0** payload: the joined string is folded as a whole,
@@ -61,6 +45,10 @@ export function getAuthHeaders(
  * still what the explorer runtime emits, so this is the shape real scene traffic arrives in.
  *
  * Only routes that opt in via `canonicalMetadataKeys` verify it; anywhere else it is a 401.
+ *
+ * Deliberately kept local rather than taken from `@dcl/test-helpers`: the shared package only
+ * signs the current format, so there is nothing there to import, and this is the only thing
+ * covering the legacy-compatibility window.
  */
 export function getLegacyAuthHeaders(
   method: string,
