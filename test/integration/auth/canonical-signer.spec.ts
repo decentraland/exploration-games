@@ -88,6 +88,36 @@ test('when a request carries a scene signer', ({ components }) => {
     })
   })
 
+  describe('and the canonical signer is delivered alongside a re-cased duplicate', () => {
+    it('should be refused rather than authorized on whichever spelling is read first', async () => {
+      // The one case @dcl/crypto-middleware 6.3.0 changes for this route. `requireSigner` fails
+      // closed on an absent field, so a re-cased key ALONE was already refused on 6.2.0 -- but the
+      // exact key present with a folded duplicate beside it was allowed, because the predicate read
+      // the exact key, found the scene signer it wanted, and never looked at the other one.
+      //
+      // No privilege is gained by it here: the caller is already presenting the canonical scene
+      // signer this route requires, and nothing in this service reads `signer` beyond that gate. It
+      // is refused because which spelling a reader picks up depends on key order rather than on
+      // anything the signature pinned, and that ambiguity should not resolve silently.
+      const metadata = { ...SIGNED_METADATA, Signer: 'dcl:explorer' }
+
+      const response = await components.localFetch.fetch(PATH, {
+        headers: getAuthHeaders('GET', PATH, metadata, (payload) =>
+          Authenticator.signPayload(
+            {
+              ephemeralIdentity: admin.ephemeralIdentity,
+              expiration: new Date(Date.now() + 10 * 60 * 1000),
+              authChain: admin.authChain
+            },
+            payload
+          )
+        )
+      })
+
+      expect(response.status).toBe(400)
+    })
+  })
+
   describe('and the request carries no signer at all', () => {
     it('should keep being rejected by the route metadata validator, which requires a scene', async () => {
       // Dropping the key changes the metadata's shape rather than its casing, so this request's

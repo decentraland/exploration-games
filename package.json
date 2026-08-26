@@ -31,7 +31,7 @@
   "dependencies": {
     "@dcl/core-commons": "^0.10.1",
     "@dcl/crypto": "^3.7.0",
-    "@dcl/crypto-middleware": "^6.2.0",
+    "@dcl/crypto-middleware": "^6.3.0",
     "@dcl/fetch-component": "^1.1.1",
     "@dcl/http-commons": "^2.0.0",
     "@dcl/http-server": "^2.1.0",
