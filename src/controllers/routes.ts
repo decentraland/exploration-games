@@ -1,6 +1,6 @@
 import { Router } from '@dcl/http-server'
 import { errorHandler, bearerTokenMiddleware } from '@dcl/http-commons'
-import { wellKnownComponents as authVerificationMiddleware } from '@dcl/crypto-middleware'
+import { wellKnownComponents as authVerificationMiddleware, requireSigner } from '@dcl/crypto-middleware'
 import { GlobalContext } from '../types'
 import isAdminMiddleware from './middlewares/is-admin-middleware'
 import { statusHandler } from './handlers/status-handler'
@@ -34,10 +34,33 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
 
   const { components } = globalContext
 
+  // Metadata keys the authenticated routes authorize on, declared so a request signed with the
+  // pre-6.0.0 payload still verifies.
+  //
+  // Needed because every caller here is a scene, signing through the explorer runtime, which still
+  // folds the whole payload before signing. 6.x binds the metadata bytes verbatim, and `hashPayload`
+  // is camelCase, so for any request carrying a body the two payloads differ and verification fails
+  // outright with a 401 — `optional: false` means the caller simply loses access.
+  //
+  // Declaring the keys is what keeps the fallback narrow. A folded payload leaves metadata casing
+  // outside the signature, so a delivered `{"Parcel":…}` would share a valid signature with
+  // `{"parcel":…}` while reading as absent to the parcel check. Naming a key refuses that with a 400
+  // rather than rewriting anything. Derived from the reads in this repo:
+  //
+  //   signer       `requireSigner` below
+  //   parcel       `validateGameParcel` in validate-signed-fetch.ts
+  //   hashPayload  `validateBody` in validate-signed-fetch.ts
+  //
+  // Not declared because nothing reads them today: `realm.hostname` and `realm.serverName` are only
+  // touched by `validateUserInDCL`, whose call site is commented out. Re-enabling it means adding
+  // both here, or its host check can be re-spelled past on a legacy-signed request.
+  //
+  // Remove once the explorer runtime signs the 6.x payload.
   const auth = authVerificationMiddleware({
     fetcher: components.fetcher,
     optional: false,
-    metadataValidator: (metadata) => metadata.signer === 'decentraland-kernel-scene'
+    metadataValidator: requireSigner('decentraland-kernel-scene'),
+    canonicalMetadataKeys: ['signer', 'parcel', 'hashPayload']
   })
 
   components.server.use(router.middleware())

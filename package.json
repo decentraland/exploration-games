@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@dcl/eslint-config": "^2.1.1",
-    "@dcl/test-helpers": "^0.2.0",
+    "@dcl/test-helpers": "^0.3.2",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.28",
     "jest": "^29.7.0",
@@ -31,7 +31,7 @@
   "dependencies": {
     "@dcl/core-commons": "^0.10.1",
     "@dcl/crypto": "^3.7.0",
-    "@dcl/crypto-middleware": "^5.1.0",
+    "@dcl/crypto-middleware": "^6.3.0",
     "@dcl/fetch-component": "^1.1.1",
     "@dcl/http-commons": "^2.0.0",
     "@dcl/http-server": "^2.1.0",
