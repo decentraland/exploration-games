@@ -29,7 +29,7 @@
     "tabWidth": 2
   },
   "dependencies": {
-    "@dcl/core-commons": "^0.10.1",
+    "@dcl/core-commons": "^0.11.0",
     "@dcl/crypto": "^3.7.0",
     "@dcl/crypto-middleware": "^6.3.0",
     "@dcl/fetch-component": "^1.1.1",
