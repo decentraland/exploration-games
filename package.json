@@ -33,7 +33,7 @@
     "@dcl/crypto": "^3.7.0",
     "@dcl/crypto-middleware": "^6.3.0",
     "@dcl/fetch-component": "^1.1.1",
-    "@dcl/http-commons": "^2.0.0",
+    "@dcl/http-commons": "^2.0.1",
     "@dcl/http-server": "^2.1.0",
     "@dcl/metrics": "^1.0.1",
     "@dcl/pg-component": "^0.2.0",
