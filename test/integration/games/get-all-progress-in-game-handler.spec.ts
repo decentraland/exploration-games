@@ -37,7 +37,7 @@ test('GET /games/:id/progress/all', ({ components }) => {
         for (const progress of sndUserProgress) {
             await db.createProgressInGame(
                 game.id,
-                { userAddress: '0xd9b96b5dc720fc52bede1ec3b40a930e15f70ddd', userName: 'UserName2' },
+                { userAddress: '0x1234567890123456789012345678901234567890', userName: 'UserName2' },
                 progress,
                 {
                     metadata: true
