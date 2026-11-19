@@ -38,7 +38,7 @@ test('GET /api/games/:id/leaderboard', ({ components }) => {
     for (const progress of scndUserProgress) {
       await db.createProgressInGame(
         game.id,
-        { userAddress: '0xd9b96b5dc720fc52bede1ec3b40a930e15f70ddd', userName: 'userName2' },
+        { userAddress: '0x1234567890123456789012345678901234567890', userName: 'userName2' },
         progress
       )
       await new Promise((r) => setTimeout(r, 1))
